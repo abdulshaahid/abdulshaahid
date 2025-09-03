@@ -96,7 +96,7 @@ export function ExpandableTabs({
           return (
             <span
               key={`label-${index}`}
-              className="px-3 py-1 text-sm font-semibold text-foreground/80 pointer-events-none select-none"
+              className="px-3 py-1 text-sm font-semibold text-white pointer-events-none select-none"
               aria-label={t.text}
               role="note"
             >
