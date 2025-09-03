@@ -13,7 +13,7 @@ export function About() {
               and performance.
             </p>
             <div className="mt-8 grid gap-4">
-              <Card className="glass transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-white/5 motion-reduce:transform-none">
+              <Card className="glass  transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-white/5 motion-reduce:transform-none">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-white">Education</CardTitle>
                 </CardHeader>
@@ -30,11 +30,11 @@ export function About() {
             </div>
           </div>
           <div className="reveal">
-            <div className="glass rounded-2xl p-6 transition-transform duration-300 motion-reduce:transform-none hover:scale-[1.01]">
+            <div className="glass rounded-3xl p-6 transition-transform duration-300 motion-reduce:transform-none hover:scale-[1.01]">
               <img
                 src="/abstract-monochrome-illustration.png"
                 alt="Abstract monochrome illustration"
-                className="mx-auto rounded-xl"
+                className="mx-auto rounded-2xl"
                 loading="lazy"
                 decoding="async"
               />

@@ -1,9 +1,11 @@
 "use client"
-import Link from "next/link"
-import { useEffect, useState } from "react"
-import { cn } from "@/lib/utils"
-import { Menu, X } from "lucide-react"
 
+import { useCallback } from "react"
+import { Home, Info, Wrench, Briefcase, Images, Mail } from "lucide-react"
+import { ExpandableTabs } from "@/components/ui/expandable-tabs"
+import { useMediaQuery } from "usehooks-ts"
+
+// Keep section ids the same
 const items = [
   { id: "home", label: "Home" },
   { id: "about", label: "About" },
@@ -14,76 +16,57 @@ const items = [
 ]
 
 export function Navbar() {
-  const [active, setActive] = useState("home")
-  const [open, setOpen] = useState(false)
+  const isDesktop = useMediaQuery("(min-width: 768px)")
 
-  useEffect(() => {
-    const sections = items.map((i) => document.getElementById(i.id)).filter(Boolean) as HTMLElement[]
-    const io = new IntersectionObserver(
-      (entries) => entries.forEach((e) => e.isIntersecting && setActive(e.target.id)),
-      { rootMargin: "-45% 0px -45% 0px" },
-    )
-    sections.forEach((el) => io.observe(el))
-    return () => io.disconnect()
-  }, [])
+  const desktopTabs = [
+    { type: "label" as const, text: "Abdulshahid" },
+    { title: "Home", icon: Home },
+    { title: "About", icon: Info },
+    { title: "Skills", icon: Wrench },
+    { title: "Services", icon: Briefcase },
+    { title: "Portfolio", icon: Images },
+    { title: "Contact", icon: Mail },
+  ]
+
+  const mobileTabs = [
+    { title: "Home", icon: Home },
+    { title: "About", icon: Info },
+    { title: "Skills", icon: Wrench },
+    { title: "Services", icon: Briefcase },
+    { title: "Portfolio", icon: Images },
+    { title: "Contact", icon: Mail },
+  ]
+
+  const tabs = isDesktop ? desktopTabs : mobileTabs
+
+  const scrollToIndex = useCallback(
+    (index: number | null) => {
+      if (index == null) return
+      const logicalIndex = isDesktop ? index - 1 : index
+      if (logicalIndex < 0) return
+      const targetId = items[logicalIndex]?.id
+      if (!targetId) return
+      const el = document.getElementById(targetId)
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" })
+      }
+    },
+    [isDesktop],
+  )
 
   return (
-    <header className="sticky top-4 z-50 m-2">
-      <nav className="mx-auto max-w-6xl rounded-2xl glass px-4 py-3">
-        <div className="flex items-center justify-between">
-          {/* Logo */}
-          <Link href="#" className="font-serif text-xl font-semibold">
-            AbdulShahid
-          </Link>
-
-          {/* Desktop Menu */}
-          <ul className="hidden gap-6 md:flex">
-            {items.map((it) => (
-              <li key={it.id}>
-                <a
-                  href={`#${it.id}`}
-                  className={cn(
-                    "text-sm text-zinc-300 hover:text-white transition-colors pb-1",
-                    active === it.id && "text-white border-b-2 border-white",
-                  )}
-                >
-                  {it.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-
-          {/* Mobile Hamburger */}
-          <button
-            onClick={() => setOpen(!open)}
-            className="md:hidden text-zinc-300 hover:text-white transition-colors"
-          >
-            {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
+<header className="sticky top-2 md:top-4 z-50">
+      <nav className="">
+        <div className="flex justify-center">
+          <ExpandableTabs
+            tabs={tabs}
+            activeColor="text-white"
+            className="glass border-white/10 justify-center"
+            onChange={(index) => {
+              scrollToIndex(index)
+            }}
+          />
         </div>
-
-        {/* Mobile Menu Drawer */}
-        {open && (
-          <div
-            className="md:hidden mt-3 mx-2 sm:mx-4 rounded-2xl border border-white/10 
-                       bg-black/80 p-5 space-y-3 backdrop-blur-xl shadow-lg 
-                       animate-in fade-in slide-in-from-top-2 duration-300"
-          >
-            {items.map((it) => (
-              <a
-                key={it.id}
-                href={`#${it.id}`}
-                onClick={() => setOpen(false)}
-                className={cn(
-                  "block rounded-lg px-3 py-2 text-sm text-zinc-300 hover:text-white hover:bg-white/5 transition-colors",
-                  active === it.id && "text-white font-medium bg-white/10",
-                )}
-              >
-                {it.label}
-              </a>
-            ))}
-          </div>
-        )}
       </nav>
     </header>
   )
