@@ -231,7 +231,7 @@ export function Skills() {
         <div className="mt-12 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10">
             <Sparkles size={16} className="text-yellow-400" />
-            <span className="text-zinc-300 text-sm">Always learning and exploring new technologies</span>
+            <span className="text-zinc-300 text-sm">Always learning and exploring new techs</span>
           </div>
         </div>
       </div>
