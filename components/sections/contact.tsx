@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { Mail, Phone, Linkedin, Instagram } from "lucide-react"
 
 export function Contact() {
   const [name, setName] = useState("")
@@ -13,11 +14,11 @@ export function Contact() {
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${message}`)
-    window.location.href = `mailto:shahid.dev@example.com?subject=Portfolio Contact&body=${body}`
+    window.location.href = `mailto:shahidpallath623@gmail.com?subject=Portfolio Contact&body=${body}`
   }
 
   return (
-    <section id="contact" className="scroll-mt-24">
+    <section id="contact" className="scroll-mt-24 ">
       <div className="mx-auto max-w-6xl px-4 py-16">
         <div className="glass rounded-2xl p-6">
           <h2 className="font-serif text-3xl font-semibold">Get In Touch</h2>
@@ -63,45 +64,42 @@ export function Contact() {
               />
             </div>
             <div className="md:col-span-2">
-              <Button type="submit" className="w-full rounded-xl bg-white text-black hover:bg-zinc-200">
+              <Button type="submit" className="w-full rounded-xl bg-white/80 text-black hover:bg-zinc-200">
                 Send
               </Button>
             </div>
           </form>
-          <div className="mt-6 grid gap-2 text-sm text-zinc-400 md:grid-cols-2 lg:grid-cols-4">
-            <p>
-              Email:{" "}
-              <a className="underline decoration-white/30 hover:text-white" href="mailto:shahidpallath623@gmail.com">
-                shahidpallath623@gmail.com
-              </a>
-            </p>
-            <p>
-              Phone:{" "}
-              <a className="hover:text-white" href="tel:+916282669441">
-                +91 6282669441
-              </a>
-            </p>
-            <p>
-              <a
-                className="hover:text-white"
-                href="https://www.linkedin.com/in/mohamedabdulshahid/"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Linkedin
-              </a>
-            </p>
-             <p>
-              <a
-                className="hover:text-white"
-                href="https://instagram.com/in/abdulshaahid/"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Instagram
-              </a>
-            </p>
-          
+
+          {/* Contact Links with Icons */}
+          <div className="mt-8 grid gap-4 text-sm text-zinc-400 sm:grid-cols-2 lg:grid-cols-4">
+            <a
+              className="flex items-center gap-2 hover:text-white"
+              href="mailto:shahidpallath623@gmail.com"
+            >
+              <Mail size={16} /> shahidpallath623@gmail.com
+            </a>
+            <a
+              className="flex items-center gap-2 hover:text-white"
+              href="tel:+916282669441"
+            >
+              <Phone size={16} /> +91 6282669441
+            </a>
+            <a
+              className="flex items-center gap-2 hover:text-white"
+              href="https://www.linkedin.com/in/mohamedabdulshahid/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <Linkedin size={16} /> Linkedin
+            </a>
+            <a
+              className="flex items-center gap-2 hover:text-white"
+              href="https://instagram.com/abdulshaahid/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <Instagram size={16} /> Instagram
+            </a>
           </div>
         </div>
       </div>

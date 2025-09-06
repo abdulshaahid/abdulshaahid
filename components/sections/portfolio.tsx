@@ -129,7 +129,7 @@ export function Portfolio() {
                 {/* Left Content - Project Details */}
                 <div className="lg:col-span-1 space-y-6">
                   <CardItem translateZ="40" translateX="-15">
-                    <div className="space-y-4">
+                    <div className="space-y-4 pl-3">
                       <div>
                         <h4 className="text-white font-semibold mb-3">
                           Overview

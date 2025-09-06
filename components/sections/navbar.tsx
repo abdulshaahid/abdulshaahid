@@ -55,13 +55,13 @@ export function Navbar() {
   )
 
   return (
-<header className="sticky top-2 md:top-4 z-50">
+<header className="sticky top-2 md:top-4 z-50 ">
       <nav className="">
-        <div className="flex justify-center">
+        <div className="flex justify-center ">
           <ExpandableTabs
             tabs={tabs}
             activeColor="text-white"
-            className="glass border-white/10 justify-center"
+            className="glass border-white/10 justify-center "
             onChange={(index) => {
               scrollToIndex(index)
             }}

@@ -55,9 +55,7 @@ export default function Page() {
   return (
     <>
       {/* Fixed Navbar Outside */}
-      
         <Navbar />
-      
 
       {/* Rest of the Page with Mouse Background */}
       <MouseBackground>
