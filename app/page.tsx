@@ -72,7 +72,7 @@ export default function Page() {
           <a
             href="#top"
             aria-label="Back to top"
-            className="fixed bottom-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-black shadow-lg transition hover:bg-zinc-200"
+            className="fixed bottom-6 right-6 inline-flex h-10 w-10 items-center justify-center z-100 rounded-full bg-white text-black shadow-lg transition hover:bg-zinc-200"
           >
             ↑
           </a>
