@@ -86,63 +86,62 @@ export function ExpandableTabs({
     <div
       ref={outsideClickRef}
       className={cn(
-        "flex flex-wrap items-center gap-2 rounded-2xl border bg-background p-1  shadow-sm",
+        "flex flex-wrap items-center gap-2 rounded-2xl border bg-background p-1 shadow-sm",
         className
       )}
     >
       {tabs.map((tab, index) => {
-        if ((tab as any).type === "label") {
-          const t = tab as Label;
-          return (
-            <span
-              key={`label-${index}`}
-              className="px-3 py-1 text-sm font-semibold text-white pointer-events-none select-none"
-              aria-label={t.text}
-              role="note"
-            >
-              {t.text}
-            </span>
-          );
-        }
-
+        // Render separators normally
         if ((tab as any).type === "separator") {
           return <Separator key={`separator-${index}`} />;
         }
 
+        const isLabel = (tab as any).type === "label";
+        const labelText = isLabel ? (tab as Label).text : null;
         const t = tab as Tab;
-        const Icon = t.icon;
+        const Icon = !isLabel ? t.icon : null;
+
         return (
           <motion.button
-            key={t.title}
+            key={`tab-${index}`}
+            disabled={isLabel}
             variants={buttonVariants}
             initial={false}
             animate="animate"
             custom={selected === index}
-            onClick={() => handleSelect(index)}
+            onClick={() => !isLabel && handleSelect(index)}
             transition={transition}
             className={cn(
               "relative flex items-center rounded-xl px-4 py-2 text-sm font-medium transition-colors duration-300",
-              selected === index
+              isLabel
+                ? "pointer-events-none select-none text-white bg-transparent"
+                : selected === index
                 ? cn(activeColor, "bg-white/5 backdrop-blur-sm dark:bg-white/5")
                 : "text-muted-foreground hover:bg-white/15 hover:text-white"
             )}
-            aria-pressed={selected === index}
+            aria-pressed={!isLabel && selected === index}
           >
-            <Icon size={20} />
-            <AnimatePresence initial={false}>
-              {selected === index && (
-                <motion.span
-                  variants={spanVariants}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-                  transition={transition}
-                  className="overflow-hidden"
-                >
-                  {t.title}
-                </motion.span>
-              )}
-            </AnimatePresence>
+            {isLabel ? (
+              labelText
+            ) : (
+              <>
+                <Icon size={20} />
+                <AnimatePresence initial={false}>
+                  {selected === index && (
+                    <motion.span
+                      variants={spanVariants}
+                      initial="initial"
+                      animate="animate"
+                      exit="exit"
+                      transition={transition}
+                      className="overflow-hidden"
+                    >
+                      {t.title}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </>
+            )}
           </motion.button>
         );
       })}
