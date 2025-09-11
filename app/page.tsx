@@ -1,5 +1,6 @@
 "use client"
-import React, { useState } from "react"
+import type React from "react"
+import { useState } from "react"
 
 import { Navbar } from "@/components/sections/navbar"
 import { Hero } from "@/components/sections/hero"
@@ -9,6 +10,7 @@ import { Services } from "@/components/sections/services"
 import { Portfolio } from "@/components/sections/portfolio"
 import { Contact } from "@/components/sections/contact"
 import { Footer } from "@/components/sections/footer"
+import { Particles } from "@/components/magicui/particles"
 
 // ===== Mouse Following Background =====
 const MouseBackground = ({ children }: { children: React.ReactNode }) => {
@@ -55,11 +57,14 @@ export default function Page() {
   return (
     <>
       {/* Fixed Navbar Outside */}
-        <Navbar />
+      <Navbar />
 
       {/* Rest of the Page with Mouse Background */}
       <MouseBackground>
-        <main id="top" className="bg-dot-grid min-h-screen pt-4 ">
+        <main id="top" className="relative min-h-screen pt-4">
+          {/* Particles Background */}
+          <Particles className="absolute inset-0 -z-10" quantity={300} ease={80} color="#ffffff" refresh={false} />
+
           {/* Sections */}
           <Hero />
           <About />
