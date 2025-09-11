@@ -139,25 +139,29 @@ export function Hero() {
                 <br />
               </h1>
             </div>
-
             <div
               className="opacity-0 animate-slide-up"
               style={{ animationDelay: "0.5s" }}
             >
+              {" "}
               <div className="relative">
-                <p className="text-lg sm:text-xl lg:text-2xl text-zinc-400 font-medium">
-                  <span className="relative inline-block hover:text-white transition-colors duration-500 ">
-                    React Frontend Developer
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white/60 group-hover:w-full transition-all duration-500"></span>
-                  </span>
-                  <span className="mx-3 text-white/30">•</span>
-                  <span className="relative inline-block hover:text-white transition-colors duration-500 ">
-                    UI/UX Designer
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white/60 group-hover:w-full transition-all duration-500 delay-100"></span>
-                  </span>
-                </p>
-                <div className="absolute -bottom-2 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent transform scale-x-0 hover:scale-x-100 transition-transform duration-700"></div>
-              </div>
+                {" "}
+                <p className="inline-flex items-center whitespace-nowrap text-base sm:text-lg md:text-xl lg:text-2xl text-zinc-400 font-medium gap-3">
+                  {" "}
+                  <span className="relative inline-block group hover:text-white transition-colors duration-500">
+                    {" "}
+                    Frontend Developer{" "}
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white/60 group-hover:w-full transition-all duration-500"></span>{" "}
+                  </span>{" "}
+                  <span className="text-white/30">•</span>{" "}
+                  <span className="relative inline-block group hover:text-white transition-colors duration-500">
+                    {" "}
+                    UI/UX Designer{" "}
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white/60 group-hover:w-full transition-all duration-500 delay-100"></span>{" "}
+                  </span>{" "}
+                </p>{" "}
+                <div className="absolute -bottom-2 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent transform scale-x-0 hover:scale-x-100 transition-transform duration-700"></div>{" "}
+              </div>{" "}
             </div>
 
             <div
@@ -217,7 +221,6 @@ export function Hero() {
 
                 <Button
                   asChild
-        
                   className="w-full sm:w-auto rounded-2xl  text-white hover:text-white/80 bg-[#222222] hover:bg-[#272727] px-8 py-4 text-base font-semibold transform hover:scale-105 hover:-translate-y-1 transition-all duration-300  group relative overflow-hidden backdrop-blur-sm"
                 >
                   <a href="#contact">
