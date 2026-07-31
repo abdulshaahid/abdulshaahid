@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback } from "react"
+import { useCallback, useState, useEffect } from "react"
 import { Home, Info, Wrench, Briefcase, Images, Mail } from "lucide-react"
 import { ExpandableTabs } from "@/components/ui/expandable-tabs"
 import { useMediaQuery } from "usehooks-ts"
@@ -17,6 +17,11 @@ const items = [
 
 export function Navbar() {
   const isDesktop = useMediaQuery("(min-width: 768px)")
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const desktopTabs = [
     { type: "label" as const, text: "Abdulshahid" },
@@ -37,7 +42,7 @@ export function Navbar() {
     { title: "Contact", icon: Mail },
   ]
 
-  const tabs = isDesktop ? desktopTabs : mobileTabs
+  const tabs = mounted && isDesktop ? desktopTabs : mobileTabs
 
   const scrollToIndex = useCallback(
     (index: number | null) => {
@@ -55,13 +60,13 @@ export function Navbar() {
   )
 
   return (
-<header className="sticky top-2 md:top-4 z-50 ">
+    <header className="fixed top-4 inset-x-0 z-50 pointer-events-none">
       <nav className="">
-        <div className="flex justify-center ">
+        <div className="flex justify-center pointer-events-auto">
           <ExpandableTabs
             tabs={tabs}
             activeColor="text-white"
-            className="glass border-white/10 justify-center "
+            className="glass border-white/10 justify-center"
             onChange={(index) => {
               scrollToIndex(index)
             }}

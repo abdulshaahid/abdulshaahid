@@ -13,12 +13,6 @@ interface MousePosition {
   y: number;
 }
 
-interface GyroscopeData {
-  x: number;
-  y: number;
-  z: number;
-}
-
 function MousePosition(): MousePosition {
   const [mousePosition, setMousePosition] = useState<MousePosition>({
     x: 0,
@@ -40,86 +34,6 @@ function MousePosition(): MousePosition {
   return mousePosition;
 }
 
-function useGyroscope() {
-  const [gyroData, setGyroData] = useState<GyroscopeData>({ x: 0, y: 0, z: 0 });
-  const [isSupported, setIsSupported] = useState(false);
-  const [permissionGranted, setPermissionGranted] = useState(false);
-
-  useEffect(() => {
-    const checkSupport = () => {
-      if (typeof window !== 'undefined') {
-        const supported = 'DeviceOrientationEvent' in window || 'DeviceMotionEvent' in window;
-        setIsSupported(supported);
-      }
-    };
-
-    checkSupport();
-  }, []);
-
-  const requestPermission = async () => {
-    if (typeof window === 'undefined') return false;
-
-    try {
-      // For iOS 13+ devices
-      if (typeof DeviceOrientationEvent !== 'undefined' && 
-          typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
-        const permission = await (DeviceOrientationEvent as any).requestPermission();
-        if (permission === 'granted') {
-          setPermissionGranted(true);
-          return true;
-        }
-      } else {
-        // For Android and older iOS devices
-        setPermissionGranted(true);
-        return true;
-      }
-    } catch (error) {
-      console.error('Error requesting device orientation permission:', error);
-    }
-    return false;
-  };
-
-  useEffect(() => {
-    if (!isSupported || !permissionGranted) return;
-
-    const handleOrientation = (event: DeviceOrientationEvent) => {
-      const { beta, gamma, alpha } = event;
-      setGyroData({
-        x: gamma || 0,  // Left-right tilt (-90 to 90)
-        y: beta || 0,   // Front-back tilt (-180 to 180)
-        z: alpha || 0   // Compass direction (0 to 360)
-      });
-    };
-
-    const handleMotion = (event: DeviceMotionEvent) => {
-      const acceleration = event.accelerationIncludingGravity;
-      if (acceleration) {
-        setGyroData(prev => ({
-          x: (acceleration.x || 0) * 10, // Scale for better effect
-          y: (acceleration.y || 0) * 10,
-          z: prev.z
-        }));
-      }
-    };
-
-    // Try DeviceOrientationEvent first, fallback to DeviceMotionEvent
-    window.addEventListener('deviceorientation', handleOrientation);
-    window.addEventListener('devicemotion', handleMotion);
-
-    return () => {
-      window.removeEventListener('deviceorientation', handleOrientation);
-      window.removeEventListener('devicemotion', handleMotion);
-    };
-  }, [isSupported, permissionGranted]);
-
-  return { gyroData, isSupported, permissionGranted, requestPermission };
-}
-
-function isMobileDevice(): boolean {
-  if (typeof window === 'undefined') return false;
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-}
-
 interface ParticlesProps extends ComponentPropsWithoutRef<"div"> {
   className?: string;
   quantity?: number;
@@ -130,8 +44,6 @@ interface ParticlesProps extends ComponentPropsWithoutRef<"div"> {
   color?: string;
   vx?: number;
   vy?: number;
-  enableGyroscope?: boolean;
-  gyroscopeSensitivity?: number;
 }
 
 function hexToRgb(hex: string): number[] {
@@ -174,8 +86,6 @@ export const Particles: React.FC<ParticlesProps> = ({
   color = "#ffffff",
   vx = 0,
   vy = 0,
-  enableGyroscope = true,
-  gyroscopeSensitivity = 2,
   ...props
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -183,28 +93,11 @@ export const Particles: React.FC<ParticlesProps> = ({
   const context = useRef<CanvasRenderingContext2D | null>(null);
   const circles = useRef<Circle[]>([]);
   const mousePosition = MousePosition();
-  const { gyroData, isSupported, permissionGranted, requestPermission } = useGyroscope();
   const mouse = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const canvasSize = useRef<{ w: number; h: number }>({ w: 0, h: 0 });
   const dpr = typeof window !== "undefined" ? window.devicePixelRatio : 1;
   const rafID = useRef<number | null>(null);
   const resizeTimeout = useRef<NodeJS.Timeout | null>(null);
-  const isMobile = useRef(false);
-  const [showPermissionButton, setShowPermissionButton] = useState(false);
-
-  useEffect(() => {
-    isMobile.current = isMobileDevice();
-    
-    // Show permission button for iOS devices or if gyroscope is supported but permission not granted
-    if (isMobile.current && enableGyroscope && isSupported && !permissionGranted) {
-      // Auto-request permission on mobile
-      requestPermission().then((granted) => {
-        if (!granted) {
-          setShowPermissionButton(true);
-        }
-      });
-    }
-  }, [isSupported, permissionGranted, enableGyroscope]);
 
   useEffect(() => {
     if (canvasRef.current) {
@@ -236,27 +129,12 @@ export const Particles: React.FC<ParticlesProps> = ({
   }, [color]);
 
   useEffect(() => {
-    if (!isMobile.current) {
-      onMouseMove();
-    }
+    onMouseMove();
   }, [mousePosition.x, mousePosition.y]);
-
-  useEffect(() => {
-    if (isMobile.current && enableGyroscope && permissionGranted) {
-      onGyroscopeMove();
-    }
-  }, [gyroData.x, gyroData.y, gyroData.z]);
 
   useEffect(() => {
     initCanvas();
   }, [refresh]);
-
-  const handlePermissionRequest = async () => {
-    const granted = await requestPermission();
-    if (granted) {
-      setShowPermissionButton(false);
-    }
-  };
 
   const initCanvas = () => {
     resizeCanvas();
@@ -274,20 +152,6 @@ export const Particles: React.FC<ParticlesProps> = ({
         mouse.current.x = x;
         mouse.current.y = y;
       }
-    }
-  };
-
-  const onGyroscopeMove = () => {
-    if (canvasRef.current) {
-      const { w, h } = canvasSize.current;
-      // Convert gyroscope data to mouse-like coordinates
-      // Scale and clamp the values to reasonable ranges
-      const maxTilt = 45; // Max tilt angle to consider
-      const x = Math.max(-w/2, Math.min(w/2, (gyroData.x / maxTilt) * (w/2) * gyroscopeSensitivity));
-      const y = Math.max(-h/2, Math.min(h/2, (gyroData.y / maxTilt) * (h/2) * gyroscopeSensitivity));
-      
-      mouse.current.x = x;
-      mouse.current.y = y;
     }
   };
 
@@ -411,8 +275,8 @@ export const Particles: React.FC<ParticlesProps> = ({
       circle.x += circle.dx + vx;
       circle.y += circle.dy + vy;
 
-      // Enhanced speed for mobile devices
-      const speed = isMobile.current ? 15 : 10; // Faster reaction on mobile
+      // Speed for device
+      const speed = 10;
       circle.translateX +=
         ((mouse.current.x / (staticity / circle.magnetism) - circle.translateX) /
           ease) * speed;
@@ -447,18 +311,6 @@ export const Particles: React.FC<ParticlesProps> = ({
       {...props}
     >
       <canvas ref={canvasRef} className="size-full" />
-      
-      {/* Permission button for iOS devices */}
-      {showPermissionButton && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/50 pointer-events-auto">
-          <button
-            onClick={handlePermissionRequest}
-            className="px-6 py-3 bg-white text-black rounded-lg font-medium hover:bg-gray-100 transition-colors"
-          >
-            Enable Motion Controls
-          </button>
-        </div>
-      )}
     </div>
   );
 };

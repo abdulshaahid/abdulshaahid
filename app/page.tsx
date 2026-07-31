@@ -10,7 +10,7 @@ import { Services } from "@/components/sections/services"
 import { Portfolio } from "@/components/sections/portfolio"
 import { Contact } from "@/components/sections/contact"
 import { Footer } from "@/components/sections/footer"
-import { Particles } from "@/components/magicui/particles"
+import { WavePattern } from "@/components/ui/wave-pattern"
 
 // ===== Mouse Following Background =====
 const MouseBackground = ({ children }: { children: React.ReactNode }) => {
@@ -28,6 +28,17 @@ const MouseBackground = ({ children }: { children: React.ReactNode }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
+      {/* Universal Interactive Banknote Wave Pattern Background */}
+      <WavePattern
+        strokeColor="220, 220, 220"
+        waveAmplitude={9}
+        waveLength={85}
+        rowSpacing={16}
+        lineWidth={1}
+        interactive={true}
+        opacity={0.06}
+      />
+
       {/* Mouse Glow Effect */}
       {isHovered && (
         <div
@@ -59,12 +70,9 @@ export default function Page() {
       {/* Fixed Navbar Outside */}
       <Navbar />
 
-      {/* Rest of the Page with Mouse Background */}
+      {/* Rest of the Page with Mouse Background & Unified Particles */}
       <MouseBackground>
-        <main id="top" className="relative min-h-screen pt-4">
-          {/* Particles Background */}
-          <Particles className="absolute inset-0 -z-10" quantity={300} ease={80} color="#ffffff" refresh={false} />
-
+        <main id="top" className="relative min-h-screen pt-0">
           {/* Sections */}
           <Hero />
           <About />
