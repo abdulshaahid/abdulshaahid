@@ -57,7 +57,7 @@ export function Hero() {
             <span>there</span>
           </h1>
           {/* Mobile Version - Centered Fluid Text */}
-          <h1 className="block md:hidden font-script italic text-6xl sm:text-7xl text-zinc-100/90 leading-none font-thin tracking-wide drop-shadow-sm text-center">
+          <h1 className="block md:hidden font-script italic text-7xl sm:text-8xl text-zinc-100/90 leading-none font-thin tracking-wide drop-shadow-sm text-center">
             <span className="text-[#27bf88]">Hey,</span> <span>there</span>
           </h1>
         </div>
@@ -121,7 +121,7 @@ export function Hero() {
         <div className="flex md:hidden flex-col items-center w-full my-auto z-20 space-y-6 pt-0 pb-8 -mt-6 sm:-mt-8">
           
           {/* Center Portrait Image */}
-          <div className="relative w-full max-w-[320px] sm:max-w-[380px] flex justify-center items-end py-0 z-10 -mb-2 -translate-y-1 sm:-translate-y-1">
+          <div className="relative w-full max-w-[370px] sm:max-w-[450px] flex justify-center items-end py-0 z-10 -mb-2 -translate-y-1 sm:-translate-y-1">
             <Image
               src="/me.png"
               alt="Mohamed Abdul Shahid"
@@ -132,7 +132,7 @@ export function Hero() {
                 maskImage: "linear-gradient(to bottom, black 65%, transparent 100%)",
                 WebkitMaskImage: "linear-gradient(to bottom, black 65%, transparent 100%)",
               }}
-              className="w-full h-auto max-h-[45vh] sm:max-h-[55vh] object-contain filter grayscale contrast-110"
+              className="w-full h-auto max-h-[52vh] sm:max-h-[62vh] object-contain filter grayscale contrast-110"
             />
           </div>
 
