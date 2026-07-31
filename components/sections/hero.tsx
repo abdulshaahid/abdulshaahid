@@ -53,12 +53,12 @@ export function Hero() {
         <div className="relative w-full pointer-events-none pt-2 sm:pt-4 z-0 flex justify-center">
           {/* Desktop Version with Gap for Head */}
           <h1 className="hidden md:flex font-script italic text-[7.5rem] lg:text-[9.5rem] xl:text-[11.5rem] text-zinc-100/90 leading-none font-thin tracking-wide drop-shadow-sm items-center justify-center gap-24 lg:gap-32 mx-auto">
-            <span>Hey,</span>
+            <span className="text-[#27bf88]">Hey,</span>
             <span>there</span>
           </h1>
           {/* Mobile Version - Centered Fluid Text */}
           <h1 className="block md:hidden font-script italic text-6xl sm:text-7xl text-zinc-100/90 leading-none font-thin tracking-wide drop-shadow-sm text-center">
-            Hey, there
+            <span className="text-[#27bf88]">Hey,</span> <span>there</span>
           </h1>
         </div>
 
@@ -121,7 +121,7 @@ export function Hero() {
         <div className="flex md:hidden flex-col items-center w-full my-auto z-20 space-y-6 pt-0 pb-8 -mt-6 sm:-mt-8">
           
           {/* Center Portrait Image */}
-          <div className="relative w-full max-w-[320px] sm:max-w-[380px] flex justify-center items-end py-2 z-10 -mb-2">
+          <div className="relative w-full max-w-[320px] sm:max-w-[380px] flex justify-center items-end py-0 z-10 -mb-2 -translate-y-1 sm:-translate-y-1">
             <Image
               src="/me.png"
               alt="Mohamed Abdul Shahid"
