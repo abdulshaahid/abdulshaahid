@@ -2,6 +2,78 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+
+const AVAILABLE_SHAPES = [
+  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+  21, 22, 23, 24, 25, 26, 27, 29, 30, 31, 33, 34, 35, 36, 37, 38, 39, 40,
+  41, 42, 43, 44, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 59, 60,
+  61, 62, 63, 65, 67, 70, 71
+];
+
+const GRAIN_NOISE_SVG = `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.7'/%3E%3C/svg%3E")`;
+
+function AnimatedShapeIcon({ className }: { className?: string }) {
+  const [shapeIndex, setShapeIndex] = useState(0);
+
+  // Preload all shape SVG assets on mount to prevent any network/rendering blinking
+  useEffect(() => {
+    AVAILABLE_SHAPES.forEach((num) => {
+      const img = new window.Image();
+      img.src = `/shapes/Shape%20${num}.svg`;
+    });
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setShapeIndex((prev) => (prev + 1) % AVAILABLE_SHAPES.length);
+    }, 280);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const shapeNumber = AVAILABLE_SHAPES[shapeIndex];
+
+  return (
+    <div className={`relative flex items-center justify-center ${className}`}>
+      {/* Hidden Offscreen Mask Preloader to keep GPU mask textures warm */}
+      <div className="absolute opacity-0 pointer-events-none w-0 h-0 overflow-hidden" aria-hidden="true">
+        {AVAILABLE_SHAPES.map((num) => (
+          <div
+            key={num}
+            style={{
+              maskImage: `url("/shapes/Shape%20${num}.svg")`,
+              WebkitMaskImage: `url("/shapes/Shape%20${num}.svg")`,
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Instant Cut Shape Mask with Emerald Gradient and Grain Texture */}
+      <div className="w-full h-full relative flex items-center justify-center">
+        <div
+          style={{
+            maskImage: `url("/shapes/Shape%20${shapeNumber}.svg")`,
+            WebkitMaskImage: `url("/shapes/Shape%20${shapeNumber}.svg")`,
+            maskSize: "contain",
+            WebkitMaskSize: "contain",
+            maskRepeat: "no-repeat",
+            WebkitMaskRepeat: "no-repeat",
+            maskPosition: "center",
+            WebkitMaskPosition: "center",
+          }}
+          className="w-full h-full bg-gradient-to-br from-[#37e5a5] via-[#27bf88] to-[#1ea873] relative overflow-hidden"
+        >
+          {/* Tactile Grain Texture Layer */}
+          <div
+            className="absolute inset-0 w-full h-full opacity-60 mix-blend-overlay pointer-events-none contrast-150 brightness-110"
+            style={{ backgroundImage: GRAIN_NOISE_SVG }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function Hero() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -52,7 +124,7 @@ export function Hero() {
         {/* 1. TOP SCRIPT TITLE: "Hey, there" */}
         <div className="relative w-full pointer-events-none pt-2 sm:pt-4 z-0 flex justify-center">
           {/* Desktop Version with Gap for Head */}
-          <h1 className="hidden md:flex font-script italic text-[7.5rem] lg:text-[9.5rem] xl:text-[11.5rem] text-zinc-100/90 leading-none font-thin tracking-wide drop-shadow-sm items-center justify-center gap-24 lg:gap-32 mx-auto">
+          <h1 className="hidden md:flex font-script italic text-[7.5rem]  md:text-[7rem] lg:text-[9rem] xl:text-[10.5rem] text-zinc-100/90 leading-none font-thin tracking-wide drop-shadow-sm items-center justify-center gap-24 lg:gap-32 mx-auto">
             <span className="text-[#27bf88]">Hey,</span>
             <span>there</span>
           </h1>
@@ -72,11 +144,11 @@ export function Hero() {
            
 
             <div className="text-left select-none">
-              <span className="block text-3xl lg:text-5xl xl:text-6xl font-black uppercase tracking-tighter text-white leading-none">
-                I AM
+              <span className="block text-xl lg:text-2xl xl:text-3xl font-jakarta font-light tracking-[0.25em] bg-gradient-to-b from-zinc-100 via-zinc-300 to-zinc-500 bg-clip-text text-transparent leading-none uppercase">
+                I'm
               </span>
-              <span className="block text-5xl lg:text-[4.8rem] xl:text-[6.2rem] font-black uppercase tracking-tighter text-white leading-[0.85]">
-                SHAHID
+              <span className="block text-7xl lg:text-[5.5rem] xl:text-[7.5rem] font-jakarta font-medium tracking-tight bg-gradient-to-b from-zinc-100 via-zinc-300 to-zinc-500 bg-clip-text text-transparent leading-[1.1] uppercase">
+                Shahid
               </span>
             </div>
           </div>
@@ -105,20 +177,23 @@ export function Hero() {
               Specialized in Web Design, UX / UI, Webflow, and Front End Development.
             </p>
 
-            <div className="text-right select-none">
-              <span className="block text-2xl lg:text-4xl xl:text-5xl font-black uppercase tracking-tighter text-zinc-300 leading-none">
-                FRONTEND
-              </span>
-              <span className="block text-4xl lg:text-[4.2rem] xl:text-[5.5rem] font-black uppercase tracking-tighter text-zinc-300 leading-[0.85]">
-                DEVELOPER
-              </span>
+            <div className="flex items-center justify-end gap-3 lg:gap-4 select-none">
+              <AnimatedShapeIcon className="w-12 h-12 lg:w-16 lg:h-16 xl:w-20 xl:h-20 shrink-0" />
+              <div className="w-[185px] sm:w-[245px] lg:w-[290px] xl:w-[365px] flex flex-col justify-center gap-0.5">
+                <div className="flex justify-between w-full text-2xl sm:text-3xl lg:text-[2.5rem] xl:text-[3.2rem] font-jakarta font-medium bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none">
+                  <span>F</span><span>R</span><span>O</span><span>N</span><span>T</span><span>E</span><span>N</span><span>D</span>
+                </div>
+                <div className="flex justify-between w-full text-2xl sm:text-3xl lg:text-[2.5rem] xl:text-[3.2rem] font-jakarta font-thin bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none opacity-50">
+                  <span>D</span><span>E</span><span>V</span><span>E</span><span>L</span><span>O</span><span>P</span><span>E</span><span>R</span>
+                </div>
+              </div>
             </div>
           </div>
 
         </div>
 
         {/* MOBILE LAYOUT (< md) */}
-        <div className="flex md:hidden flex-col items-center w-full my-auto z-20 space-y-6 pt-0 pb-8 -mt-6 sm:-mt-8">
+        <div className="flex md:hidden flex-col items-center w-full my-auto z-20 pt-0 pb-8 -mt-6 sm:-mt-8">
           
           {/* Center Portrait Image */}
           <div className="relative w-full max-w-[370px] sm:max-w-[450px] flex justify-center items-end py-0 z-10 -mb-2 -translate-y-1 sm:-translate-y-1">
@@ -136,31 +211,32 @@ export function Hero() {
             />
           </div>
 
-       
-
           {/* Mobile Headlines Stack */}
-          <div className="w-full flex flex-col items-center justify-center space-y-6 pt-2 z-20">
+          <div className="w-full flex flex-col items-center justify-center space-y-4 z-20 -mt-20 sm:-mt-28 relative pointer-events-none">
             <div className="text-center select-none flex flex-col items-center">
-              <span className="block text-2xl sm:text-3xl font-black uppercase tracking-tighter text-white leading-none">
-                I AM
+              <span className="block text-xl sm:text-2xl font-jakarta font-light tracking-[0.25em] bg-gradient-to-b from-zinc-100 via-zinc-300 to-zinc-500 bg-clip-text text-transparent leading-none uppercase drop-shadow-md">
+                I'm
               </span>
-              <span className="block text-6xl sm:text-7xl font-black uppercase tracking-tighter text-white leading-[0.85]">
-                SHAHID
+              <span className="block text-7xl sm:text-7xl font-jakarta font-medium tracking-tight bg-gradient-to-b from-zinc-100 via-zinc-300 to-zinc-500 bg-clip-text text-transparent leading-[1.1] uppercase drop-shadow-md">
+                Shahid
               </span>
             </div>
 
-            <div className="text-center select-none flex flex-col items-center">
-              <span className="block text-xl sm:text-2xl font-black uppercase tracking-tighter text-zinc-300 leading-none">
-                FRONTEND
-              </span>
-              <span className="block text-5xl sm:text-6xl font-black uppercase tracking-tighter text-zinc-300 leading-[0.85]">
-                DEVELOPER
-              </span>
+            <div className="flex items-center justify-center gap-2 sm:gap-3 select-none">
+              <AnimatedShapeIcon className="w-10 h-10 sm:w-14 sm:h-14 drop-shadow-md shrink-0" />
+              <div className="w-[175px] sm:w-[235px] flex flex-col justify-center gap-0.5">
+                <div className="flex justify-between w-full text-2xl sm:text-3xl font-jakarta font-medium bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none drop-shadow-md">
+                  <span>F</span><span>R</span><span>O</span><span>N</span><span>T</span><span>E</span><span>N</span><span>D</span>
+                </div>
+                <div className="flex justify-between w-full text-2xl sm:text-3xl font-jakarta font-thin bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none drop-shadow-md opacity-50">
+                  <span>D</span><span>E</span><span>V</span><span>E</span><span>L</span><span>O</span><span>P</span><span>E</span><span>R</span>
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Bio Text Paragraph */}
-          <p className="text-sm text-zinc-400 font-normal text-center max-w-[300px] px-4 pt-2">
+          <p className="text-sm text-zinc-400 font-normal text-center max-w-[300px] px-4 mt-6 sm:mt-8 relative z-20">
             Specialized in Web Design, UX / UI, Webflow, and Front End Development.
           </p>
         </div>
