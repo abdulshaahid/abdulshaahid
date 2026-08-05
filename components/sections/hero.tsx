@@ -101,20 +101,20 @@ export function Hero() {
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 flex justify-center items-start">
         {/* Giant U-Shape Ambient Glow Bowl */}
         <div
-          className="w-[140vw] max-w-[1500px] h-[450px] sm:h-[650px] md:h-[800px] -mt-20 sm:-mt-32 rounded-b-[50%] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#37e5a5]/30 via-[#37e5a5]/10 to-transparent blur-3xl transition-transform duration-700 ease-out"
+          className="w-[200vw] sm:w-[140vw] max-w-[1500px] h-[500px] sm:h-[650px] md:h-[800px] -mt-32 sm:-mt-32 rounded-b-[100%] sm:rounded-b-[50%] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#37e5a5]/22 sm:from-[#37e5a5]/30 via-[#37e5a5]/8 sm:via-[#37e5a5]/10 to-transparent blur-3xl transition-transform duration-700 ease-out"
           style={{
             transform: `translate(${mousePosition.x * 15}px, ${mousePosition.y * 10}px)`,
           }}
         />
 
         {/* Left Ambient Wing Glow */}
-        <div className="absolute top-0 left-[-15%] sm:left-[0%] w-[350px] sm:w-[650px] h-[350px] sm:h-[650px] bg-gradient-to-br from-[#37e5a5]/20 via-[#37e5a5]/8 to-transparent rounded-full blur-[90px] sm:blur-[150px]" />
+        <div className="absolute top-0 left-[-35%] sm:left-[0%] w-[350px] sm:w-[650px] h-[450px] sm:h-[650px] bg-gradient-to-br from-[#37e5a5]/15 sm:from-[#37e5a5]/20 via-[#37e5a5]/5 sm:via-[#37e5a5]/8 to-transparent rounded-full blur-[100px] sm:blur-[150px]" />
 
         {/* Right Ambient Wing Glow */}
-        <div className="absolute top-0 right-[-15%] sm:right-[0%] w-[350px] sm:w-[650px] h-[350px] sm:h-[650px] bg-gradient-to-bl from-[#37e5a5]/20 via-[#37e5a5]/8 to-transparent rounded-full blur-[90px] sm:blur-[150px]" />
+        <div className="absolute top-0 right-[-35%] sm:right-[0%] w-[350px] sm:w-[650px] h-[450px] sm:h-[650px] bg-gradient-to-bl from-[#37e5a5]/15 sm:from-[#37e5a5]/20 via-[#37e5a5]/5 sm:via-[#37e5a5]/8 to-transparent rounded-full blur-[100px] sm:blur-[150px]" />
 
-        {/* Center Soft Head Spotlight */}
-        <div className="absolute top-[8%] left-1/2 -translate-x-1/2 w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] bg-[#37e5a5]/15 rounded-full blur-[100px] sm:blur-[160px]" />
+        {/* Center Soft Wide Header Glow */}
+        <div className="absolute top-[-5%] left-1/2 -translate-x-1/2 w-full max-w-[500px] sm:max-w-[600px] h-[350px] sm:h-[600px] bg-[#37e5a5]/12 sm:bg-[#37e5a5]/15 rounded-[100%] blur-[90px] sm:blur-[160px]" />
 
       </div>
 
@@ -166,7 +166,7 @@ export function Hero() {
                   maskImage: "linear-gradient(to bottom, black 65%, transparent 100%)",
                   WebkitMaskImage: "linear-gradient(to bottom, black 65%, transparent 100%)",
                 }}
-                className="w-full h-auto max-h-[76vh] lg:max-h-[84vh] object-contain filter grayscale contrast-110 transition-transform duration-500 group-hover:scale-[1.01]"
+                className="w-full h-auto max-h-[76vh] lg:max-h-[84vh] object-contain transition-transform duration-500 group-hover:scale-[1.01]"
               />
             </div>
           </div>
@@ -207,7 +207,7 @@ export function Hero() {
                 maskImage: "linear-gradient(to bottom, black 65%, transparent 100%)",
                 WebkitMaskImage: "linear-gradient(to bottom, black 65%, transparent 100%)",
               }}
-              className="w-full h-auto max-h-[52vh] sm:max-h-[62vh] object-contain filter grayscale contrast-110"
+              className="w-full h-auto max-h-[52vh] sm:max-h-[62vh] object-contain"
             />
           </div>
 
@@ -222,9 +222,9 @@ export function Hero() {
               </span>
             </div>
 
-            <div className="flex items-center justify-center gap-2 sm:gap-3 select-none">
+            <div className="flex items-center justify-center gap-2.5 sm:gap-3 select-none">
               <AnimatedShapeIcon className="w-10 h-10 sm:w-14 sm:h-14 drop-shadow-md shrink-0" />
-              <div className="w-[175px] sm:w-[235px] flex flex-col justify-center gap-0.5">
+              <div className="w-[195px] sm:w-[250px] flex flex-col justify-center gap-0.5">
                 <div className="flex justify-between w-full text-2xl sm:text-3xl font-jakarta font-medium bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none drop-shadow-md">
                   <span>F</span><span>R</span><span>O</span><span>N</span><span>T</span><span>E</span><span>N</span><span>D</span>
                 </div>
