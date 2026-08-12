@@ -24,7 +24,7 @@ export function Navbar() {
   }, [])
 
   const desktopTabs = [
-    { type: "label" as const, text: "Abdulshahid" },
+    { type: "label" as const, text: "Shahid" },
     { title: "Home", icon: Home },
     { title: "About", icon: Info },
     { title: "Skills", icon: Wrench },
