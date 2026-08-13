@@ -27,6 +27,7 @@ export interface GrainientProps {
   color2?: string;
   color3?: string;
   className?: string;
+  onReady?: () => void;
 }
 
 const hexToRgb = (hex: string): [number, number, number] => {
@@ -166,8 +167,11 @@ export function Grainient({
   color2 = "#072218",
   color3 = "#000000",
   className = "",
+  onReady,
 }: GrainientProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const onReadyRef = useRef(onReady);
+  onReadyRef.current = onReady;
 
   // Effect 1: build WebGL context once, pause when offscreen / tab hidden
   useEffect(() => {
@@ -178,7 +182,8 @@ export function Grainient({
       webgl: 2,
       alpha: true,
       antialias: false,
-      dpr: Math.min(window.devicePixelRatio || 1, 2),
+      powerPreference: "high-performance",
+      dpr: Math.min(window.devicePixelRatio || 1, 1.25),
     });
 
     const gl = renderer.gl;
@@ -236,6 +241,9 @@ export function Grainient({
     const ro = new ResizeObserver(setSize);
     ro.observe(container);
     setSize();
+
+    // Signal that the WebGL shader is compiled and the initial frame is rendered
+    onReadyRef.current?.();
 
     let raf = 0;
     let isVisible = true;

@@ -1,7 +1,8 @@
 "use client"
 import type React from "react"
-import { useState } from "react"
+import { useState, useCallback } from "react"
 
+import { SplashScreen } from "@/components/ui/splash-screen"
 import { Navbar } from "@/components/sections/navbar"
 import { Hero } from "@/components/sections/hero"
 import { About } from "@/components/sections/about"
@@ -65,8 +66,17 @@ const MouseBackground = ({ children }: { children: React.ReactNode }) => {
 
 // ===== Main Page =====
 export default function Page() {
+  const [isSiteReady, setIsSiteReady] = useState(false)
+
+  const handleSplashComplete = useCallback(() => {
+    setIsSiteReady(true)
+  }, [])
+
   return (
     <>
+      {/* Full Black Background Splash Screen with Head & Welcome Animation */}
+      <SplashScreen onComplete={handleSplashComplete} />
+
       {/* Fixed Navbar Outside */}
       <Navbar />
 
@@ -74,7 +84,7 @@ export default function Page() {
       <MouseBackground>
         <main id="top" className="relative min-h-screen pt-0">
           {/* Sections */}
-          <Hero />
+          <Hero isReady={isSiteReady} />
           <About />
           <Skills />
           <Services />

@@ -86,7 +86,7 @@ export function ExpandableTabs({
     <div
       ref={outsideClickRef}
       className={cn(
-        "flex flex-wrap items-center gap-2 rounded-2xl border bg-background p-1 shadow-sm",
+        "flex flex-wrap items-center gap-2 rounded-full border bg-background p-1 shadow-sm",
         className
       )}
     >
@@ -112,7 +112,7 @@ export function ExpandableTabs({
             onClick={() => !isLabel && handleSelect(index)}
             transition={transition}
             className={cn(
-              "relative flex items-center rounded-xl px-4 py-2 text-sm font-medium transition-colors duration-300",
+              "relative flex items-center rounded-full px-4 py-2 text-sm font-medium transition-colors duration-300",
               isLabel
                 ? "pointer-events-none select-none text-white bg-transparent"
                 : selected === index

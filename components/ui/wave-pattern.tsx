@@ -72,7 +72,7 @@ const WavePattern: React.FC<WavePatternProps> = ({
     if (!ctx) return;
 
     const setCanvasSize = () => {
-      const dpr = window.devicePixelRatio || 1;
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.25);
       const cssWidth = canvas.clientWidth || window.innerWidth;
       const cssHeight = canvas.clientHeight || window.innerHeight;
       ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -86,7 +86,7 @@ const WavePattern: React.FC<WavePatternProps> = ({
     let resizeTimeout: NodeJS.Timeout;
     const throttledResize = () => {
       clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(setCanvasSize, 100);
+      resizeTimeout = setTimeout(setCanvasSize, 150);
     };
 
     window.addEventListener("resize", throttledResize, { passive: true });
@@ -103,7 +103,7 @@ const WavePattern: React.FC<WavePatternProps> = ({
     }
 
     let phase = 0;
-    const xStep = 6; // Sampling step across width
+    const xStep = 10; // Optimized step size for ultra-smooth 60-120fps on all devices
 
     const animate = () => {
       const dpr = window.devicePixelRatio || 1;
