@@ -4,6 +4,8 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 
+import { useMediaQuery } from "usehooks-ts";
+
 const Grainient = dynamic(() => import("@/components/ui/grainient"), {
   ssr: false,
 });
@@ -81,6 +83,12 @@ function AnimatedShapeIcon({ className }: { className?: string }) {
 
 export function Hero() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [mounted, setMounted] = useState(false);
+  const isMobile = useMediaQuery("(max-width: 767px)");
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -95,6 +103,8 @@ export function Hero() {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
+  const activeMobile = mounted && isMobile;
+
   return (
     <div className="w-full px-2 sm:px-3 md:px-4 pt-2 sm:pt-3 md:pt-4">
       <section
@@ -105,49 +115,46 @@ export function Hero() {
         {/* ===== GRAINIENT WEBGL ANIMATED BACKGROUND ===== */}
         <div className="absolute inset-0 h-full w-full pointer-events-none -z-10 opacity-40">
           <Grainient
-            color1="#14573e"
-            color2="#072218"
-            color3="#000000"
-            timeSpeed={1.2}
-            colorBalance={0.0}
-            warpStrength={2.5}
-            warpFrequency={6.0}
-            warpSpeed={2.0}
+            color1="#175b43"
+            color2="#0b3023"
+            color3="#020e08"
+            timeSpeed={activeMobile ? 1.4 : 1.2}
+            colorBalance={0.35}
+            warpStrength={activeMobile ? 3.1 : 2.8}
+            warpFrequency={activeMobile ? 5.8 : 5.5}
+            warpSpeed={activeMobile ? 2.2 : 2.0}
             warpAmplitude={35.0}
-            blendAngle={30.0}
-            blendSoftness={0.4}
-            rotationAmount={350.0}
-            noiseScale={3.0}
+            blendAngle={60.0}
+            blendSoftness={0.45}
+            rotationAmount={activeMobile ? 380.0 : 350.0}
+            noiseScale={activeMobile ? 3.1 : 3.0}
             grainAmount={0.12}
             grainScale={1.5}
             grainAnimated={true}
             contrast={1.1}
             gamma={1.1}
-            saturation={0.7}
+            saturation={0.75}
             centerX={0.0}
-            centerY={0.0}
-            zoom={1.1}
+            centerY={0.1}
+            zoom={1.0}
           />
         </div>
 
-        {/* ===== PURE CSS U-SHAPED AMBIENT LIGHT BACKDROP OVERLAY ===== */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden -z-5 flex justify-center items-start">
-          {/* Giant U-Shape Ambient Glow Bowl */}
+        {/* ===== PURE CSS BALANCED AMBIENT LIGHT BACKDROP OVERLAY ===== */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden -z-5 flex justify-center items-center">
+          {/* Central Full-Span Ambient Glow Bowl */}
           <div
-            className="w-[200vw] sm:w-[140vw] max-w-[1500px] h-[500px] sm:h-[650px] md:h-[800px] -mt-32 sm:-mt-32 rounded-b-[100%] sm:rounded-b-[50%] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#37e5a5]/22 sm:from-[#37e5a5]/30 via-[#37e5a5]/8 sm:via-[#37e5a5]/10 to-transparent blur-3xl transition-transform duration-700 ease-out"
+            className="w-[180vw] sm:w-[130vw] max-w-[1500px] h-[800px] sm:h-[1000px] rounded-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#37e5a5]/14 sm:from-[#37e5a5]/18 via-[#37e5a5]/4 to-transparent blur-3xl transition-transform duration-700 ease-out"
             style={{
               transform: `translate(${mousePosition.x * 15}px, ${mousePosition.y * 10}px)`,
             }}
           />
 
-          {/* Left Ambient Wing Glow */}
-          <div className="absolute top-0 left-[-35%] sm:left-[0%] w-[350px] sm:w-[650px] h-[450px] sm:h-[650px] bg-gradient-to-br from-[#37e5a5]/15 sm:from-[#37e5a5]/20 via-[#37e5a5]/5 sm:via-[#37e5a5]/8 to-transparent rounded-full blur-[100px] sm:blur-[150px]" />
+          {/* Left Ambient Glow */}
+          <div className="absolute top-1/4 left-[-20%] sm:left-[0%] w-[350px] sm:w-[600px] h-[500px] sm:h-[700px] bg-gradient-to-br from-[#37e5a5]/10 via-[#37e5a5]/3 to-transparent rounded-full blur-[120px]" />
 
-          {/* Right Ambient Wing Glow */}
-          <div className="absolute top-0 right-[-35%] sm:right-[0%] w-[350px] sm:w-[650px] h-[450px] sm:h-[650px] bg-gradient-to-bl from-[#37e5a5]/15 sm:from-[#37e5a5]/20 via-[#37e5a5]/5 sm:via-[#37e5a5]/8 to-transparent rounded-full blur-[100px] sm:blur-[150px]" />
-
-          {/* Center Soft Wide Header Glow */}
-          <div className="absolute top-[-5%] left-1/2 -translate-x-1/2 w-full max-w-[500px] sm:max-w-[600px] h-[350px] sm:h-[600px] bg-[#37e5a5]/12 sm:bg-[#37e5a5]/15 rounded-[100%] blur-[90px] sm:blur-[160px]" />
+          {/* Right Ambient Glow */}
+          <div className="absolute bottom-10 right-[-20%] sm:right-[0%] w-[350px] sm:w-[600px] h-[500px] sm:h-[700px] bg-gradient-to-bl from-[#37e5a5]/10 via-[#37e5a5]/3 to-transparent rounded-full blur-[120px]" />
         </div>
 
         {/* Main Content Container */}
