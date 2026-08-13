@@ -2,7 +2,11 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import dynamic from "next/dynamic";
+
+const Grainient = dynamic(() => import("@/components/ui/grainient"), {
+  ssr: false,
+});
 
 const AVAILABLE_SHAPES = [
   1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
@@ -92,156 +96,183 @@ export function Hero() {
   }, []);
 
   return (
-    <section
-      id="home"
-      aria-label="Hero"
-      className="relative w-full min-h-[100svh] text-white flex flex-col justify-start overflow-hidden pt-28 sm:pt-32 md:pt-16 pb-12 px-4 sm:px-6 md:px-12 lg:px-16 select-none"
-    >
-      {/* ===== PURE CSS U-SHAPED AMBIENT LIGHT BACKDROP ===== */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 flex justify-center items-start">
-        {/* Giant U-Shape Ambient Glow Bowl */}
-        <div
-          className="w-[200vw] sm:w-[140vw] max-w-[1500px] h-[500px] sm:h-[650px] md:h-[800px] -mt-32 sm:-mt-32 rounded-b-[100%] sm:rounded-b-[50%] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#37e5a5]/22 sm:from-[#37e5a5]/30 via-[#37e5a5]/8 sm:via-[#37e5a5]/10 to-transparent blur-3xl transition-transform duration-700 ease-out"
-          style={{
-            transform: `translate(${mousePosition.x * 15}px, ${mousePosition.y * 10}px)`,
-          }}
-        />
-
-        {/* Left Ambient Wing Glow */}
-        <div className="absolute top-0 left-[-35%] sm:left-[0%] w-[350px] sm:w-[650px] h-[450px] sm:h-[650px] bg-gradient-to-br from-[#37e5a5]/15 sm:from-[#37e5a5]/20 via-[#37e5a5]/5 sm:via-[#37e5a5]/8 to-transparent rounded-full blur-[100px] sm:blur-[150px]" />
-
-        {/* Right Ambient Wing Glow */}
-        <div className="absolute top-0 right-[-35%] sm:right-[0%] w-[350px] sm:w-[650px] h-[450px] sm:h-[650px] bg-gradient-to-bl from-[#37e5a5]/15 sm:from-[#37e5a5]/20 via-[#37e5a5]/5 sm:via-[#37e5a5]/8 to-transparent rounded-full blur-[100px] sm:blur-[150px]" />
-
-        {/* Center Soft Wide Header Glow */}
-        <div className="absolute top-[-5%] left-1/2 -translate-x-1/2 w-full max-w-[500px] sm:max-w-[600px] h-[350px] sm:h-[600px] bg-[#37e5a5]/12 sm:bg-[#37e5a5]/15 rounded-[100%] blur-[90px] sm:blur-[160px]" />
-
-      </div>
-
-      {/* Main Content Container */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto flex-1 flex flex-col items-center">
-        
-        {/* 1. TOP SCRIPT TITLE: "Hey, there" */}
-        <div className="relative w-full pointer-events-none pt-2 sm:pt-4 z-0 flex justify-center">
-          {/* Desktop Version with Gap for Head */}
-          <h1 className="hidden md:flex font-script italic text-[7.5rem]  md:text-[7rem] lg:text-[9rem] xl:text-[10.5rem] text-zinc-100/90 leading-none font-thin tracking-wide drop-shadow-sm items-center justify-center gap-24 lg:gap-32 mx-auto">
-            <span className="text-[#27bf88]">Hey,</span>
-            <span>there</span>
-          </h1>
-          {/* Mobile Version - Centered Fluid Text */}
-          <h1 className="block md:hidden font-script italic text-7xl sm:text-8xl text-zinc-100/90 leading-none font-thin tracking-wide drop-shadow-sm text-center">
-            <span className="text-[#27bf88]">Hey,</span> <span>there</span>
-          </h1>
+    <div className="w-full px-2 sm:px-3 md:px-4 pt-2 sm:pt-3 md:pt-4">
+      <section
+        id="home"
+        aria-label="Hero"
+        className="relative w-full min-h-[calc(100svh-1rem)] text-white flex flex-col justify-start overflow-hidden pt-28 sm:pt-32 md:pt-16 pb-12 px-4 sm:px-6 md:px-12 lg:px-16 select-none rounded-[24px] sm:rounded-[32px] md:rounded-[36px] lg:rounded-[40px] shadow-2xl bg-black z-10"
+      >
+        {/* ===== GRAINIENT WEBGL ANIMATED BACKGROUND ===== */}
+        <div className="absolute inset-0 h-full w-full pointer-events-none -z-10 opacity-40">
+          <Grainient
+            color1="#14573e"
+            color2="#072218"
+            color3="#000000"
+            timeSpeed={1.2}
+            colorBalance={0.0}
+            warpStrength={2.5}
+            warpFrequency={6.0}
+            warpSpeed={2.0}
+            warpAmplitude={35.0}
+            blendAngle={30.0}
+            blendSoftness={0.4}
+            rotationAmount={350.0}
+            noiseScale={3.0}
+            grainAmount={0.12}
+            grainScale={1.5}
+            grainAnimated={true}
+            contrast={1.1}
+            gamma={1.1}
+            saturation={0.7}
+            centerX={0.0}
+            centerY={0.0}
+            zoom={1.1}
+          />
         </div>
 
-        {/* 2. MIDDLE & WAIST SECTION: Desktop Grid vs Mobile Layout */}
-        
-        {/* DESKTOP LAYOUT (md:grid) */}
-        <div className="hidden md:grid relative w-full grid-cols-12 items-end my-auto z-10 gap-0 -mt-20 lg:-mt-32">
-          
-          {/* Left Column: Pill + "I AM SHAHID" Headline */}
-          <div className="col-span-3 flex flex-col justify-center items-start z-20 space-y-8 pb-12 lg:pb-16 -translate-y-4 lg:-translate-y-8">
-           
+        {/* ===== PURE CSS U-SHAPED AMBIENT LIGHT BACKDROP OVERLAY ===== */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden -z-5 flex justify-center items-start">
+          {/* Giant U-Shape Ambient Glow Bowl */}
+          <div
+            className="w-[200vw] sm:w-[140vw] max-w-[1500px] h-[500px] sm:h-[650px] md:h-[800px] -mt-32 sm:-mt-32 rounded-b-[100%] sm:rounded-b-[50%] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#37e5a5]/22 sm:from-[#37e5a5]/30 via-[#37e5a5]/8 sm:via-[#37e5a5]/10 to-transparent blur-3xl transition-transform duration-700 ease-out"
+            style={{
+              transform: `translate(${mousePosition.x * 15}px, ${mousePosition.y * 10}px)`,
+            }}
+          />
 
-            <div className="text-left select-none">
-              <span className="block text-xl lg:text-2xl xl:text-3xl font-jakarta font-light tracking-[0.25em] bg-gradient-to-b from-zinc-100 via-zinc-300 to-zinc-500 bg-clip-text text-transparent leading-none uppercase">
-                I'm
-              </span>
-              <span className="block text-7xl lg:text-[5.5rem] xl:text-[7.5rem] font-jakarta font-medium tracking-tight bg-gradient-to-b from-zinc-100 via-zinc-300 to-zinc-500 bg-clip-text text-transparent leading-[1.1] uppercase">
-                Shahid
-              </span>
-            </div>
+          {/* Left Ambient Wing Glow */}
+          <div className="absolute top-0 left-[-35%] sm:left-[0%] w-[350px] sm:w-[650px] h-[450px] sm:h-[650px] bg-gradient-to-br from-[#37e5a5]/15 sm:from-[#37e5a5]/20 via-[#37e5a5]/5 sm:via-[#37e5a5]/8 to-transparent rounded-full blur-[100px] sm:blur-[150px]" />
+
+          {/* Right Ambient Wing Glow */}
+          <div className="absolute top-0 right-[-35%] sm:right-[0%] w-[350px] sm:w-[650px] h-[450px] sm:h-[650px] bg-gradient-to-bl from-[#37e5a5]/15 sm:from-[#37e5a5]/20 via-[#37e5a5]/5 sm:via-[#37e5a5]/8 to-transparent rounded-full blur-[100px] sm:blur-[150px]" />
+
+          {/* Center Soft Wide Header Glow */}
+          <div className="absolute top-[-5%] left-1/2 -translate-x-1/2 w-full max-w-[500px] sm:max-w-[600px] h-[350px] sm:h-[600px] bg-[#37e5a5]/12 sm:bg-[#37e5a5]/15 rounded-[100%] blur-[90px] sm:blur-[160px]" />
+        </div>
+
+        {/* Main Content Container */}
+        <div className="relative z-10 w-full max-w-7xl mx-auto flex-1 flex flex-col items-center">
+          
+          {/* 1. TOP SCRIPT TITLE: "Hey, there" */}
+          <div className="relative w-full pointer-events-none pt-2 sm:pt-4 z-0 flex justify-center">
+            {/* Desktop Version with Gap for Head */}
+            <h1 className="hidden md:flex font-script italic text-[7.5rem]  md:text-[7rem] lg:text-[9rem] xl:text-[10.5rem] text-zinc-100/90 leading-none font-thin tracking-wide drop-shadow-sm items-center justify-center gap-24 lg:gap-32 mx-auto">
+              <span className="text-[#27bf88]">Hey,</span>
+              <span>there</span>
+            </h1>
+            {/* Mobile Version - Centered Fluid Text */}
+            <h1 className="block md:hidden font-script italic text-7xl sm:text-8xl text-zinc-100/90 leading-none font-thin tracking-wide drop-shadow-sm text-center">
+              <span className="text-[#27bf88]">Hey,</span> <span>there</span>
+            </h1>
           </div>
 
-          {/* Center Column: Main Cutout Portrait Photo */}
-          <div className="col-span-6 flex justify-center items-end relative z-10">
-            <div className="relative w-full max-w-[480px] lg:max-w-[580px] xl:max-w-[660px] flex justify-center items-end group">
+          {/* 2. MIDDLE & WAIST SECTION: Desktop Grid vs Mobile Layout */}
+          
+          {/* DESKTOP LAYOUT (md:grid) */}
+          <div className="hidden md:grid relative w-full grid-cols-12 items-end my-auto z-10 gap-0 -mt-20 lg:-mt-32">
+            
+            {/* Left Column: Pill + "I AM SHAHID" Headline */}
+            <div className="col-span-3 flex flex-col justify-center items-start z-20 space-y-8 pb-12 lg:pb-16 -translate-y-4 lg:-translate-y-8">
+              <div className="text-left select-none">
+                <span className="block text-xl lg:text-2xl xl:text-3xl font-jakarta font-light tracking-[0.25em] bg-gradient-to-b from-zinc-100 via-zinc-300 to-zinc-500 bg-clip-text text-transparent leading-none uppercase">
+                  I'm
+                </span>
+                <span className="block text-7xl lg:text-[5.5rem] xl:text-[7.5rem] font-jakarta font-medium tracking-tight bg-gradient-to-b from-zinc-100 via-zinc-300 to-zinc-500 bg-clip-text text-transparent leading-[1.1] uppercase">
+                  Shahid
+                </span>
+              </div>
+            </div>
+
+            {/* Center Column: Main Cutout Portrait Photo */}
+            <div className="col-span-6 flex justify-center items-end relative z-10">
+              <div className="relative w-full max-w-[480px] lg:max-w-[580px] xl:max-w-[660px] flex justify-center items-end group">
+                <Image
+                  src="/me.png"
+                  alt="Mohamed Abdul Shahid"
+                  width={750}
+                  height={900}
+                  priority
+                  style={{
+                    maskImage: "linear-gradient(to bottom, black 65%, transparent 100%)",
+                    WebkitMaskImage: "linear-gradient(to bottom, black 65%, transparent 100%)",
+                  }}
+                  className="w-full h-auto max-h-[76vh] lg:max-h-[84vh] object-contain transition-transform duration-500 group-hover:scale-[1.01]"
+                />
+              </div>
+            </div>
+
+            {/* Right Column: Bio Paragraph + "FRONTEND DEVELOPER" Headline */}
+            <div className="col-span-3 flex flex-col justify-center items-end z-20 space-y-8 pb-12 lg:pb-16 -translate-y-4 lg:-translate-y-8">
+              <p className="text-xs sm:text-sm md:text-base text-zinc-400 font-normal leading-relaxed max-w-[220px] lg:max-w-[260px] text-right">
+                Specialized in Web Design, UX / UI, Webflow, and Front End Development.
+              </p>
+
+              <div className="flex items-center justify-end gap-3 lg:gap-4 select-none">
+                <AnimatedShapeIcon className="w-12 h-12 lg:w-16 lg:h-16 xl:w-20 xl:h-20 shrink-0" />
+                <div className="w-[185px] sm:w-[245px] lg:w-[290px] xl:w-[365px] flex flex-col justify-center gap-0.5">
+                  <div className="flex justify-between w-full text-2xl sm:text-3xl lg:text-[2.5rem] xl:text-[3.2rem] font-jakarta font-medium bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none">
+                    <span>F</span><span>R</span><span>O</span><span>N</span><span>T</span><span>E</span><span>N</span><span>D</span>
+                  </div>
+                  <div className="flex justify-between w-full text-2xl sm:text-3xl lg:text-[2.5rem] xl:text-[3.2rem] font-jakarta font-thin bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none opacity-50">
+                    <span>D</span><span>E</span><span>V</span><span>E</span><span>L</span><span>O</span><span>P</span><span>E</span><span>R</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          {/* MOBILE LAYOUT (< md) */}
+          <div className="flex md:hidden flex-col items-center w-full my-auto z-20 pt-0 pb-8 -mt-6 sm:-mt-8">
+            
+            {/* Center Portrait Image */}
+            <div className="relative w-full max-w-[370px] sm:max-w-[450px] flex justify-center items-end py-0 z-10 -mb-2 -translate-y-1 sm:-translate-y-1">
               <Image
                 src="/me.png"
                 alt="Mohamed Abdul Shahid"
-                width={750}
-                height={900}
+                width={500}
+                height={600}
                 priority
                 style={{
                   maskImage: "linear-gradient(to bottom, black 65%, transparent 100%)",
                   WebkitMaskImage: "linear-gradient(to bottom, black 65%, transparent 100%)",
                 }}
-                className="w-full h-auto max-h-[76vh] lg:max-h-[84vh] object-contain transition-transform duration-500 group-hover:scale-[1.01]"
+                className="w-full h-auto max-h-[52vh] sm:max-h-[62vh] object-contain"
               />
             </div>
-          </div>
 
-          {/* Right Column: Bio Paragraph + "FRONTEND DEVELOPER" Headline */}
-          <div className="col-span-3 flex flex-col justify-center items-end z-20 space-y-8 pb-12 lg:pb-16 -translate-y-4 lg:-translate-y-8">
-            <p className="text-xs sm:text-sm md:text-base text-zinc-400 font-normal leading-relaxed max-w-[220px] lg:max-w-[260px] text-right">
+            {/* Mobile Headlines Stack */}
+            <div className="w-full flex flex-col items-center justify-center space-y-4 z-20 -mt-20 sm:-mt-28 relative pointer-events-none">
+              <div className="text-center select-none flex flex-col items-center">
+                <span className="block text-xl sm:text-2xl font-jakarta font-light tracking-[0.25em] bg-gradient-to-b from-zinc-100 via-zinc-300 to-zinc-500 bg-clip-text text-transparent leading-none uppercase drop-shadow-md">
+                  I'm
+                </span>
+                <span className="block text-7xl sm:text-7xl font-jakarta font-medium tracking-tight bg-gradient-to-b from-zinc-100 via-zinc-300 to-zinc-500 bg-clip-text text-transparent leading-[1.1] uppercase drop-shadow-md">
+                  Shahid
+                </span>
+              </div>
+
+              <div className="flex items-center justify-center gap-2.5 sm:gap-3 select-none">
+                <AnimatedShapeIcon className="w-10 h-10 sm:w-14 sm:h-14 drop-shadow-md shrink-0" />
+                <div className="w-[195px] sm:w-[250px] flex flex-col justify-center gap-0.5">
+                  <div className="flex justify-between w-full text-2xl sm:text-3xl font-jakarta font-medium bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none drop-shadow-md">
+                    <span>F</span><span>R</span><span>O</span><span>N</span><span>T</span><span>E</span><span>N</span><span>D</span>
+                  </div>
+                  <div className="flex justify-between w-full text-2xl sm:text-3xl font-jakarta font-thin bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none drop-shadow-md opacity-50">
+                    <span>D</span><span>E</span><span>V</span><span>E</span><span>L</span><span>O</span><span>P</span><span>E</span><span>R</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Bio Text Paragraph */}
+            <p className="text-sm text-zinc-400 font-normal text-center max-w-[300px] px-4 mt-6 sm:mt-8 relative z-20">
               Specialized in Web Design, UX / UI, Webflow, and Front End Development.
             </p>
-
-            <div className="flex items-center justify-end gap-3 lg:gap-4 select-none">
-              <AnimatedShapeIcon className="w-12 h-12 lg:w-16 lg:h-16 xl:w-20 xl:h-20 shrink-0" />
-              <div className="w-[185px] sm:w-[245px] lg:w-[290px] xl:w-[365px] flex flex-col justify-center gap-0.5">
-                <div className="flex justify-between w-full text-2xl sm:text-3xl lg:text-[2.5rem] xl:text-[3.2rem] font-jakarta font-medium bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none">
-                  <span>F</span><span>R</span><span>O</span><span>N</span><span>T</span><span>E</span><span>N</span><span>D</span>
-                </div>
-                <div className="flex justify-between w-full text-2xl sm:text-3xl lg:text-[2.5rem] xl:text-[3.2rem] font-jakarta font-thin bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none opacity-50">
-                  <span>D</span><span>E</span><span>V</span><span>E</span><span>L</span><span>O</span><span>P</span><span>E</span><span>R</span>
-                </div>
-              </div>
-            </div>
           </div>
 
         </div>
-
-        {/* MOBILE LAYOUT (< md) */}
-        <div className="flex md:hidden flex-col items-center w-full my-auto z-20 pt-0 pb-8 -mt-6 sm:-mt-8">
-          
-          {/* Center Portrait Image */}
-          <div className="relative w-full max-w-[370px] sm:max-w-[450px] flex justify-center items-end py-0 z-10 -mb-2 -translate-y-1 sm:-translate-y-1">
-            <Image
-              src="/me.png"
-              alt="Mohamed Abdul Shahid"
-              width={500}
-              height={600}
-              priority
-              style={{
-                maskImage: "linear-gradient(to bottom, black 65%, transparent 100%)",
-                WebkitMaskImage: "linear-gradient(to bottom, black 65%, transparent 100%)",
-              }}
-              className="w-full h-auto max-h-[52vh] sm:max-h-[62vh] object-contain"
-            />
-          </div>
-
-          {/* Mobile Headlines Stack */}
-          <div className="w-full flex flex-col items-center justify-center space-y-4 z-20 -mt-20 sm:-mt-28 relative pointer-events-none">
-            <div className="text-center select-none flex flex-col items-center">
-              <span className="block text-xl sm:text-2xl font-jakarta font-light tracking-[0.25em] bg-gradient-to-b from-zinc-100 via-zinc-300 to-zinc-500 bg-clip-text text-transparent leading-none uppercase drop-shadow-md">
-                I'm
-              </span>
-              <span className="block text-7xl sm:text-7xl font-jakarta font-medium tracking-tight bg-gradient-to-b from-zinc-100 via-zinc-300 to-zinc-500 bg-clip-text text-transparent leading-[1.1] uppercase drop-shadow-md">
-                Shahid
-              </span>
-            </div>
-
-            <div className="flex items-center justify-center gap-2.5 sm:gap-3 select-none">
-              <AnimatedShapeIcon className="w-10 h-10 sm:w-14 sm:h-14 drop-shadow-md shrink-0" />
-              <div className="w-[195px] sm:w-[250px] flex flex-col justify-center gap-0.5">
-                <div className="flex justify-between w-full text-2xl sm:text-3xl font-jakarta font-medium bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none drop-shadow-md">
-                  <span>F</span><span>R</span><span>O</span><span>N</span><span>T</span><span>E</span><span>N</span><span>D</span>
-                </div>
-                <div className="flex justify-between w-full text-2xl sm:text-3xl font-jakarta font-thin bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none drop-shadow-md opacity-50">
-                  <span>D</span><span>E</span><span>V</span><span>E</span><span>L</span><span>O</span><span>P</span><span>E</span><span>R</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Bio Text Paragraph */}
-          <p className="text-sm text-zinc-400 font-normal text-center max-w-[300px] px-4 mt-6 sm:mt-8 relative z-20">
-            Specialized in Web Design, UX / UI, Webflow, and Front End Development.
-          </p>
-        </div>
-
-      </div>
-    </section>
+      </section>
+    </div>
   );
 }

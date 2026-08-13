@@ -179,3 +179,28 @@
 .glow-ring {
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15), 0 0 40px rgba(255, 255, 255, 0.08) inset;
 }
+
+/* ===== THIN FULL-BLACK CUSTOM SCROLLBAR ===== */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #141414 #000000;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: #000000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #141414;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #222222;
+}
+
