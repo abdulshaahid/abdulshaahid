@@ -226,10 +226,10 @@ const WavePattern: React.FC<WavePatternProps> = ({
   return (
     <canvas
       ref={canvasRef}
-      className={cn("w-full h-full pointer-events-none", className)}
+      className={cn("fixed inset-0 w-full h-full pointer-events-none z-0", className)}
       style={{
-        width: "100%",
-        height: "100%",
+        width: "100vw",
+        height: "100vh",
         top: 0,
         left: 0,
       }}

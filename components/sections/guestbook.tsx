@@ -35,9 +35,9 @@ const collaborators: Collaborator[] = [
 export function Guestbook() {
   return (
     <section id="guestbook" className="relative scroll-mt-24 w-full">
-      {/* Central Column */}
-      <div className="w-[calc(100%-3rem)] sm:w-[calc(100%-4.5rem)] md:w-[calc(100%-5rem)] lg:max-w-[1140px] xl:max-w-[1200px] mx-auto border-l border-r border-zinc-800/90 relative bg-[#09090b]">
-        {/* Header */}
+      {/* Central Content Container */}
+      <div className="w-[calc(100%-3rem)] sm:w-[calc(100%-4.5rem)] md:w-[calc(100%-5rem)] lg:max-w-[1220px] xl:max-w-[1300px] mx-auto border-l border-r border-zinc-800/90 relative bg-[#09090b]">
+        {/* Intro Header */}
         <div className="px-6 sm:px-10 lg:px-12 py-8 sm:py-10 border-b border-zinc-800/90">
           <p className="font-bricolage text-base sm:text-xl lg:text-2xl text-zinc-100 leading-snug max-w-2xl text-pretty font-medium">
             Words from friends and <GreenHighlight>collaborators</GreenHighlight> who know me best.
@@ -66,7 +66,7 @@ export function Guestbook() {
                   </div>
                 </div>
 
-                <p className="text-[13px] sm:text-[14px] text-zinc-300/90 leading-relaxed italic">
+                <p className="text-[13px] sm:text-[14px] text-zinc-400 font-light leading-relaxed italic">
                   "{c.text}"
                 </p>
               </div>
@@ -80,7 +80,7 @@ export function Guestbook() {
             href="https://www.linkedin.com/in/mohamedabdulshahid/"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-mono font-medium text-zinc-200 hover:text-white bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 rounded-[4px] transition-all"
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-mono font-medium text-zinc-200 hover:text-white bg-zinc-900 hover:bg-zinc-800 rounded-full transition-all"
           >
             <span>Sign the guestbook</span>
             <ArrowUpRight size={13} />

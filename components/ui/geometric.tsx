@@ -44,7 +44,7 @@ export function SlopeDivider({ className }: { className?: string }) {
       )}
     >
       {/* Central column intersection crosshairs perfectly aligned with X & Y border coordinates */}
-      <div className="w-[calc(100%-3rem)] sm:w-[calc(100%-4.5rem)] md:w-[calc(100%-5rem)] lg:max-w-[1140px] xl:max-w-[1200px] mx-auto relative h-full pointer-events-none">
+      <div className="w-[calc(100%-3rem)] sm:w-[calc(100%-4.5rem)] md:w-[calc(100%-5rem)] lg:max-w-[1220px] xl:max-w-[1300px] mx-auto relative h-full pointer-events-none">
         {/* Top-Left Corner */}
         <CrosshairMarker className="top-0 left-0" />
         {/* Bottom-Left Corner */}

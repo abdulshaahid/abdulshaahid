@@ -91,9 +91,9 @@ const projects: ProjectItem[] = [
 export function Portfolio() {
   return (
     <section id="portfolio" className="relative scroll-mt-24 w-full">
-      {/* Central Column */}
-      <div className="w-[calc(100%-3rem)] sm:w-[calc(100%-4.5rem)] md:w-[calc(100%-5rem)] lg:max-w-[1140px] xl:max-w-[1200px] mx-auto border-l border-r border-zinc-800/90 relative bg-[#09090b]">
-        {/* Intro Header */}
+      {/* Central Content Container */}
+      <div className="w-[calc(100%-3rem)] sm:w-[calc(100%-4.5rem)] md:w-[calc(100%-5rem)] lg:max-w-[1220px] xl:max-w-[1300px] mx-auto border-l border-r border-zinc-800/90 relative bg-[#09090b]">
+        {/* Section Header Banner */}
         <div className="px-6 sm:px-10 lg:px-12 py-8 sm:py-10 border-b border-zinc-800/90">
           <p className="font-bricolage text-base sm:text-xl lg:text-2xl text-zinc-100 leading-snug max-w-2xl text-pretty font-medium">
             Think of{" "}
@@ -122,7 +122,7 @@ export function Portfolio() {
                   </h3>
 
                   {/* Concise Description with Increased Font Size */}
-                  <p className="mt-2.5 text-[13.5px] sm:text-[14.5px] text-zinc-300/90 leading-relaxed">
+                  <p className="mt-2.5 text-[13.5px] sm:text-[14.5px] text-zinc-400 font-light leading-relaxed">
                     {project.description}
                   </p>
 
@@ -185,7 +185,7 @@ export function Portfolio() {
               href="https://github.com/abdulshaahid"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-[4px] text-xs font-mono font-medium text-black bg-zinc-200 hover:bg-white transition-all shadow-sm group"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-mono font-medium text-black bg-zinc-200 hover:bg-white transition-all shadow-sm group"
             >
               <Github size={13} className="text-black" />
               <span>Explore on GitHub</span>

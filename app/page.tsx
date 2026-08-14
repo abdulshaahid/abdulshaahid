@@ -14,6 +14,7 @@ import { Guestbook } from "@/components/sections/guestbook"
 import { Contact } from "@/components/sections/contact"
 import { Footer } from "@/components/sections/footer"
 import { SlopeDivider } from "@/components/ui/geometric"
+import { WavePattern } from "@/components/ui/wave-pattern"
 
 // ===== Mouse Following Ambient Glow =====
 const MouseBackground = ({ children }: { children: React.ReactNode }) => {
@@ -31,6 +32,17 @@ const MouseBackground = ({ children }: { children: React.ReactNode }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
+      {/* Universal Interactive Banknote Wave Pattern Background */}
+      <WavePattern
+        strokeColor="220, 220, 220"
+        waveAmplitude={9}
+        waveLength={85}
+        rowSpacing={16}
+        lineWidth={1}
+        interactive={true}
+        opacity={0.06}
+      />
+
       {/* Subtle Mouse Glow */}
       {isHovered && (
         <div
@@ -72,7 +84,7 @@ export default function Page() {
 
       {/* Main Page Layout */}
       <MouseBackground>
-        <main id="top" className="relative min-h-screen pt-0 bg-tech-grid">
+        <main id="top" className="relative min-h-screen pt-0">
           {/* Hero Section (Preserved) */}
           <Hero isReady={isSiteReady} />
 

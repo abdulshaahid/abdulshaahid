@@ -16,15 +16,16 @@ export function Contact() {
 
   return (
     <section id="contact" className="relative scroll-mt-24 w-full">
-      {/* Central Column */}
-      <div className="w-[calc(100%-3rem)] sm:w-[calc(100%-4.5rem)] md:w-[calc(100%-5rem)] lg:max-w-[1140px] xl:max-w-[1200px] mx-auto border-l border-r border-zinc-800/90 relative bg-[#09090b]">
+      {/* Central Content Container */}
+      <div className="w-[calc(100%-3rem)] sm:w-[calc(100%-4.5rem)] md:w-[calc(100%-5rem)] lg:max-w-[1220px] xl:max-w-[1300px] mx-auto border-l border-r border-zinc-800/90 relative bg-[#09090b]">
+        {/* Intro Header */}
         <div className="p-8 sm:p-12 lg:p-16">
           <div className="max-w-2xl">
             <h2 className="font-bricolage text-xl sm:text-2xl lg:text-3xl font-bold text-white tracking-tight">
               Got something <GreenHighlight>worth building?</GreenHighlight>
             </h2>
 
-            <p className="mt-4 text-[13.5px] sm:text-[14.5px] text-zinc-300 leading-relaxed">
+            <p className="mt-4 text-[13.5px] sm:text-[14.5px] text-zinc-400 font-light leading-relaxed">
               Open to new opportunities, freelance projects, and creative collaborations.
               Have an ambitious idea or need frontend engineering? Let's talk.
             </p>
@@ -33,7 +34,7 @@ export function Contact() {
             <div className="mt-8 flex flex-wrap items-center gap-2.5 sm:gap-3">
               <a
                 href={`mailto:${email}?subject=Portfolio%20Inquiry`}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-[4px] text-xs font-mono font-medium bg-zinc-200 text-black hover:bg-white transition-all shadow-sm group"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-mono font-medium bg-zinc-200 text-black hover:bg-white transition-all shadow-sm group"
               >
                 <Mail size={14} />
                 <span>Say Hello</span>
@@ -42,7 +43,7 @@ export function Contact() {
 
               <button
                 onClick={handleCopyEmail}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-[4px] text-xs font-mono font-medium text-zinc-200 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 transition-all"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-mono font-medium text-zinc-200 bg-zinc-900 hover:bg-zinc-800  transition-all"
               >
                 {copied ? (
                   <>
@@ -61,7 +62,7 @@ export function Contact() {
                 href="https://github.com/abdulshaahid"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-[4px] text-xs font-mono font-medium text-zinc-300 hover:text-white bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 transition-all"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-mono font-medium text-zinc-300 hover:text-white bg-zinc-900/80 hover:bg-zinc-800  transition-all"
               >
                 <Github size={14} />
                 <span>GitHub</span>
@@ -71,7 +72,7 @@ export function Contact() {
                 href="https://www.linkedin.com/in/mohamedabdulshahid/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-[4px] text-xs font-mono font-medium text-zinc-300 hover:text-white bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 transition-all"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-mono font-medium text-zinc-300 hover:text-white bg-zinc-900/80 hover:bg-zinc-800  transition-all"
               >
                 <Linkedin size={14} />
                 <span>LinkedIn</span>
@@ -81,7 +82,7 @@ export function Contact() {
                 href="https://instagram.com/abdulshaahid/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-[4px] text-xs font-mono font-medium text-zinc-300 hover:text-white bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 transition-all"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-mono font-medium text-zinc-300 hover:text-white bg-zinc-900/80 hover:bg-zinc-800  transition-all"
               >
                 <Instagram size={14} />
                 <span>Instagram</span>

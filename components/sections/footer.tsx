@@ -10,8 +10,8 @@ export function Footer() {
 
   return (
     <footer className="relative w-full border-t border-zinc-800/80 bg-[#070709]">
-      <div className="w-[calc(100%-3rem)] sm:w-[calc(100%-4.5rem)] md:w-[calc(100%-5rem)] lg:max-w-[1140px] xl:max-w-[1200px] mx-auto border-l border-r border-zinc-800/80 relative bg-[#070709]">
-        <div className="p-8 sm:p-12 lg:p-16">
+      <div className="w-[calc(100%-3rem)] sm:w-[calc(100%-4.5rem)] md:w-[calc(100%-5rem)] lg:max-w-[1220px] xl:max-w-[1300px] mx-auto border-l border-r border-zinc-800/80 relative bg-[#070709]">
+        <div className="p-8 sm:p-12 lg:p-14 space-y-12">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12">
             {/* Left Column: Brand, Bio & Status */}
             <div className="md:col-span-7 space-y-4">
@@ -22,14 +22,13 @@ export function Footer() {
                 </span>
               </div>
 
-              <p className="text-xs sm:text-[13px] text-zinc-400 max-w-sm leading-relaxed">
+              <p className="text-xs sm:text-[13px] text-zinc-400 font-light max-w-sm leading-relaxed">
                 Frontend Developer & UI/UX Designer crafting purposeful digital experiences and scalable web systems.
               </p>
 
               {/* Status indicator */}
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-[4px] bg-zinc-900 border border-zinc-800 text-[11px] font-mono text-zinc-300">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#1fd38a]" />
-                <span>Available for full-time & freelance projects</span>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900  text-[11px] font-mono text-zinc-300">
+                <span>Available for <span className="text-[#1fd38a]">full-time & freelance</span> projects</span>
               </div>
 
               {/* Social Icons */}
@@ -39,7 +38,7 @@ export function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="GitHub"
-                  className="w-8 h-8 rounded-[4px] bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white hover:border-zinc-700 transition-colors"
+                  className="w-8 h-8 rounded-lg bg-zinc-900  flex items-center justify-center text-zinc-400 hover:text-white hover:border-zinc-700 transition-colors"
                 >
                   <Github size={14} />
                 </a>
@@ -48,7 +47,7 @@ export function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="LinkedIn"
-                  className="w-8 h-8 rounded-[4px] bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white hover:border-zinc-700 transition-colors"
+                  className="w-8 h-8 rounded-lg bg-zinc-900  flex items-center justify-center text-zinc-400 hover:text-white hover:border-zinc-700 transition-colors"
                 >
                   <Linkedin size={14} />
                 </a>
@@ -57,14 +56,14 @@ export function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Instagram"
-                  className="w-8 h-8 rounded-[4px] bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white hover:border-zinc-700 transition-colors"
+                  className="w-8 h-8 rounded-lg bg-zinc-900  flex items-center justify-center text-zinc-400 hover:text-white hover:border-zinc-700 transition-colors"
                 >
                   <Instagram size={14} />
                 </a>
                 <a
                   href="mailto:shahidpallath623@gmail.com"
                   aria-label="Email"
-                  className="w-8 h-8 rounded-[4px] bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white hover:border-zinc-700 transition-colors"
+                  className="w-8 h-8 rounded-lg bg-zinc-900  flex items-center justify-center text-zinc-400 hover:text-white hover:border-zinc-700 transition-colors"
                 >
                   <Mail size={14} />
                 </a>

@@ -51,8 +51,8 @@ const stackGroups: TechCategory[] = [
 export function Skills() {
   return (
     <section id="skills" className="relative scroll-mt-24 w-full">
-      {/* Central Column */}
-      <div className="w-[calc(100%-3rem)] sm:w-[calc(100%-4.5rem)] md:w-[calc(100%-5rem)] lg:max-w-[1140px] xl:max-w-[1200px] mx-auto border-l border-r border-zinc-800/90 relative bg-[#09090b]">
+      {/* Central Content Container */}
+      <div className="w-[calc(100%-3rem)] sm:w-[calc(100%-4.5rem)] md:w-[calc(100%-5rem)] lg:max-w-[1220px] xl:max-w-[1300px] mx-auto border-l border-r border-zinc-800/90 relative bg-[#09090b]">
         {/* Intro Header */}
         <div className="px-6 sm:px-10 lg:px-12 py-8 sm:py-10 border-b border-zinc-800/90">
           <p className="font-bricolage text-base sm:text-xl lg:text-2xl text-zinc-100 leading-snug max-w-2xl text-pretty font-medium">
@@ -85,7 +85,7 @@ export function Skills() {
                         {item.name}
                       </span>
                       {item.core && (
-                        <span className="text-[10px] font-mono font-semibold text-emerald-400 bg-emerald-950/40 border border-emerald-800/50 px-1.5 py-0.5 rounded-full">
+                        <span className="text-[10px] font-mono font-semibold text-black bg-[#1fd38a]  px-1.5 py-0.5 rounded-full">
                           CORE
                         </span>
                       )}
