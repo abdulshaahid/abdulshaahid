@@ -93,6 +93,7 @@
   --font-sans: var(--font-inter);
   --font-serif: var(--font-sora);
   --font-jakarta: var(--font-jakarta);
+  --font-bricolage: var(--font-bricolage);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -140,7 +141,50 @@
   }
 }
 
-/* Dotted grid backdrop similar to inspiration, low contrast for AA compliance with text */
+/* Technical fine grid background extending full width */
+.bg-tech-grid {
+  background-color: #09090b;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+/* Slope-like diagonal hatching pattern divider */
+.bg-diagonal-hatch {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(255, 255, 255, 0.07),
+    rgba(255, 255, 255, 0.07) 1.5px,
+    transparent 1.5px,
+    transparent 7px
+  );
+}
+
+/* Multi-line clone break green highlight badge */
+.green-highlight {
+  display: inline;
+  background-color: #1fd38a;
+  color: #000000;
+  font-weight: 400;
+  padding: 2px 6px;
+  border-radius: 4px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  line-height: 1.6;
+}
+
+.bg-diagonal-hatch-subtle {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(255, 255, 255, 0.04),
+    rgba(255, 255, 255, 0.04) 1px,
+    transparent 1px,
+    transparent 6px
+  );
+}
+
+/* Dotted grid backdrop */
 .bg-dot-grid {
   background-image: radial-gradient(#1f1f1f 1px, transparent 1px);
   background-size: 16px 16px;

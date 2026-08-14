@@ -53,7 +53,9 @@ const spanVariants = {
   exit: { width: 0, opacity: 0 },
 };
 
-const transition = { delay: 0.1, type: "spring", bounce: 0, duration: 0.6 };
+import type { Transition } from "framer-motion";
+
+const transition: Transition = { delay: 0.1, type: "spring", bounce: 0, duration: 0.6 };
 
 export function ExpandableTabs({
   tabs,
@@ -62,9 +64,9 @@ export function ExpandableTabs({
   onChange,
 }: ExpandableTabsProps) {
   const [selected, setSelected] = React.useState<number | null>(null);
-  const outsideClickRef = React.useRef(null);
+  const outsideClickRef = React.useRef<HTMLDivElement>(null);
 
-  useOnClickOutside(outsideClickRef, () => {
+  useOnClickOutside(outsideClickRef as React.RefObject<HTMLElement>, () => {
     setSelected(null);
     onChange?.(null);
   });
@@ -99,7 +101,7 @@ export function ExpandableTabs({
         const isLabel = (tab as any).type === "label";
         const labelText = isLabel ? (tab as Label).text : null;
         const t = tab as Tab;
-        const Icon = !isLabel ? t.icon : null;
+        const IconComponent = !isLabel ? t.icon : null;
 
         return (
           <motion.button
@@ -125,7 +127,7 @@ export function ExpandableTabs({
               labelText
             ) : (
               <>
-                <Icon size={20} />
+                {IconComponent && <IconComponent size={20} />}
                 <AnimatePresence initial={false}>
                   {selected === index && (
                     <motion.span

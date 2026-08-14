@@ -1,281 +1,199 @@
-"use client";
-import React, { useRef } from "react";
+"use client"
 
-// 3D Card Components
-const CardContainer = ({ children, className = "" }) => {
-  const containerRef = useRef(null);
+import React from "react"
+import { ArrowUpRight, Github, ExternalLink } from "lucide-react"
+import { CrosshairMarker, GreenHighlight } from "@/components/ui/geometric"
 
-  const handleMouseMove = (e) => {
-    if (!containerRef.current) return;
-    const { left, top, width, height } =
-      containerRef.current.getBoundingClientRect();
-    const x = (e.clientX - left - width / 2) / 25;
-    const y = (e.clientY - top - height / 2) / 25;
-    containerRef.current.style.transform = `rotateY(${x}deg) rotateX(${-y}deg)`;
-  };
+interface ProjectItem {
+  id: string
+  title: string
+  description: string
+  tags: string[]
+  liveUrl?: string
+  githubUrl?: string
+}
 
-  const handleMouseEnter = () => {
-    if (!containerRef.current) return;
-    containerRef.current.style.transition = "none";
-  };
-
-  const handleMouseLeave = () => {
-    if (!containerRef.current) return;
-    containerRef.current.style.transition = "transform 0.5s ease-out";
-    containerRef.current.style.transform = `rotateY(0deg) rotateX(0deg)`;
-  };
-
-  return (
-    <div
-      className={`w-full flex items-center justify-center ${className}`}
-      style={{ perspective: "1000px" }}
-    >
-      <div
-        ref={containerRef}
-        onMouseMove={handleMouseMove}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        className="w-full transition-all duration-200 ease-linear"
-        style={{ transformStyle: "preserve-3d" }}
-      >
-        {children}
-      </div>
-    </div>
-  );
-};
-
-const CardItem = ({
-  as: Component = "div",
-  children,
-  className = "",
-  translateX = 0,
-  translateY = 0,
-  translateZ = 0,
-  rotateX = 0,
-  rotateY = 0,
-  rotateZ = 0,
-  ...rest
-}) => {
-  const style = {
-    transform: `translateX(${translateX}px) translateY(${translateY}px) translateZ(${translateZ}px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`,
-  };
-
-  return (
-    <Component className={className} style={style} {...rest}>
-      {children}
-    </Component>
-  );
-};
+const projects: ProjectItem[] = [
+  {
+    id: "trawayl",
+    title: "Trawayl",
+    description:
+      "Travel package marketplace with custom itinerary discovery and instant booking workflows.",
+    tags: ["React", "Next.js", "Tailwind CSS", "TypeScript"],
+    liveUrl: "https://trawayl.com",
+    githubUrl: "https://github.com/abdulshaahid",
+  },
+  {
+    id: "trawayl-agent",
+    title: "Trawayl Agent Portal",
+    description:
+      "Operations dashboard for agencies to manage live inventory, bookings, and inquiries.",
+    tags: ["React", "Tailwind CSS", "REST APIs", "Analytics"],
+    liveUrl: "https://trawayl.com",
+    githubUrl: "https://github.com/abdulshaahid",
+  },
+  {
+    id: "portfolio-os",
+    title: "Portfolio OS",
+    description:
+      "Minimal developer portfolio with a strict geometric grid and 60fps micro-interactions.",
+    tags: ["Next.js", "TypeScript", "Tailwind CSS", "Framer"],
+    liveUrl: "https://github.com/abdulshaahid",
+    githubUrl: "https://github.com/abdulshaahid",
+  },
+  {
+    id: "monochrome-lens",
+    title: "Monochrome Lens UI",
+    description:
+      "Interactive image magnification component with cursor-tracking and hardware zoom.",
+    tags: ["React", "UI/UX", "CSS Transforms", "Figma"],
+    liveUrl: "https://github.com/abdulshaahid",
+    githubUrl: "https://github.com/abdulshaahid",
+  },
+  {
+    id: "evervault-card",
+    title: "Evervault Shield Card",
+    description:
+      "Dynamic cryptographic character-scrambling card with cursor-proximity illumination.",
+    tags: ["TypeScript", "Canvas API", "Tailwind CSS"],
+    liveUrl: "https://github.com/abdulshaahid",
+    githubUrl: "https://github.com/abdulshaahid",
+  },
+  {
+    id: "sorting-visualizer",
+    title: "Canvas & WebGL UI",
+    description:
+      "High-performance interactive graphical shaders with fluid noise and hardware compositing.",
+    tags: ["WebGL", "OGL", "GLSL", "React"],
+    liveUrl: "https://github.com/abdulshaahid",
+    githubUrl: "https://github.com/abdulshaahid",
+  },
+  {
+    id: "design-system",
+    title: "Design System Kit",
+    description:
+      "Token-driven accessible UI primitives with strict typographic scale and keyboard flows.",
+    tags: ["React", "Radix UI", "Tailwind CSS", "Figma"],
+    liveUrl: "https://github.com/abdulshaahid",
+    githubUrl: "https://github.com/abdulshaahid",
+  },
+  {
+    id: "travel-api-service",
+    title: "Package Filter Engine",
+    description:
+      "Client-side multi-parameter filter engine with stateful URL sync and instant debouncing.",
+    tags: ["Next.js", "TypeScript", "Zod", "React Hook Form"],
+    liveUrl: "https://trawayl.com",
+    githubUrl: "https://github.com/abdulshaahid",
+  },
+]
 
 export function Portfolio() {
   return (
-    <section
-      id="portfolio"
-      aria-labelledby="portfolio-title"
-      className="scroll-mt-24"
-    >
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 py-12 sm:py-16">
-        <CardItem translateZ="20">
-          <h2
-            id="portfolio-title"
-            className="font-serif text-3xl font-semibold text-pretty mb-8"
-          >
-            My Work
-          </h2>
-        </CardItem>
+    <section id="portfolio" className="relative scroll-mt-24 w-full">
+      {/* Central Column */}
+      <div className="w-[calc(100%-3rem)] sm:w-[calc(100%-4.5rem)] md:w-[calc(100%-5rem)] lg:max-w-[1140px] xl:max-w-[1200px] mx-auto border-l border-r border-zinc-800/90 relative bg-[#09090b]">
+        {/* Intro Header */}
+        <div className="px-6 sm:px-10 lg:px-12 py-8 sm:py-10 border-b border-zinc-800/90">
+          <p className="font-bricolage text-base sm:text-xl lg:text-2xl text-zinc-100 leading-snug max-w-2xl text-pretty font-medium">
+            Think of{" "}
+            <GreenHighlight>
+              side-projects and open source as my personal lab
+            </GreenHighlight>
+          </p>
+        </div>
 
-        <CardContainer>
-          <CardItem
-            translateZ="0"
-            className="glass relative group/card overflow-hidden rounded-2xl border border-white/10 transition-all duration-300 hover:shadow-xl hover:shadow-white/5 w-full max-w-5xl mx-auto"
-          >
-            <div className="p-6 sm:p-8">
-              {/* Header */}
-              <div className="mb-8">
-                <CardItem translateZ="50">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-                    {/* Title + Logo */}
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-white text-2xl sm:text-3xl font-bold">
-                          Trawayl
-                        </h3>
-                        <img
-                          src="/logo.png" // replace with your logo path
-                          alt="Trawayl Logo"
-                          className="h-10 w-10 object-contain"
-                        />
-                      </div>
-                      <p className="text-zinc-400 text-base mt-1">
-                        Modern travel package booking platform
-                      </p>
-                    </div>
+        {/* 2-Column Grid of 8 Project Cells */}
+        <div className="grid grid-cols-1 md:grid-cols-2">
+          {projects.map((project, index) => {
+            const isLeftCol = index % 2 === 0
 
-                    {/* Tags */}
-                    <div className="flex gap-3">
-                      <span className="px-3 py-1 bg-emerald-500/20 text-emerald-300 rounded-full text-sm font-medium">
-                        Live
+            return (
+              <article
+                key={project.id}
+                className={`relative flex flex-col justify-between p-6 sm:p-8 hover:bg-white/[0.015] transition-colors duration-150 border-b border-zinc-800/90 group ${
+                  isLeftCol ? "md:border-r border-zinc-800/90" : ""
+                }`}
+              >
+                <div>
+                  {/* Title with Bricolage Grotesque */}
+                  <h3 className="font-bricolage text-lg sm:text-xl lg:text-[22px] font-bold text-white group-hover:text-[#1fd38a] transition-colors tracking-tight">
+                    {project.title}
+                  </h3>
+
+                  {/* Concise Description with Increased Font Size */}
+                  <p className="mt-2.5 text-[13.5px] sm:text-[14.5px] text-zinc-300/90 leading-relaxed">
+                    {project.description}
+                  </p>
+
+                  {/* Tech Pills */}
+                  <div className="mt-4 flex flex-wrap gap-1.5">
+                    {project.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="rounded-full bg-zinc-900/90 border border-zinc-800 px-2.5 py-0.5 text-xs font-mono text-zinc-300"
+                      >
+                        {tag}
                       </span>
-                      <span className="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-sm font-medium">
-                        2025
-                      </span>
-                    </div>
+                    ))}
                   </div>
-                </CardItem>
-              </div>
+                </div>
 
-              {/* Main Content Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-                {/* Left Content - Project Details */}
-                <div className="lg:col-span-1 space-y-6">
-                  <CardItem translateZ="40" translateX="-15">
-                    <div className="space-y-4 pl-3">
-                      <div>
-                        <h4 className="text-white font-semibold mb-3">
-                          Overview
-                        </h4>
-                        <p className="text-zinc-400 text-sm leading-relaxed">
-                          Comprehensive travel ecosystem featuring seamless
-                          package booking for users and powerful management
-                          dashboard for travel agents.
-                        </p>
-                      </div>
-
-                      <div>
-                        <h4 className="text-white font-semibold mb-3">
-                          Key Features
-                        </h4>
-                        <ul className="text-zinc-400 text-sm space-y-2">
-                          <li className="flex items-start gap-2">
-                            <span className="text-emerald-400 mt-1">•</span>
-                            <span>
-                              User-friendly package exploration & booking
-                            </span>
-                          </li>
-                          <li className="flex items-start gap-2">
-                            <span className="text-emerald-400 mt-1">•</span>
-                            <span>Real-time agent dashboard & management</span>
-                          </li>
-                        </ul>
-                      </div>
-
-                      <div>
-                        <h4 className="text-white font-semibold mb-3">
-                          Tech Stack
-                        </h4>
-                        <div className="flex flex-wrap gap-2">
-                          {["React", "Tailwind CSS", "JavaScript", "AWS"].map(
-                            (tech) => (
-                              <span
-                                key={tech}
-                                className="px-3 py-1 bg-white/10 text-white rounded-lg text-xs font-medium"
-                              >
-                                {tech}
-                              </span>
-                            )
-                          )}
-                        </div>
-                      </div>
-
-                      <div>
-                        <h4 className="text-white font-semibold mb-3">Role</h4>
-                        <p className="text-zinc-400 text-sm">
-                          Co - Founder • UI/UX Design • Frontend Development •
-                          User Experience
-                        </p>
-                      </div>
-                    </div>
-                  </CardItem>
-
-                  {/* CTA Link */}
-                  <CardItem translateZ="30" translateX="-10">
+                {/* Action Buttons */}
+                <div className="mt-6 pt-3 flex items-center gap-2">
+                  {project.githubUrl && (
                     <a
-                      href="https://trawayl.com"
+                      href={project.githubUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white rounded-3xl transition-all duration-300 group font-medium border border-white/10"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-[6px] text-xs font-mono font-medium text-zinc-200 bg-[#141418] hover:bg-zinc-800 hover:text-white border border-zinc-800 hover:border-zinc-700 transition-all"
                     >
-                      Visit Website
-                      <svg
-                        className="w-4 h-4 transition-transform group-hover:translate-x-1"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                        />
-                      </svg>
+                      <Github size={13} />
+                      <span>GitHub</span>
                     </a>
-                  </CardItem>
-                </div>
+                  )}
 
-                {/* Right Content - Screenshots */}
-                <div className="lg:col-span-2">
-                  <div className="grid grid-cols-2 sm:grid-cols-2 gap-6">
-                    {/* Desktop Version */}
-                    <CardItem
-                      translateZ="85"
-                      rotateY="8"
-                      rotateX="3"
-                      className="group/img"
+                  {project.liveUrl && (
+                    <a
+                      href={project.liveUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-[6px] text-xs font-mono font-medium text-zinc-200 bg-[#141418] hover:bg-zinc-800 hover:text-white border border-zinc-800 hover:border-zinc-700 transition-all"
                     >
-                      <div className="relative">
-                        <div className="bg-gray-800 rounded-2xl overflow-hidden shadow-2xl border border-gray-600 transition-transform duration-300 group-hover/img:scale-105 mx-auto max-w-[200px]">
-                          {/* Mobile Header */}
-
-                          {/* Mobile Screenshot */}
-                          <img
-                            src="/trawayl-desktop.png"
-                            alt="Trawayl mobile version"
-                            className="w-full h-full object-cover rounded"
-                            loading="lazy"
-                          />
-
-                          {/* Mobile Bottom Bar */}
-                        </div>
-                        <div className="absolute -top-2 -right-2 bg-emerald-500 text-black text-xs px-2 py-1 rounded-full">
-                          Dashboard
-                        </div>
-                      </div>
-                    </CardItem>
-
-                    {/* Mobile Version */}
-                    <CardItem
-                      translateZ="85"
-                      rotateY="8"
-                      rotateX="3"
-                      className="group/img"
-                    >
-                      <div className="relative">
-                        <div className="bg-gray-800 rounded-2xl overflow-hidden shadow-2xl border border-gray-600 transition-transform duration-300 group-hover/img:scale-105 mx-auto max-w-[200px]">
-                          {/* Mobile Header */}
-
-                          {/* Mobile Screenshot */}
-                          <img
-                            src="/trawayl-mobile.png"
-                            alt="Trawayl mobile version"
-                            className="w-full h-full object-cover rounded"
-                            loading="lazy"
-                          />
-
-                          {/* Mobile Bottom Bar */}
-                        </div>
-                        <div className="absolute -top-2 -right-2 bg-emerald-500 text-black text-xs px-2 py-1 rounded-full">
-                          Marketplace
-                        </div>
-                      </div>
-                    </CardItem>
-                  </div>
+                      <ExternalLink size={13} />
+                      <span>Visit</span>
+                    </a>
+                  )}
                 </div>
-              </div>
-            </div>
-          </CardItem>
-        </CardContainer>
+              </article>
+            )
+          })}
+        </div>
+
+        {/* Closing Statement */}
+        <div className="p-8 sm:p-10 text-center">
+          <p className="font-bricolage text-sm sm:text-base text-zinc-200 max-w-xl mx-auto leading-relaxed">
+            I also contribute to{" "}
+            <GreenHighlight>
+              open-source tools & utilities
+            </GreenHighlight>{" "}
+            regularly on GitHub.
+          </p>
+
+          <div className="mt-4">
+            <a
+              href="https://github.com/abdulshaahid"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-[4px] text-xs font-mono font-medium text-black bg-zinc-200 hover:bg-white transition-all shadow-sm group"
+            >
+              <Github size={13} className="text-black" />
+              <span>Explore on GitHub</span>
+              <ArrowUpRight size={12} className="text-black group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            </a>
+          </div>
+        </div>
       </div>
     </section>
-  );
+  )
 }

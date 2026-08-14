@@ -1,6 +1,6 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Inter, Sora, Plus_Jakarta_Sans } from "next/font/google"
+import { Inter, Sora, Plus_Jakarta_Sans, Bricolage_Grotesque } from "next/font/google"
 import "./globals.css"
 
 const inter = Inter({
@@ -18,6 +18,11 @@ const jakarta = Plus_Jakarta_Sans({
   display: "swap",
   variable: "--font-jakarta",
 })
+const bricolage = Bricolage_Grotesque({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-bricolage",
+})
 
 export const metadata: Metadata = {
   title: "Mohamed Abdul Shahid — Portfolio",
@@ -27,7 +32,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${sora.variable} ${jakarta.variable} antialiased scroll-smooth`}>
+    <html lang="en" className={`${inter.variable} ${sora.variable} ${jakarta.variable} ${bricolage.variable} antialiased scroll-smooth`}>
       <body className="bg-black text-white font-sans">{children}</body>
     </html>
   )

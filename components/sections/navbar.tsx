@@ -5,13 +5,13 @@ import { Home, Info, Wrench, Briefcase, Images, Mail } from "lucide-react"
 import { ExpandableTabs } from "@/components/ui/expandable-tabs"
 import { useMediaQuery } from "usehooks-ts"
 
-// Keep section ids the same
+// Keep section ids in sync with page order
 const items = [
   { id: "home", label: "Home" },
   { id: "about", label: "About" },
+  { id: "portfolio", label: "Portfolio" },
   { id: "skills", label: "Skills" },
   { id: "services", label: "Services" },
-  { id: "portfolio", label: "Portfolio" },
   { id: "contact", label: "Contact" },
 ]
 
@@ -27,18 +27,18 @@ export function Navbar() {
     { type: "label" as const, text: "Shahid" },
     { title: "Home", icon: Home },
     { title: "About", icon: Info },
+    { title: "Portfolio", icon: Images },
     { title: "Skills", icon: Wrench },
     { title: "Services", icon: Briefcase },
-    { title: "Portfolio", icon: Images },
     { title: "Contact", icon: Mail },
   ]
 
   const mobileTabs = [
     { title: "Home", icon: Home },
     { title: "About", icon: Info },
+    { title: "Portfolio", icon: Images },
     { title: "Skills", icon: Wrench },
     { title: "Services", icon: Briefcase },
-    { title: "Portfolio", icon: Images },
     { title: "Contact", icon: Mail },
   ]
 

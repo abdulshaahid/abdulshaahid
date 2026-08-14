@@ -1,19 +1,21 @@
 "use client"
+
 import type React from "react"
 import { useState, useCallback } from "react"
 
 import { SplashScreen } from "@/components/ui/splash-screen"
 import { Navbar } from "@/components/sections/navbar"
 import { Hero } from "@/components/sections/hero"
+import { Portfolio } from "@/components/sections/portfolio"
 import { About } from "@/components/sections/about"
 import { Skills } from "@/components/sections/skills"
-import { Services } from "@/components/sections/services"
-import { Portfolio } from "@/components/sections/portfolio"
+import { Writing } from "@/components/sections/writing"
+import { Guestbook } from "@/components/sections/guestbook"
 import { Contact } from "@/components/sections/contact"
 import { Footer } from "@/components/sections/footer"
-import { WavePattern } from "@/components/ui/wave-pattern"
+import { SlopeDivider } from "@/components/ui/geometric"
 
-// ===== Mouse Following Background =====
+// ===== Mouse Following Ambient Glow =====
 const MouseBackground = ({ children }: { children: React.ReactNode }) => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [isHovered, setIsHovered] = useState(false)
@@ -24,36 +26,35 @@ const MouseBackground = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div
-      className="relative w-full min-h-full bg-[#000] overflow-hidden"
+      className="relative w-full min-h-full bg-[#09090b] text-white selection:bg-[#1fd38a] selection:text-black overflow-x-hidden"
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Mouse Glow Effect */}
+      {/* Subtle Mouse Glow */}
       {isHovered && (
         <div
-          className="pointer-events-none fixed rounded-full"
+          className="pointer-events-none fixed rounded-full -z-10 opacity-70"
           style={{
             width: "400px",
             height: "400px",
             top: mousePosition.y - 200,
             left: mousePosition.x - 200,
-            background: "#37e5a530",
-            filter: "blur(150px)",
-            transform: "translate(-0%, -0%)",
-            zIndex: 0, // stays behind content
-            willChange: "transform, top, left",
+            background: "radial-gradient(circle, rgba(31, 211, 138, 0.04) 0%, transparent 70%)",
+            filter: "blur(60px)",
+            transform: "translateZ(0)",
+            willChange: "top, left",
           }}
         />
       )}
 
-      {/* Page Content on top */}
+      {/* Page Content */}
       <div className="relative z-10">{children}</div>
     </div>
   )
 }
 
-// ===== Main Page =====
+// ===== Main Portfolio Page =====
 export default function Page() {
   const [isSiteReady, setIsSiteReady] = useState(false)
 
@@ -63,56 +64,62 @@ export default function Page() {
 
   return (
     <>
-      {/* Full Black Background Splash Screen with Head & Welcome Animation */}
+      {/* Splash Screen */}
       <SplashScreen onComplete={handleSplashComplete} />
 
-      {/* Fixed Navbar Outside */}
+      {/* Fixed Navbar */}
       <Navbar />
 
-      {/* Rest of the Page with Mouse Background */}
+      {/* Main Page Layout */}
       <MouseBackground>
-        <main id="top" className="relative min-h-screen pt-0">
-          {/* Hero Section */}
+        <main id="top" className="relative min-h-screen pt-0 bg-tech-grid">
+          {/* Hero Section (Preserved) */}
           <Hero isReady={isSiteReady} />
 
-          {/* Sections starting from About with WavePattern & Smooth Top Fade */}
-          <div className="relative w-full">
-            {/* Sticky Interactive Wave Pattern Background with top fade */}
-            <div
-              className="sticky top-0 h-screen w-full pointer-events-none -z-10 -mb-[100vh] overflow-hidden"
-              style={{
-                maskImage: "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.6) 80px, black 200px, black 100%)",
-                WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.6) 80px, black 200px, black 100%)",
-              }}
-            >
-              <WavePattern
-                className="absolute inset-0 w-full h-full"
-                strokeColor="220, 220, 220"
-                waveAmplitude={9}
-                waveLength={85}
-                rowSpacing={16}
-                lineWidth={1}
-                interactive={true}
-                opacity={0.06}
-              />
-            </div>
-
-            {/* Sections below Hero */}
-            <div className="relative z-10">
-              <About />
-              <Skills />
-              <Services />
-              <Portfolio />
-              <Contact />
-              <Footer />
-            </div>
+          {/* Spacing below hero before geometric sections start */}
+          <div className="pt-8 sm:pt-16">
+            {/* 1. Philosophy / About Section (First section starting below Hero) */}
+            <About />
           </div>
 
-          {/* Back to Top Button */}
+          {/* Full-width Slope Divider */}
+          <SlopeDivider />
+
+          {/* 2. Projects / Work Section */}
+          <Portfolio />
+
+          {/* Full-width Slope Divider */}
+          <SlopeDivider />
+
+          {/* 3. Skills / Ecosystem Section */}
+          <Skills />
+
+          {/* Full-width Slope Divider */}
+          <SlopeDivider />
+
+          {/* 4. Writing / Blog Section */}
+          <Writing />
+
+          {/* Full-width Slope Divider */}
+          <SlopeDivider />
+
+          {/* 5. Guestbook / Social Proof Section */}
+          <Guestbook />
+
+          {/* Full-width Slope Divider */}
+          <SlopeDivider />
+
+          {/* 6. Final Contact CTA Module */}
+          <Contact />
+
+          {/* 7. Footer */}
+          <Footer />
+
+          {/* Minimalist Back to Top Pill Button */}
           <a
             href="#top"
             aria-label="Back to top"
-            className="fixed bottom-6 right-6 inline-flex h-10 w-10 items-center justify-center z-100 rounded-full bg-white text-black shadow-lg transition hover:bg-zinc-200"
+            className="fixed bottom-6 right-6 inline-flex h-8 w-8 items-center justify-center z-40 rounded-full bg-zinc-900/90 text-zinc-400 hover:text-white border border-zinc-800 hover:border-zinc-600 shadow-xl backdrop-blur-md transition-all text-xs font-mono"
           >
             ↑
           </a>

@@ -1,105 +1,92 @@
 "use client"
-import type React from "react"
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Mail, Phone, Linkedin, Instagram } from "lucide-react"
+
+import React, { useState } from "react"
+import { Mail, Github, Linkedin, Instagram, Check, Copy, ArrowUpRight } from "lucide-react"
+import { GreenHighlight } from "@/components/ui/geometric"
 
 export function Contact() {
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [message, setMessage] = useState("")
+  const [copied, setCopied] = useState(false)
+  const email = "shahidpallath623@gmail.com"
 
-  const onSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${message}`)
-    window.location.href = `mailto:shahidpallath623@gmail.com?subject=Portfolio Contact&body=${body}`
+  const handleCopyEmail = () => {
+    navigator.clipboard.writeText(email)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   return (
-    <section id="contact" className="scroll-mt-24 ">
-      <div className="mx-auto max-w-6xl px-4 py-16">
-        <div className="glass rounded-2xl p-6">
-          <h2 className="font-serif text-3xl font-semibold">Get In Touch</h2>
-          <form onSubmit={onSubmit} className="mt-6 grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <label htmlFor="name" className="text-sm text-zinc-300">
-                Name
-              </label>
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="rounded-xl border-white/20 bg-black text-white placeholder:text-zinc-500 focus-visible:ring-white"
-                placeholder="Your name"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="email" className="text-sm text-zinc-300">
-                Email
-              </label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="rounded-xl border-white/20 bg-black text-white placeholder:text-zinc-500 focus-visible:ring-white"
-                placeholder="you@example.com"
-                required
-              />
-            </div>
-            <div className="space-y-2 md:col-span-2">
-              <label htmlFor="message" className="text-sm text-zinc-300">
-                Message
-              </label>
-              <Textarea
-                id="message"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                className="min-h-[140px] rounded-xl border-white/20 bg-black text-white placeholder:text-zinc-500 focus-visible:ring-white"
-                placeholder="Tell me about your project..."
-                required
-              />
-            </div>
-            <div className="md:col-span-2">
-              <Button type="submit" className="w-full rounded-xl bg-white/80 text-black hover:bg-zinc-200">
-                Send
-              </Button>
-            </div>
-          </form>
+    <section id="contact" className="relative scroll-mt-24 w-full">
+      {/* Central Column */}
+      <div className="w-[calc(100%-3rem)] sm:w-[calc(100%-4.5rem)] md:w-[calc(100%-5rem)] lg:max-w-[1140px] xl:max-w-[1200px] mx-auto border-l border-r border-zinc-800/90 relative bg-[#09090b]">
+        <div className="p-8 sm:p-12 lg:p-16">
+          <div className="max-w-2xl">
+            <h2 className="font-bricolage text-xl sm:text-2xl lg:text-3xl font-bold text-white tracking-tight">
+              Got something <GreenHighlight>worth building?</GreenHighlight>
+            </h2>
 
-          {/* Contact Links with Icons */}
-          <div className="mt-8 grid gap-4 text-sm text-zinc-400 sm:grid-cols-2 lg:grid-cols-4">
-            <a
-              className="flex items-center gap-2 hover:text-white"
-              href="mailto:shahidpallath623@gmail.com"
-            >
-              <Mail size={16} /> shahidpallath623@gmail.com
-            </a>
-            <a
-              className="flex items-center gap-2 hover:text-white"
-              href="tel:+916282669441"
-            >
-              <Phone size={16} /> +91 6282669441
-            </a>
-            <a
-              className="flex items-center gap-2 hover:text-white"
-              href="https://www.linkedin.com/in/mohamedabdulshahid/"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <Linkedin size={16} /> Linkedin
-            </a>
-            <a
-              className="flex items-center gap-2 hover:text-white"
-              href="https://instagram.com/abdulshaahid/"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <Instagram size={16} /> Instagram
-            </a>
+            <p className="mt-4 text-[13.5px] sm:text-[14.5px] text-zinc-300 leading-relaxed">
+              Open to new opportunities, freelance projects, and creative collaborations.
+              Have an ambitious idea or need frontend engineering? Let's talk.
+            </p>
+
+            {/* Action Buttons Row */}
+            <div className="mt-8 flex flex-wrap items-center gap-2.5 sm:gap-3">
+              <a
+                href={`mailto:${email}?subject=Portfolio%20Inquiry`}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-[4px] text-xs font-mono font-medium bg-zinc-200 text-black hover:bg-white transition-all shadow-sm group"
+              >
+                <Mail size={14} />
+                <span>Say Hello</span>
+                <ArrowUpRight size={13} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              </a>
+
+              <button
+                onClick={handleCopyEmail}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-[4px] text-xs font-mono font-medium text-zinc-200 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 transition-all"
+              >
+                {copied ? (
+                  <>
+                    <Check size={13} className="text-[#1fd38a]" />
+                    <span className="text-[#1fd38a]">Copied!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy size={13} className="text-zinc-400" />
+                    <span>Copy Email</span>
+                  </>
+                )}
+              </button>
+
+              <a
+                href="https://github.com/abdulshaahid"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-[4px] text-xs font-mono font-medium text-zinc-300 hover:text-white bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 transition-all"
+              >
+                <Github size={14} />
+                <span>GitHub</span>
+              </a>
+
+              <a
+                href="https://www.linkedin.com/in/mohamedabdulshahid/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-[4px] text-xs font-mono font-medium text-zinc-300 hover:text-white bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 transition-all"
+              >
+                <Linkedin size={14} />
+                <span>LinkedIn</span>
+              </a>
+
+              <a
+                href="https://instagram.com/abdulshaahid/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-[4px] text-xs font-mono font-medium text-zinc-300 hover:text-white bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 transition-all"
+              >
+                <Instagram size={14} />
+                <span>Instagram</span>
+              </a>
+            </div>
           </div>
         </div>
       </div>

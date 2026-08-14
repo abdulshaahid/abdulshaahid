@@ -1,238 +1,109 @@
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Code, Layout, MonitorSmartphone, PanelsTopLeft, Ruler, Sparkles } from "lucide-react"
+"use client"
 
-const skills = [
+import React from "react"
+import { GreenHighlight } from "@/components/ui/geometric"
+
+interface TechCategory {
+  title: string
+  items: {
+    name: string
+    role: string
+    core?: boolean
+  }[]
+}
+
+const stackGroups: TechCategory[] = [
   {
-    icon: Code,
-    label: "React.js",
-    description: "Building dynamic UIs",
-    iconColor: "text-blue-400",
-    size: "large",
+    title: "Frontend Core",
+    items: [
+      { name: "React.js", role: "Component architecture & hooks", core: true },
+      { name: "Next.js", role: "App Router, SSR, Turbopack", core: true },
+      { name: "TypeScript", role: "Type safety & scalable interfaces", core: true },
+      { name: "Tailwind CSS", role: "Utility tokens & design systems", core: true },
+      { name: "JavaScript (ES6+)", role: "Modern async features" },
+      { name: "HTML5 & CSS3", role: "Semantic layout specs" },
+    ],
   },
   {
-    icon: Sparkles,
-    label: "JavaScript (ES6+)",
-    description: "Modern JS features",
-    iconColor: "text-yellow-400",
-    size: "medium",
+    title: "Design & UX",
+    items: [
+      { name: "UI/UX Design", role: "User journeys & wireframes", core: true },
+      { name: "Figma", role: "Prototyping & component kits", core: true },
+      { name: "Framer Motion", role: "GPU micro-animations" },
+      { name: "Design Tokens", role: "Harmonious scales & palettes" },
+      { name: "Radix UI", role: "Accessible headless primitives" },
+      { name: "Responsive Design", role: "Multi-device layouts" },
+    ],
   },
   {
-    icon: Layout,
-    label: "HTML5 & CSS3",
-    description: "Semantic markup",
-    iconColor: "text-green-400",
-    size: "medium",
-  },
-  {
-    icon: PanelsTopLeft,
-    label: "Tailwind CSS",
-    description: "Utility-first styling",
-    iconColor: "text-purple-400",
-    size: "large",
-  },
-  {
-    icon: Ruler,
-    label: "UI/UX Design",
-    description: "User-centered design",
-    iconColor: "text-rose-400",
-    size: "medium",
-  },
-  {
-    icon: MonitorSmartphone,
-    label: "Responsive Design",
-    description: "Multi-device layouts",
-    iconColor: "text-indigo-400",
-    size: "medium",
+    title: "Ecosystem",
+    items: [
+      { name: "Git & GitHub", role: "Version control & workflows", core: true },
+      { name: "Vercel", role: "Edge deployment & CI/CD" },
+      { name: "REST APIs", role: "Data fetching & integration" },
+      { name: "Node.js", role: "Tooling & serverless backends" },
+      { name: "Web Performance", role: "Lighthouse & 60fps execution" },
+      { name: "AWS Cloud", role: "Storage & cloud infrastructure" },
+    ],
   },
 ]
 
 export function Skills() {
   return (
-    <section id="skills" className="scroll-mt-24">
-      <div className="mx-auto max-w-6xl px-4 py-16">
-        <div className="text-center mb-12">
-          <h2 className="font-serif text-4xl font-bold bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent mb-4 text-balance">
-            Skills & Expertise
-          </h2>
-          <p className="text-zinc-400 text-lg max-w-2xl mx-auto text-pretty">
-            Technologies and tools I use to bring ideas to life
+    <section id="skills" className="relative scroll-mt-24 w-full">
+      {/* Central Column */}
+      <div className="w-[calc(100%-3rem)] sm:w-[calc(100%-4.5rem)] md:w-[calc(100%-5rem)] lg:max-w-[1140px] xl:max-w-[1200px] mx-auto border-l border-r border-zinc-800/90 relative bg-[#09090b]">
+        {/* Intro Header */}
+        <div className="px-6 sm:px-10 lg:px-12 py-8 sm:py-10 border-b border-zinc-800/90">
+          <p className="font-bricolage text-base sm:text-xl lg:text-2xl text-zinc-100 leading-snug max-w-2xl text-pretty font-medium">
+            Technologies powering{" "}
+            <GreenHighlight>
+              modern web applications & digital experiences
+            </GreenHighlight>
           </p>
         </div>
 
-        {/* Bento Grid Layout */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-12 gap-4 mx-auto max-w-6xl">
-          {/* React.js - Hero card (prominent on larger screens, full-width on small) */}
-          <Card className="sm:col-span-2 lg:col-span-5 glass hover-lift rounded-2xl group relative overflow-hidden border-white/10 motion-safe:hover:scale-[1.02] motion-reduce:transform-none transition-all duration-300 hover:shadow-xl hover:shadow-white/5">
-            <div className="absolute inset-0 bg-gradient-to-br from-white/3 to-transparent opacity-30" />
-            <CardContent className="relative p-8 h-full flex flex-col justify-between">
-              <div className="flex items-start justify-between mb-6">
-                <div className="rounded-2xl p-4 bg-white/10 backdrop-blur-sm group-hover:bg-white/20 transition-colors duration-300">
-                  <Code
-                    size={36}
-                    className="text-blue-400 group-hover:scale-110 transition-transform duration-300"
-                    aria-hidden="true"
-                  />
-                </div>
-                <Badge className="bg-white/10 text-zinc-300 border-white/20 hover:bg-white/20 transition-colors">
-                  Featured
-                </Badge>
-              </div>
-              <div className="space-y-4">
-                <h3 className="text-3xl lg:text-4xl font-bold text-white group-hover:text-white/90 transition-colors">
-                  React.js
+        {/* 3 Columns */}
+        <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-zinc-800/90">
+          {stackGroups.map((group) => (
+            <div
+              key={group.title}
+              className="relative p-6 sm:p-8 hover:bg-white/[0.015] transition-colors"
+            >
+              <div className="flex items-center gap-2 pb-3.5 mb-5 border-b border-zinc-800/60">
+                <span className="w-2 h-2 rounded-full bg-[#1fd38a]" />
+                <h3 className="font-bricolage text-sm sm:text-base font-bold uppercase tracking-wider text-zinc-100">
+                  {group.title}
                 </h3>
-                {/* improve text wrapping */}
-                <p className="text-lg text-zinc-300/80 leading-relaxed text-pretty">
-                  Building modern, interactive user interfaces with component-based architecture
-                </p>
               </div>
-              <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-colors duration-500" />
-            </CardContent>
-          </Card>
 
-          {/* JavaScript */}
-          <Card className="sm:col-span-1 lg:col-span-4 glass hover-lift rounded-2xl group relative overflow-hidden border-white/10 motion-safe:hover:scale-105 motion-reduce:transform-none transition-all duration-300 hover:shadow-xl hover:shadow-white/5">
-            <div className="absolute inset-0 bg-gradient-to-br from-white/3 to-transparent opacity-30" />
-            <CardContent className="relative p-6 h-full flex flex-col justify-between">
-              <div className="flex items-start justify-between mb-4">
-                <div className="rounded-xl p-3 bg-white/10 backdrop-blur-sm group-hover:bg-white/20 transition-colors duration-300">
-                  <Sparkles
-                    size={28}
-                    className="text-yellow-400 group-hover:scale-110 transition-transform duration-300"
-                    aria-hidden="true"
-                  />
-                </div>
-                <Badge className="bg-white/10 text-zinc-300 border-white/20 hover:bg-white/20 transition-colors">
-                  Core
-                </Badge>
-              </div>
-              <div className="space-y-3">
-                <h3 className="text-xl font-semibold text-white group-hover:text-white/90 transition-colors">
-                  JavaScript (ES6+)
-                </h3>
-                {/* improve text wrapping */}
-                <p className="text-sm text-zinc-300/80 leading-relaxed text-pretty">
-                  Modern JavaScript features and async programming
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* HTML5 & CSS3 */}
-          <Card className="sm:col-span-1 lg:col-span-3 glass hover-lift rounded-2xl group relative overflow-hidden border-white/10 motion-safe:hover:scale-105 motion-reduce:transform-none transition-all duration-300 hover:shadow-xl hover:shadow-white/5">
-            <div className="absolute inset-0 bg-gradient-to-br from-white/3 to-transparent opacity-30" />
-            <CardContent className="relative p-6 h-full flex flex-col justify-between">
-              <div className="flex items-start justify-between mb-4">
-                <div className="rounded-xl p-3 bg-white/10 backdrop-blur-sm group-hover:bg-white/20 transition-colors duration-300">
-                  <Layout
-                    size={26}
-                    className="text-green-400 group-hover:scale-110 transition-transform duration-300"
-                    aria-hidden="true"
-                  />
-                </div>
-                <Badge className="bg-white/10 text-zinc-300 border-white/20 hover:bg-white/20 transition-colors">
-                  Core
-                </Badge>
-              </div>
-              <div className="space-y-3">
-                <h3 className="text-lg font-semibold text-white group-hover:text-white/90 transition-colors">
-                  HTML5 & CSS3
-                </h3>
-                {/* improve text wrapping */}
-                <p className="text-sm text-zinc-300/80 leading-relaxed text-pretty">Semantic markup & styling</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Tailwind CSS - Wide on desktop, full on small */}
-          <Card className="sm:col-span-2 lg:col-span-7 glass hover-lift rounded-2xl group relative overflow-hidden border-white/10 motion-safe:hover:scale-[1.02] motion-reduce:transform-none transition-all duration-300 hover:shadow-xl hover:shadow-white/5">
-            <div className="absolute inset-0 bg-gradient-to-br from-white/3 to-transparent opacity-30" />
-            <CardContent className="relative p-6 h-full flex flex-col justify-between">
-              <div className="flex items-start justify-between mb-4">
-                <div className="rounded-xl p-3 bg-white/10 backdrop-blur-sm group-hover:bg-white/20 transition-colors duration-300">
-                  <PanelsTopLeft
-                    size={30}
-                    className="text-purple-400 group-hover:scale-110 transition-transform duration-300"
-                    aria-hidden="true"
-                  />
-                </div>
-                <Badge className="bg-white/10 text-zinc-300 border-white/20 hover:bg-white/20 transition-colors">
-                  Essential
-                </Badge>
-              </div>
-              <div className="space-y-3">
-                <h3 className="text-xl lg:text-2xl font-semibold text-white group-hover:text-white/90 transition-colors">
-                  Tailwind CSS
-                </h3>
-                {/* improve text wrapping */}
-                <p className="text-base text-zinc-300/80 leading-relaxed text-pretty">
-                  Utility-first CSS framework for rapid UI development
-                </p>
-              </div>
-              <div className="absolute -bottom-4 -right-4 w-20 h-20 bg-purple-500/10 rounded-full blur-xl group-hover:bg-purple-500/20 transition-colors duration-500" />
-            </CardContent>
-          </Card>
-
-          {/* UI/UX Design */}
-          <Card className="sm:col-span-1 lg:col-span-3 glass hover-lift rounded-2xl group relative overflow-hidden border-white/10 motion-safe:hover:scale-105 motion-reduce:transform-none transition-all duration-300 hover:shadow-xl hover:shadow-white/5">
-            <div className="absolute inset-0 bg-gradient-to-br from-white/3 to-transparent opacity-30" />
-            <CardContent className="relative p-6 h-full flex flex-col justify-between">
-              <div className="flex items-center justify-between mb-4">
-                <div className="rounded-xl p-3 bg-white/10 backdrop-blur-sm group-hover:bg-white/20 transition-colors duration-300">
-                  <Ruler
-                    size={26}
-                    className="text-rose-400 group-hover:scale-110 transition-transform duration-300"
-                    aria-hidden="true"
-                  />
-                </div>
-                <Badge className="bg-white/10 text-zinc-300 border-white/20 hover:bg-white/20 transition-colors">
-                  Design
-                </Badge>
-              </div>
-              <div className="space-y-3">
-                <h3 className="text-lg font-semibold text-white group-hover:text-white/90 transition-colors">
-                  UI/UX Design
-                </h3>
-                {/* improve text wrapping */}
-                <p className="text-sm text-zinc-300/80 leading-relaxed text-pretty">User-centered design principles</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Responsive Design */}
-          <Card className="sm:col-span-1 lg:col-span-2 glass hover-lift rounded-2xl group relative overflow-hidden border-white/10 motion-safe:hover:scale-105 motion-reduce:transform-none transition-all duration-300 hover:shadow-xl hover:shadow-white/5">
-            <div className="absolute inset-0 bg-gradient-to-br from-white/3 to-transparent opacity-30" />
-            <CardContent className="relative p-6 h-full flex flex-col justify-between">
-              <div className="flex items-center justify-between mb-4">
-                <div className="rounded-xl p-3 bg-white/10 backdrop-blur-sm group-hover:bg-white/20 transition-colors duration-300">
-                  <MonitorSmartphone
-                    size={26}
-                    className="text-indigo-400 group-hover:scale-110 transition-transform duration-300"
-                    aria-hidden="true"
-                  />
-                </div>
-                <Badge className="bg-white/10 text-zinc-300 border-white/20 hover:bg-white/20 transition-colors">
-                  Mobile
-                </Badge>
-              </div>
-              <div className="space-y-3">
-                <h3 className="text-lg font-semibold text-white group-hover:text-white/90 transition-colors">
-                  Responsive Design
-                </h3>
-                {/* improve text wrapping */}
-                <p className="text-sm text-zinc-300/80 leading-relaxed text-pretty">Cross-device compatibility</p>
-              </div>
-            </CardContent>
-          </Card>
+              <ul className="space-y-4">
+                {group.items.map((item) => (
+                  <li key={item.name} className="group/item">
+                    <div className="flex items-center justify-between text-[13.5px] sm:text-[14.5px]">
+                      <span className="font-medium text-zinc-200 group-hover/item:text-[#1fd38a] transition-colors">
+                        {item.name}
+                      </span>
+                      {item.core && (
+                        <span className="text-[10px] font-mono font-semibold text-emerald-400 bg-emerald-950/40 border border-emerald-800/50 px-1.5 py-0.5 rounded-full">
+                          CORE
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-zinc-400 font-mono mt-0.5 leading-snug">
+                      {item.role}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
 
-        {/* Additional info section */}
-        <div className="mt-12 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10">
-            <Sparkles size={16} className="text-yellow-400" />
-            <span className="text-zinc-300 text-sm">Always learning and exploring new techs</span>
-          </div>
+        {/* Bottom specs bar */}
+        <div className="px-6 sm:px-10 lg:px-12 py-4 border-t border-zinc-800/90 flex items-center justify-between flex-wrap gap-2 text-xs font-mono text-zinc-400">
+          <span>* Scalable modular architecture & 60fps interaction standards</span>
+          <span className="text-zinc-500">ECOSYSTEM // 2025</span>
         </div>
       </div>
     </section>
