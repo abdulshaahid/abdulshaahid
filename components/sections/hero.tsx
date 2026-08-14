@@ -2,18 +2,36 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useMediaQuery } from "usehooks-ts";
 import Grainient from "@/components/ui/grainient";
 
-const AVAILABLE_SHAPES = [
-  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-  21, 22, 23, 24, 25, 26, 27, 29, 30, 31, 33, 34, 35, 36, 37, 38, 39, 40,
-  41, 42, 43, 44, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 59, 60,
-  61, 62, 63, 65, 67, 70, 71
+const CURATED_SHAPE_PATHS = [
+  // Shape 1: Clover Star
+  "M 228 0 C 172.772 0 128 44.772 128 100 L 128 0 L 0 0 L 0 28 C 0 83.228 44.772 128 100 128 L 0 128 L 0 256 L 28 256 C 83.228 256 128 211.228 128 156 L 128 256 L 256 256 L 256 228 C 256 172.772 211.228 128 156 128 L 256 128 L 256 0 Z",
+  // Shape 2: Hyperbolic 4-Point Starburst
+  "M 128 192 C 92.654 192 64 220.654 64 256 L 0 256 C 0 185.308 57.308 128 128 128 Z M 256 128 C 256 198.692 198.692 256 128 256 L 128 192 C 163.346 192 192 163.346 192 128 Z M 128 64 C 92.654 64 64 92.654 64 128 L 0 128 C 0 57.308 57.308 0 128 0 Z M 256 0 C 256 70.692 198.692 128 128 128 L 128 64 C 163.346 64 192 35.346 192 0 Z",
+  // Shape 3: Diagonal Floral Petals
+  "M 128 128 C 198.692 128 256 185.308 256 256 L 192 256 C 192 220.654 163.346 192 128 192 C 92.654 192 64 220.654 64 256 L 0 256 C 0 185.308 57.308 128 128 128 Z M 256 0 C 256 70.692 198.692 128 128 128 C 57.308 128 0 70.692 0 0 L 64 0 C 64 35.346 92.654 64 128 64 C 163.346 64 192 35.346 192 0 Z",
+  // Shape 4: Curved Arcs
+  "M 0 128 C 70.692 128 128 185.308 128 256 L 64 256 C 64 220.654 35.346 192 0 192 Z M 256 192 C 220.654 192 192 220.654 192 256 L 128 256 C 128 185.308 185.308 128 256 128 Z M 128 0 C 128 70.692 70.692 128 0 128 L 0 64 C 35.346 64 64 35.346 64 0 Z M 192 0 C 192 35.346 220.654 64 256 64 L 256 128 C 185.308 128 128 70.692 128 0 Z",
+  // Shape 5: Intersecting Quad Lenses
+  "M 64 128 C 64 163.346 92.654 192 128 192 L 128 256 C 57.308 256 0 198.692 0 128 Z M 192 128 C 192 163.346 220.654 192 256 192 L 256 256 C 185.308 256 128 198.692 128 128 Z M 64 0 C 64 35.346 92.654 64 128 64 L 128 128 C 57.308 128 0 70.692 0 0 Z M 192 0 C 192 35.346 220.654 64 256 64 L 256 128 C 185.308 128 128 70.692 128 0 Z",
+  // Shape 7: 8-Point Geometric Crystal
+  "M 112 32 L 54.627 32 L 128 105.373 L 201.373 32 L 144 32 L 144 0 L 256 0 L 256 112 L 224 112 L 224 54.627 L 150.627 128 L 224 201.373 L 224 144 L 256 144 L 256 256 L 144 256 L 144 224 L 201.373 224 L 128 150.627 L 54.627 224 L 112 224 L 112 256 L 0 256 L 0 144 L 32 144 L 32 201.373 L 105.373 128 L 32 54.627 L 32 112 L 0 112 L 0 0 L 112 0 Z",
+  // Shape 8: Curved Ribbon Ring
+  "M 128.005 191.173 C 128.448 156.208 156.93 128 192 128 L 192 64 L 128 64 C 128 99.346 99.346 128 64 128 L 64 192 L 128 192 Z M 192 256 L 64 256 C 28.654 256 0 227.346 0 192 L 0 64 L 64 64 L 64 0 L 192 0 C 227.346 0 256 28.654 256 64 L 256 192 L 192 192 Z",
+  // Shape 9: Blossom Quad
+  "M 192 192 L 256 192 L 256 256 L 192 256 C 156.654 256 128 227.346 128 192 C 128 227.346 99.346 256 64 256 L 0 256 L 0 192 L 64 192 L 64 128 L 192 128 Z M 192 64 L 256 64 L 256 128 L 192 128 C 156.654 128 128 99.346 128 64 C 128 99.346 99.346 128 64 128 L 0 128 L 0 64 L 64 64 L 64 0 L 192 0 Z",
+  // Shape 10: Rounded Geometric Maze
+  "M 64 192 L 128 192 L 128 256 L 64 256 C 28.654 256 0 227.346 0 192 L 0 128 L 64 128 Z M 192 192 L 256 192 L 256 256 L 192 256 C 156.654 256 128 227.346 128 192 L 128 128 L 192 128 Z M 64 64 L 128 64 L 128 0 L 192 0 C 227.346 0 256 28.654 256 64 L 256 128 L 192 128 L 192 64 L 128 64 L 128 128 L 64 128 C 28.654 128 0 99.346 0 64 L 0 0 L 64 0 Z",
+  // Shape 16: Diamond Blade Aperture
+  "M 128 192 L 0 256 L 0 192 L 128 128 Z M 256 192 L 128 256 L 128 192 L 256 128 Z M 128 64 L 128 128 L 0 64 L 0 0 Z M 256 64 L 256 128 L 128 64 L 128 0 Z",
+  // Shape 20: Modern Corner Glyph
+  "M 128 28 C 128 83.228 83.228 128 28 128 L 128 128 Z M 256 156 C 256 211.228 211.228 256 156 256 L 128 256 L 128 156 C 128 211.228 83.228 256 28 256 L 0 256 L 0 0 L 256 0 L 256 28 C 256 83.228 211.228 128 156 128 L 256 128 Z",
+  // Shape 30: Swirl Vortex
+  "M 191.173 128.005 C 156.208 128.448 128 156.93 128 192 C 128 227.346 156.654 256 192 256 L 256 256 L 256 216 L 192 216 C 178.745 216 168 205.255 168 192 C 168 178.745 178.745 168 192 168 L 256 168 L 256 88 L 192 88 C 178.745 88 168 77.255 168 64 C 168 50.745 178.745 40 192 40 L 256 40 L 256 0 L 192 0 C 156.654 0 128 28.654 128 64 C 128 99.346 156.654 128 192 128 Z M 0 40 L 64 40 C 77.255 40 88 50.745 88 64 C 88 77.255 77.255 88 64 88 L 0 88 L 0 168 L 64 168 C 77.255 168 88 178.745 88 192 C 88 205.255 77.255 216 64 216 L 0 216 L 0 256 L 64 256 C 99.346 256 128 227.346 128 192 C 128 156.93 99.792 128.448 64.827 128.005 L 64 128 C 99.346 128 128 99.346 128 64 C 128 28.654 99.346 0 64 0 L 0 0 Z"
 ];
-
-const GRAIN_NOISE_SVG = `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.7'/%3E%3C/svg%3E")`;
 
 // Ultra-smooth Apple-grade fluid exponential deceleration curve
 const SMOOTH_EASE = [0.16, 1, 0.3, 1] as const;
@@ -29,63 +47,80 @@ const GPU_LAYER = {
 
 function AnimatedShapeIcon({ className }: { className?: string }) {
   const [shapeIndex, setShapeIndex] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
 
-  // Preload initial shapes immediately, lazily load the rest in background
-  useEffect(() => {
-    [1, 2, 3, 4, 5].forEach((num) => {
-      const img = new window.Image();
-      img.src = `/shapes/Shape%20${num}.svg`;
-    });
-
-    const timer = setTimeout(() => {
-      AVAILABLE_SHAPES.slice(5).forEach((num) => {
-        const img = new window.Image();
-        img.src = `/shapes/Shape%20${num}.svg`;
-      });
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Delay continuous shape morphing until 1.4s after mount so entrance is 100% thread-free
+  // Fast, crisp periodic shape morphing
   useEffect(() => {
     const timer = setTimeout(() => {
       const interval = setInterval(() => {
-        setShapeIndex((prev) => (prev + 1) % AVAILABLE_SHAPES.length);
-      }, 280);
+        setShapeIndex((prev) => (prev + 1) % CURATED_SHAPE_PATHS.length);
+      }, 1100);
       return () => clearInterval(interval);
-    }, 1400);
+    }, 800);
 
     return () => clearTimeout(timer);
   }, []);
 
-  const shapeNumber = AVAILABLE_SHAPES[shapeIndex];
+  const pathD = CURATED_SHAPE_PATHS[shapeIndex];
 
   return (
-    <div className={`relative flex items-center justify-center ${className}`}>
-      {/* Instant Cut Shape Mask with Emerald Gradient and Grain Texture */}
-      <div className="w-full h-full relative flex items-center justify-center">
-        <div
-          style={{
-            maskImage: `url("/shapes/Shape%20${shapeNumber}.svg")`,
-            WebkitMaskImage: `url("/shapes/Shape%20${shapeNumber}.svg")`,
-            maskSize: "contain",
-            WebkitMaskSize: "contain",
-            maskRepeat: "no-repeat",
-            WebkitMaskRepeat: "no-repeat",
-            maskPosition: "center",
-            WebkitMaskPosition: "center",
-            transform: "translateZ(0)",
-          }}
-          className="w-full h-full bg-gradient-to-br from-[#37e5a5] via-[#27bf88] to-[#1ea873] relative overflow-hidden"
-        >
-          {/* Tactile Grain Texture Layer */}
-          <div
-            className="absolute inset-0 w-full h-full opacity-60 mix-blend-overlay pointer-events-none contrast-150 brightness-110"
-            style={{ backgroundImage: GRAIN_NOISE_SVG }}
-          />
-        </div>
-      </div>
+    <div
+      className={`relative flex items-center justify-center cursor-pointer group select-none ${className}`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onClick={() => setShapeIndex((prev) => (prev + 1) % CURATED_SHAPE_PATHS.length)}
+      title="Click to cycle shape"
+    >
+      {/* Continuously Rotating Vector Gyroscope */}
+      <motion.div
+        animate={{ rotate: 360 }}
+        transition={{
+          duration: isHovered ? 6 : 12,
+          ease: "linear",
+          repeat: Infinity,
+        }}
+        className="w-full h-full relative flex items-center justify-center"
+        style={GPU_LAYER}
+      >
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={shapeIndex}
+            initial={{ opacity: 0, scale: 0.72, rotate: -25 }}
+            animate={{ opacity: 1, scale: 1, rotate: 0 }}
+            exit={{ opacity: 0, scale: 1.15, rotate: 25 }}
+            transition={{
+              duration: 0.32,
+              ease: SMOOTH_EASE,
+            }}
+            className="w-full h-full absolute inset-0 flex items-center justify-center"
+            style={GPU_LAYER}
+          >
+            <svg
+              viewBox="0 0 256 256"
+              className="w-full h-full overflow-visible transition-transform duration-300 group-hover:scale-105"
+            >
+              <defs>
+                <linearGradient
+                  id={`shape-emerald-grad-${shapeIndex}`}
+                  x1="0%"
+                  y1="0%"
+                  x2="100%"
+                  y2="100%"
+                >
+                  <stop offset="0%" stopColor="#37e5a5" />
+                  <stop offset="45%" stopColor="#27bf88" />
+                  <stop offset="100%" stopColor="#148356" />
+                </linearGradient>
+              </defs>
+              <path
+                d={pathD}
+                fill={`url(#shape-emerald-grad-${shapeIndex})`}
+                className="transition-all duration-300"
+              />
+            </svg>
+          </motion.div>
+        </AnimatePresence>
+      </motion.div>
     </div>
   );
 }
@@ -363,13 +398,13 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
                   <div className="overflow-hidden py-0.5">
                     <motion.div
                       initial={{ y: "115%", opacity: 0 }}
-                      animate={isReady ? { y: "0%", opacity: 1 } : { y: "115%", opacity: 0 }}
+                      animate={isReady ? { y: "0%", opacity: 0.5 } : { y: "115%", opacity: 0 }}
                       transition={{
                         y: { duration: 1.0, ease: SMOOTH_EASE, delay: 0.3 },
                         opacity: { duration: 0.7, ease: "easeOut", delay: 0.3 },
                       }}
                       style={GPU_LAYER}
-                      className="flex justify-between w-full text-2xl sm:text-3xl lg:text-[2.5rem] xl:text-[3.2rem] font-jakarta font-thin bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none opacity-50"
+                      className="flex justify-between w-full text-2xl sm:text-3xl lg:text-[2.5rem] xl:text-[3.2rem] font-jakarta font-thin bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none"
                     >
                       <span>D</span><span>E</span><span>V</span><span>E</span><span>L</span><span>O</span><span>P</span><span>E</span><span>R</span>
                     </motion.div>
@@ -449,7 +484,7 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
                   transition={{ duration: 0.85, ease: SMOOTH_EASE, delay: 0.26 }}
                   style={GPU_LAYER}
                 >
-                  <AnimatedShapeIcon className="w-10 h-10 sm:w-14 sm:h-14 drop-shadow-md shrink-0" />
+                  <AnimatedShapeIcon className="w-10 h-10 sm:w-14 sm:h-14 shrink-0" />
                 </motion.div>
                 <div className="w-[195px] sm:w-[250px] flex flex-col justify-center gap-0.5">
                   <div className="overflow-hidden py-0.5">
@@ -469,13 +504,13 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
                   <div className="overflow-hidden py-0.5">
                     <motion.div
                       initial={{ y: "115%", opacity: 0 }}
-                      animate={isReady ? { y: "0%", opacity: 1 } : { y: "115%", opacity: 0 }}
+                      animate={isReady ? { y: "0%", opacity: 0.35 } : { y: "115%", opacity: 0 }}
                       transition={{
                         y: { duration: 0.95, ease: SMOOTH_EASE, delay: 0.3 },
                         opacity: { duration: 0.7, ease: "easeOut", delay: 0.3 },
                       }}
                       style={GPU_LAYER}
-                      className="flex justify-between w-full text-2xl sm:text-3xl font-jakarta font-thin bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none drop-shadow-md opacity-50"
+                      className="flex justify-between w-full text-2xl sm:text-3xl font-jakarta font-thin bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none drop-shadow-md"
                     >
                       <span>D</span><span>E</span><span>V</span><span>E</span><span>L</span><span>O</span><span>P</span><span>E</span><span>R</span>
                     </motion.div>

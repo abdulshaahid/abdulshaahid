@@ -29,17 +29,6 @@ const MouseBackground = ({ children }: { children: React.ReactNode }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Universal Interactive Banknote Wave Pattern Background */}
-      <WavePattern
-        strokeColor="220, 220, 220"
-        waveAmplitude={9}
-        waveLength={85}
-        rowSpacing={16}
-        lineWidth={1}
-        interactive={true}
-        opacity={0.06}
-      />
-
       {/* Mouse Glow Effect */}
       {isHovered && (
         <div
@@ -80,16 +69,44 @@ export default function Page() {
       {/* Fixed Navbar Outside */}
       <Navbar />
 
-      {/* Rest of the Page with Mouse Background & Unified Particles */}
+      {/* Rest of the Page with Mouse Background */}
       <MouseBackground>
         <main id="top" className="relative min-h-screen pt-0">
-          {/* Sections */}
+          {/* Hero Section */}
           <Hero isReady={isSiteReady} />
-          <About />
-          <Skills />
-          <Services />
-          <Portfolio />
-          <Contact />
+
+          {/* Sections starting from About with WavePattern & Smooth Top Fade */}
+          <div className="relative w-full">
+            {/* Sticky Interactive Wave Pattern Background with top fade */}
+            <div
+              className="sticky top-0 h-screen w-full pointer-events-none -z-10 -mb-[100vh] overflow-hidden"
+              style={{
+                maskImage: "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.6) 80px, black 200px, black 100%)",
+                WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.6) 80px, black 200px, black 100%)",
+              }}
+            >
+              <WavePattern
+                className="absolute inset-0 w-full h-full"
+                strokeColor="220, 220, 220"
+                waveAmplitude={9}
+                waveLength={85}
+                rowSpacing={16}
+                lineWidth={1}
+                interactive={true}
+                opacity={0.06}
+              />
+            </div>
+
+            {/* Sections below Hero */}
+            <div className="relative z-10">
+              <About />
+              <Skills />
+              <Services />
+              <Portfolio />
+              <Contact />
+              <Footer />
+            </div>
+          </div>
 
           {/* Back to Top Button */}
           <a
@@ -99,8 +116,6 @@ export default function Page() {
           >
             ↑
           </a>
-
-          <Footer />
         </main>
       </MouseBackground>
     </>

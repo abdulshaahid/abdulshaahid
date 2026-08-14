@@ -71,14 +71,17 @@ const WavePattern: React.FC<WavePatternProps> = ({
     const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 
+    let dpr = 1;
+    let cssWidth = 0;
+    let cssHeight = 0;
+
     const setCanvasSize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.25);
-      const cssWidth = canvas.clientWidth || window.innerWidth;
-      const cssHeight = canvas.clientHeight || window.innerHeight;
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      cssWidth = canvas.clientWidth || window.innerWidth;
+      cssHeight = canvas.clientHeight || window.innerHeight;
       canvas.width = Math.round(cssWidth * dpr);
       canvas.height = Math.round(cssHeight * dpr);
-      ctx.scale(dpr, dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
 
     setCanvasSize();
@@ -86,10 +89,18 @@ const WavePattern: React.FC<WavePatternProps> = ({
     let resizeTimeout: NodeJS.Timeout;
     const throttledResize = () => {
       clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(setCanvasSize, 150);
+      resizeTimeout = setTimeout(setCanvasSize, 100);
     };
 
     window.addEventListener("resize", throttledResize, { passive: true });
+
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined") {
+      resizeObserver = new ResizeObserver(() => {
+        setCanvasSize();
+      });
+      resizeObserver.observe(canvas);
+    }
 
     if (interactive) {
       isTouchDevice.current =
@@ -99,6 +110,7 @@ const WavePattern: React.FC<WavePatternProps> = ({
       if (isTouchDevice.current) {
         window.addEventListener("touchmove", handleTouchMove, { passive: true });
         window.addEventListener("touchend", handlePointerLeave, { passive: true });
+        window.addEventListener("touchcancel", handlePointerLeave, { passive: true });
       }
     }
 
@@ -106,9 +118,8 @@ const WavePattern: React.FC<WavePatternProps> = ({
     const xStep = 10; // Optimized step size for ultra-smooth 60-120fps on all devices
 
     const animate = () => {
-      const dpr = window.devicePixelRatio || 1;
-      const width = canvas.width / dpr;
-      const height = canvas.height / dpr;
+      const width = cssWidth || canvas.clientWidth || window.innerWidth;
+      const height = cssHeight || canvas.clientHeight || window.innerHeight;
 
       ctx.clearRect(0, 0, width, height);
 
@@ -147,7 +158,7 @@ const WavePattern: React.FC<WavePatternProps> = ({
 
         for (let x = -20; x <= width + 20; x += xStep) {
           // Banknote sine wave calculation
-          let y = baseY + Math.sin(x / waveLength * (Math.PI * 2) + phase + row * 0.15) * currentAmplitude;
+          let y = baseY + Math.sin((x / waveLength) * (Math.PI * 2) + phase + row * 0.15) * currentAmplitude;
 
           // Interactive mouse wave distortion
           if (interactive && mouseX > -500) {
@@ -182,12 +193,16 @@ const WavePattern: React.FC<WavePatternProps> = ({
 
     return () => {
       window.removeEventListener("resize", throttledResize);
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
       if (interactive) {
         window.removeEventListener("pointermove", handlePointerMove);
         window.removeEventListener("pointerleave", handlePointerLeave);
         if (isTouchDevice.current) {
           window.removeEventListener("touchmove", handleTouchMove);
           window.removeEventListener("touchend", handlePointerLeave);
+          window.removeEventListener("touchcancel", handlePointerLeave);
         }
       }
       if (animationFrameId.current) {
@@ -211,10 +226,10 @@ const WavePattern: React.FC<WavePatternProps> = ({
   return (
     <canvas
       ref={canvasRef}
-      className={cn("fixed inset-0 w-full h-full pointer-events-none z-0", className)}
+      className={cn("w-full h-full pointer-events-none", className)}
       style={{
-        width: "100vw",
-        height: "100vh",
+        width: "100%",
+        height: "100%",
         top: 0,
         left: 0,
       }}
