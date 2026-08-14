@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useId } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMediaQuery } from "usehooks-ts";
 import Grainient from "@/components/ui/grainient";
@@ -48,6 +48,8 @@ const GPU_LAYER = {
 function AnimatedShapeIcon({ className }: { className?: string }) {
   const [shapeIndex, setShapeIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const rawId = useId();
+  const gradientId = `shape-grad-${rawId.replace(/[^a-zA-Z0-9_-]/g, "")}`;
 
   // Fast, crisp periodic shape morphing
   useEffect(() => {
@@ -101,7 +103,7 @@ function AnimatedShapeIcon({ className }: { className?: string }) {
             >
               <defs>
                 <linearGradient
-                  id={`shape-emerald-grad-${shapeIndex}`}
+                  id={`${gradientId}-${shapeIndex}`}
                   x1="0%"
                   y1="0%"
                   x2="100%"
@@ -114,7 +116,7 @@ function AnimatedShapeIcon({ className }: { className?: string }) {
               </defs>
               <path
                 d={pathD}
-                fill={`url(#shape-emerald-grad-${shapeIndex})`}
+                fill={`url(#${gradientId}-${shapeIndex})`}
                 className="transition-all duration-300"
               />
             </svg>
