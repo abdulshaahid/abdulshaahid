@@ -3,6 +3,7 @@
 import React from "react"
 import { ArrowUpRight, Github, ExternalLink } from "lucide-react"
 import { CrosshairMarker, GreenHighlight } from "@/components/ui/geometric"
+import { GithubGraph } from "@/components/ui/github-graph"
 
 interface ProjectItem {
   id: string
@@ -168,6 +169,11 @@ export function Portfolio() {
               </article>
             )
           })}
+        </div>
+
+        {/* GitHub Activity Heatmap Graph */}
+        <div className="px-6 sm:px-10 lg:px-12 py-8 sm:py-10 border-b border-zinc-800/90">
+          <GithubGraph />
         </div>
 
         {/* Closing Statement */}
