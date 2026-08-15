@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import React, { useRef, useEffect } from "react"
 import Image from "next/image"
 import { Github, ExternalLink } from "lucide-react"
 import { CrosshairMarker, GreenHighlight } from "@/components/ui/geometric"
@@ -14,6 +14,97 @@ interface ProjectItem {
   githubUrl?: string
   videoUrl?: string
   imageUrl?: string
+}
+
+function ProjectVideo({ src }: { src: string }) {
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+
+    // Ensure muted DOM property is explicitly true for reliable autoplay policies
+    video.muted = true
+    video.defaultMuted = true
+
+    const playVideo = () => {
+      if (video.paused) {
+        const promise = video.play()
+        if (promise !== undefined) {
+          promise.catch(() => {
+            // Autoplay catch handler to prevent unhandled rejection
+          })
+        }
+      }
+    }
+
+    // Initial attempt to play
+    playVideo()
+
+    // Resume when screen is turned back on or tab visibility changes
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        playVideo()
+      }
+    }
+
+    // Resume on window focus and pageshow (device wake / unlock events)
+    const handleFocus = () => playVideo()
+    const handlePageShow = () => playVideo()
+
+    document.addEventListener("visibilitychange", handleVisibilityChange)
+    window.addEventListener("focus", handleFocus)
+    window.addEventListener("pageshow", handlePageShow)
+
+    // IntersectionObserver to play when in viewport and pause when scrolled away
+    let observer: IntersectionObserver | null = null
+    if ("IntersectionObserver" in window) {
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              playVideo()
+            } else {
+              video.pause()
+            }
+          })
+        },
+        { threshold: 0.1 }
+      )
+      observer.observe(video)
+    }
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange)
+      window.removeEventListener("focus", handleFocus)
+      window.removeEventListener("pageshow", handlePageShow)
+      if (observer) {
+        observer.disconnect()
+      }
+    }
+  }, [src])
+
+  const handleEnded = () => {
+    // Fail-safe loop restart in case browser halts at end of stream on sleep
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0
+      videoRef.current.play().catch(() => {})
+    }
+  }
+
+  return (
+    <video
+      ref={videoRef}
+      src={src}
+      autoPlay
+      loop
+      muted
+      playsInline
+      preload="auto"
+      onEnded={handleEnded}
+      className="w-full h-full object-cover scale-[1.05] pointer-events-none"
+    />
+  )
 }
 
 const projects: ProjectItem[] = [
@@ -123,15 +214,7 @@ export function Portfolio() {
                 {/* Left Side: 16:9 Video / Image Preview */}
                 <div className="relative aspect-video w-full sm:w-[200px] md:w-[220px] lg:w-[210px] xl:w-[240px] shrink-0 overflow-hidden rounded-xl bg-zinc-950 shadow-lg shadow-black/60 group-hover:shadow-xl group-hover:shadow-black/80 transition-shadow">
                   {project.videoUrl ? (
-                    <video
-                      src={project.videoUrl}
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      preload="auto"
-                      className="w-full h-full object-cover scale-[1.05] pointer-events-none"
-                    />
+                    <ProjectVideo src={project.videoUrl} />
                   ) : project.imageUrl ? (
                     <div className="relative w-full h-full">
                       <Image
