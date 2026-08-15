@@ -7,6 +7,7 @@ import { SplashScreen } from "@/components/ui/splash-screen"
 import { Navbar } from "@/components/sections/navbar"
 import { Hero } from "@/components/sections/hero"
 import { Portfolio } from "@/components/sections/portfolio"
+import { GithubActivity } from "@/components/sections/github-activity"
 import { About } from "@/components/sections/about"
 import { Skills } from "@/components/sections/skills"
 import { Writing } from "@/components/sections/writing"
@@ -99,6 +100,12 @@ export default function Page() {
 
           {/* 2. Projects / Work Section */}
           <Portfolio />
+
+          {/* Full-width Slope Divider */}
+          <SlopeDivider />
+
+          {/* GitHub Activity / Open Source Section */}
+          <GithubActivity />
 
           {/* Full-width Slope Divider */}
           <SlopeDivider />

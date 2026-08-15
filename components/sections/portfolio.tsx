@@ -2,9 +2,8 @@
 
 import React from "react"
 import Image from "next/image"
-import { ArrowUpRight, Github, ExternalLink } from "lucide-react"
+import { Github, ExternalLink } from "lucide-react"
 import { CrosshairMarker, GreenHighlight } from "@/components/ui/geometric"
-import { GithubGraph } from "@/components/ui/github-graph"
 
 interface ProjectItem {
   id: string
@@ -106,7 +105,7 @@ export function Portfolio() {
         </div>
 
         {/* 2-Column Grid on Desktop with Video on Left & Text on Right in Each Card */}
-        <div className="grid grid-cols-1 lg:grid-cols-2">
+        <div className="grid grid-cols-1 lg:grid-cols-2 relative">
           {projects.map((project, index) => {
             const isLeftCol = index % 2 === 0
 
@@ -117,11 +116,9 @@ export function Portfolio() {
                   isLeftCol ? "lg:border-r border-dashed border-zinc-800/90" : ""
                 }`}
               >
-                {/* Corner Crosshair Markers */}
-                <CrosshairMarker className="top-0 left-0" />
+                {/* Crosshair Markers: Render top-left (hidden on lg for right column to avoid duplicate center marker) and top-right */}
+                <CrosshairMarker className={`top-0 left-0 ${!isLeftCol ? "lg:hidden" : ""}`} />
                 <CrosshairMarker className="top-0 left-full" />
-                <CrosshairMarker className="top-full left-0" />
-                <CrosshairMarker className="top-full left-full" />
 
                 {/* Left Side: 16:9 Video / Image Preview */}
                 <div className="relative aspect-video w-full sm:w-[200px] md:w-[220px] lg:w-[210px] xl:w-[240px] shrink-0 overflow-hidden rounded-xl bg-zinc-950 shadow-lg shadow-black/60 group-hover:shadow-xl group-hover:shadow-black/80 transition-shadow">
@@ -220,35 +217,9 @@ export function Portfolio() {
               </article>
             )
           })}
-        </div>
 
-        {/* GitHub Activity Heatmap Graph */}
-        <div className="px-6 sm:px-10 lg:px-12 py-8 sm:py-10 border-b border-zinc-800/90">
-          <GithubGraph />
-        </div>
-
-        {/* Closing Statement */}
-        <div className="p-8 sm:p-10 text-center">
-          <p className="font-bricolage text-sm sm:text-base text-zinc-200 max-w-xl mx-auto leading-relaxed">
-            I also contribute to{" "}
-            <GreenHighlight>
-              open-source tools & utilities
-            </GreenHighlight>{" "}
-            regularly on GitHub.
-          </p>
-
-          <div className="mt-4">
-            <a
-              href="https://github.com/abdulshaahid"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-mono font-medium text-black bg-zinc-200 hover:bg-white transition-all shadow-sm group"
-            >
-              <Github size={13} className="text-black" />
-              <span>Explore on GitHub</span>
-              <ArrowUpRight size={12} className="text-black group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-            </a>
-          </div>
+          {/* Bottom center intersection crosshair for desktop 2-column divider */}
+          <CrosshairMarker className="hidden lg:flex top-full left-1/2" />
         </div>
       </div>
     </section>
