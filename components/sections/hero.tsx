@@ -5,6 +5,7 @@ import { useEffect, useState, useId } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMediaQuery } from "usehooks-ts";
 import Grainient from "@/components/ui/grainient";
+import { ParticleImage } from "@/components/ui/particle-image";
 
 const CURATED_SHAPE_PATHS = [
   // Shape 1: Clover Star
@@ -344,18 +345,10 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
               className="col-span-6 flex justify-center items-end relative z-10"
             >
               <div className="relative w-full max-w-[480px] lg:max-w-[580px] xl:max-w-[660px] flex justify-center items-end group">
-                <Image
+                <ParticleImage
                   src="/me.webp"
                   alt="Mohamed Abdul Shahid"
-                  width={750}
-                  height={900}
-                  priority
-                  style={{
-                    maskImage: "linear-gradient(to bottom, black 65%, transparent 100%)",
-                    WebkitMaskImage: "linear-gradient(to bottom, black 65%, transparent 100%)",
-                    transform: "translateZ(0)",
-                  }}
-                  className="w-full h-auto max-h-[76vh] lg:max-h-[84vh] object-contain transition-transform duration-500 group-hover:scale-[1.01]"
+                  className="w-full h-auto max-h-[76vh] lg:max-h-[84vh]"
                 />
               </div>
             </motion.div>
@@ -431,18 +424,10 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
               style={GPU_LAYER}
               className="relative w-full max-w-[370px] sm:max-w-[450px] flex justify-center items-end py-0 z-10 -mb-2 -translate-y-1 sm:-translate-y-1"
             >
-              <Image
+              <ParticleImage
                 src="/me.webp"
                 alt="Mohamed Abdul Shahid"
-                width={500}
-                height={600}
-                priority
-                style={{
-                  maskImage: "linear-gradient(to bottom, black 65%, transparent 100%)",
-                  WebkitMaskImage: "linear-gradient(to bottom, black 65%, transparent 100%)",
-                  transform: "translateZ(0)",
-                }}
-                className="w-full h-auto max-h-[52vh] sm:max-h-[62vh] object-contain"
+                className="w-full h-auto max-h-[52vh] sm:max-h-[62vh]"
               />
             </motion.div>
 
