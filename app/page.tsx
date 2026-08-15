@@ -43,17 +43,19 @@ const MouseBackground = ({ children }: { children: React.ReactNode }) => {
         opacity={0.06}
       />
 
-      {/* Subtle Mouse Glow (Hardware accelerated pure gradient) */}
+      {/* Subtle Mouse Glow */}
       {isHovered && (
         <div
-          className="pointer-events-none fixed rounded-full -z-10 opacity-70 transition-opacity duration-300"
+          className="pointer-events-none fixed rounded-full -z-10 opacity-70"
           style={{
-            width: "380px",
-            height: "380px",
-            top: mousePosition.y - 190,
-            left: mousePosition.x - 190,
-            background: "radial-gradient(circle, rgba(31, 211, 138, 0.06) 0%, rgba(31, 211, 138, 0.01) 50%, transparent 70%)",
+            width: "400px",
+            height: "400px",
+            top: mousePosition.y - 200,
+            left: mousePosition.x - 200,
+            background: "radial-gradient(circle, rgba(31, 211, 138, 0.04) 0%, transparent 70%)",
+            filter: "blur(60px)",
             transform: "translateZ(0)",
+            willChange: "top, left",
           }}
         />
       )}

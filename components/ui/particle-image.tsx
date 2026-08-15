@@ -364,24 +364,7 @@ export function ParticleImage({
   }, [src])
 
   useEffect(() => {
-    let timer: NodeJS.Timeout | number
-    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
-      timer = (window as unknown as { requestIdleCallback: (cb: () => void) => number }).requestIdleCallback(() => {
-        initCanvas()
-      })
-    } else {
-      timer = setTimeout(() => {
-        initCanvas()
-      }, 80)
-    }
-
-    return () => {
-      if (typeof window !== "undefined" && "cancelIdleCallback" in window && typeof timer === "number") {
-        (window as unknown as { cancelIdleCallback: (id: number) => void }).cancelIdleCallback(timer)
-      } else {
-        clearTimeout(timer as NodeJS.Timeout)
-      }
-    }
+    initCanvas()
   }, [initCanvas])
 
   // O(1) Particle perturbation

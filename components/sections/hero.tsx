@@ -34,16 +34,17 @@ const CURATED_SHAPE_PATHS = [
   "M 191.173 128.005 C 156.208 128.448 128 156.93 128 192 C 128 227.346 156.654 256 192 256 L 256 256 L 256 216 L 192 216 C 178.745 216 168 205.255 168 192 C 168 178.745 178.745 168 192 168 L 256 168 L 256 88 L 192 88 C 178.745 88 168 77.255 168 64 C 168 50.745 178.745 40 192 40 L 256 40 L 256 0 L 192 0 C 156.654 0 128 28.654 128 64 C 128 99.346 156.654 128 192 128 Z M 0 40 L 64 40 C 77.255 40 88 50.745 88 64 C 88 77.255 77.255 88 64 88 L 0 88 L 0 168 L 64 168 C 77.255 168 88 178.745 88 192 C 88 205.255 77.255 216 64 216 L 0 216 L 0 256 L 64 256 C 99.346 256 128 227.346 128 192 C 128 156.93 99.792 128.448 64.827 128.005 L 64 128 C 99.346 128 128 99.346 128 64 C 128 28.654 99.346 0 64 0 L 0 0 Z"
 ];
 
-// Ultra-smooth Apple-grade fluid exponential deceleration curve
-const SMOOTH_EASE = [0.16, 1, 0.3, 1] as const;
+// Fluid deceleration curve for compositor-level transitions
+const SMOOTH_EASE = [0.22, 1, 0.36, 1] as const;
 
 // Hardware acceleration style snippet for locked 60/120fps compositor execution
 const GPU_LAYER = {
-  transform: "translateZ(0)",
-  WebkitTransform: "translateZ(0)",
-  backfaceVisibility: "hidden" as const,
-  WebkitBackfaceVisibility: "hidden" as const,
-};
+  willChange: "transform, opacity",
+  transform: "translate3d(0, 0, 0)",
+  WebkitTransform: "translate3d(0, 0, 0)",
+  backfaceVisibility: "hidden",
+  WebkitBackfaceVisibility: "hidden",
+} as const;
 
 function AnimatedShapeIcon({ className }: { className?: string }) {
   const [shapeIndex, setShapeIndex] = useState(0);
@@ -52,7 +53,7 @@ function AnimatedShapeIcon({ className }: { className?: string }) {
   const rawId = useId();
   const gradientId = `shape-grad-${rawId.replace(/[^a-zA-Z0-9_-]/g, "")}`;
 
-  // Start periodic morphing and rotation smoothly after entrance animation settles
+  // Start periodic morphing and rotation after initial entrance completes
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsSpinning(true);
@@ -60,7 +61,7 @@ function AnimatedShapeIcon({ className }: { className?: string }) {
         setShapeIndex((prev) => (prev + 1) % CURATED_SHAPE_PATHS.length);
       }, 1200);
       return () => clearInterval(interval);
-    }, 1200);
+    }, 1000);
 
     return () => clearTimeout(timer);
   }, []);
@@ -79,7 +80,7 @@ function AnimatedShapeIcon({ className }: { className?: string }) {
       <motion.div
         animate={isSpinning ? { rotate: 360 } : { rotate: 0 }}
         transition={{
-          duration: isHovered ? 6 : 14,
+          duration: isHovered ? 6 : 12,
           ease: "linear",
           repeat: Infinity,
         }}
@@ -89,11 +90,11 @@ function AnimatedShapeIcon({ className }: { className?: string }) {
         <AnimatePresence mode="wait">
           <motion.div
             key={shapeIndex}
-            initial={{ opacity: 0, scale: 0.72, rotate: -25 }}
+            initial={{ opacity: 0, scale: 0.75, rotate: -20 }}
             animate={{ opacity: 1, scale: 1, rotate: 0 }}
-            exit={{ opacity: 0, scale: 1.15, rotate: 25 }}
+            exit={{ opacity: 0, scale: 1.12, rotate: 20 }}
             transition={{
-              duration: 0.32,
+              duration: 0.28,
               ease: SMOOTH_EASE,
             }}
             className="w-full h-full absolute inset-0 flex items-center justify-center"
@@ -180,19 +181,19 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
             color1="#175b43"
             color2="#0b3023"
             color3="#020e08"
-            timeSpeed={activeMobile ? 1.3 : 1.1}
+            timeSpeed={activeMobile ? 0.9 : 1.1}
             colorBalance={0.35}
-            warpStrength={activeMobile ? 2.8 : 2.5}
-            warpFrequency={activeMobile ? 5.5 : 5.0}
-            warpSpeed={activeMobile ? 2.0 : 1.8}
-            warpAmplitude={32.0}
+            warpStrength={activeMobile ? 2.2 : 2.6}
+            warpFrequency={activeMobile ? 4.5 : 5.2}
+            warpSpeed={activeMobile ? 1.6 : 1.8}
+            warpAmplitude={30.0}
             blendAngle={60.0}
             blendSoftness={0.45}
-            rotationAmount={activeMobile ? 360.0 : 340.0}
-            noiseScale={activeMobile ? 2.8 : 2.6}
-            grainAmount={0.10}
+            rotationAmount={activeMobile ? 280.0 : 320.0}
+            noiseScale={2.6}
+            grainAmount={activeMobile ? 0.05 : 0.1}
             grainScale={1.5}
-            grainAnimated={true}
+            grainAnimated={!activeMobile}
             contrast={1.1}
             gamma={1.1}
             saturation={0.75}
@@ -202,51 +203,38 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
           />
         </div>
 
-        {/* ===== HARDWARE-ACCELERATED AMBIENT LIGHT BACKDROP (ZERO GAUSSIAN BLUR LAG) ===== */}
+        {/* ===== HARDWARE-NATIVE AMBIENT LIGHT (NO HEAVY GAUSSIAN BLURS) ===== */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden -z-5 flex justify-center items-center">
-          {/* Central Full-Span Ambient Glow Bowl */}
+          {/* Central Ambient Glow Bowl */}
           <div
-            className="w-[140vw] sm:w-[110vw] max-w-[1300px] h-[600px] sm:h-[800px] rounded-full pointer-events-none transition-transform duration-500 ease-out"
+            className="w-[160vw] sm:w-[120vw] max-w-[1400px] h-[700px] sm:h-[900px] rounded-full bg-[radial-gradient(ellipse_at_center,_rgba(55,229,165,0.14)_0%,_rgba(55,229,165,0.04)_45%,_transparent_72%)] transition-transform duration-500 ease-out"
             style={{
-              background:
-                "radial-gradient(ellipse at center, rgba(55, 229, 165, 0.16) 0%, rgba(55, 229, 165, 0.04) 45%, transparent 70%)",
               transform: `translate3d(${mousePosition.x * 12}px, ${mousePosition.y * 8}px, 0)`,
+              willChange: "transform",
             }}
           />
 
           {/* Left Ambient Glow */}
-          <div
-            className="absolute top-1/4 left-[-15%] sm:left-[0%] w-[320px] sm:w-[500px] h-[400px] sm:h-[600px] pointer-events-none"
-            style={{
-              background:
-                "radial-gradient(circle at 40% 40%, rgba(55, 229, 165, 0.08) 0%, rgba(55, 229, 165, 0.02) 50%, transparent 70%)",
-            }}
-          />
+          <div className="absolute top-1/4 left-[-15%] sm:left-[0%] w-[320px] sm:w-[500px] h-[450px] sm:h-[600px] bg-[radial-gradient(circle,_rgba(55,229,165,0.08)_0%,_rgba(55,229,165,0.02)_45%,_transparent_70%)] pointer-events-none" />
 
           {/* Right Ambient Glow */}
-          <div
-            className="absolute bottom-10 right-[-15%] sm:right-[0%] w-[320px] sm:w-[500px] h-[400px] sm:h-[600px] pointer-events-none"
-            style={{
-              background:
-                "radial-gradient(circle at 60% 60%, rgba(55, 229, 165, 0.08) 0%, rgba(55, 229, 165, 0.02) 50%, transparent 70%)",
-            }}
-          />
+          <div className="absolute bottom-10 right-[-15%] sm:right-[0%] w-[320px] sm:w-[500px] h-[450px] sm:h-[600px] bg-[radial-gradient(circle,_rgba(55,229,165,0.08)_0%,_rgba(55,229,165,0.02)_45%,_transparent_70%)] pointer-events-none" />
         </div>
 
         {/* Main Content Container */}
         <div className="relative z-10 w-full max-w-7xl mx-auto flex-1 flex flex-col items-center">
           
-          {/* 1. TOP SCRIPT TITLE: "Hey, there" with Fade-in & Masked Split Reveal */}
+          {/* 1. TOP SCRIPT TITLE: "Hey, there" */}
           <div className="relative w-full pointer-events-none pt-2 sm:pt-4 z-0 flex justify-center">
-            {/* Desktop Version */}
+            {/* Desktop Script Title */}
             <h1 className="hidden md:flex font-script italic text-[7.5rem] md:text-[7rem] lg:text-[9rem] xl:text-[10.5rem] text-zinc-100/90 leading-none font-thin tracking-wide drop-shadow-sm items-center justify-center gap-24 lg:gap-32 mx-auto">
               <span className="inline-flex overflow-hidden pb-4 -mb-4 pt-1">
                 <motion.span
                   initial={{ y: "115%", opacity: 0 }}
                   animate={isReady ? { y: "0%", opacity: 1 } : { y: "115%", opacity: 0 }}
                   transition={{
-                    y: { duration: 1.05, ease: SMOOTH_EASE, delay: 0.05 },
-                    opacity: { duration: 0.75, ease: "easeOut", delay: 0.05 },
+                    y: { duration: 0.9, ease: SMOOTH_EASE, delay: 0.04 },
+                    opacity: { duration: 0.6, ease: "easeOut", delay: 0.04 },
                   }}
                   style={GPU_LAYER}
                   className="text-[#27bf88] inline-block"
@@ -259,8 +247,8 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
                   initial={{ y: "115%", opacity: 0 }}
                   animate={isReady ? { y: "0%", opacity: 1 } : { y: "115%", opacity: 0 }}
                   transition={{
-                    y: { duration: 1.05, ease: SMOOTH_EASE, delay: 0.12 },
-                    opacity: { duration: 0.75, ease: "easeOut", delay: 0.12 },
+                    y: { duration: 0.9, ease: SMOOTH_EASE, delay: 0.1 },
+                    opacity: { duration: 0.6, ease: "easeOut", delay: 0.1 },
                   }}
                   style={GPU_LAYER}
                   className="inline-block"
@@ -270,15 +258,15 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
               </span>
             </h1>
 
-            {/* Mobile Version */}
+            {/* Mobile Script Title */}
             <h1 className="block md:hidden font-script italic text-7xl sm:text-8xl text-zinc-100/90 leading-none font-thin tracking-wide drop-shadow-sm text-center">
               <span className="inline-flex overflow-hidden pb-2 -mb-2">
                 <motion.span
                   initial={{ y: "115%", opacity: 0 }}
                   animate={isReady ? { y: "0%", opacity: 1 } : { y: "115%", opacity: 0 }}
                   transition={{
-                    y: { duration: 0.95, ease: SMOOTH_EASE, delay: 0.05 },
-                    opacity: { duration: 0.7, ease: "easeOut", delay: 0.05 },
+                    y: { duration: 0.85, ease: SMOOTH_EASE, delay: 0.04 },
+                    opacity: { duration: 0.6, ease: "easeOut", delay: 0.04 },
                   }}
                   style={GPU_LAYER}
                   className="text-[#27bf88] inline-block"
@@ -291,8 +279,8 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
                   initial={{ y: "115%", opacity: 0 }}
                   animate={isReady ? { y: "0%", opacity: 1 } : { y: "115%", opacity: 0 }}
                   transition={{
-                    y: { duration: 0.95, ease: SMOOTH_EASE, delay: 0.12 },
-                    opacity: { duration: 0.7, ease: "easeOut", delay: 0.12 },
+                    y: { duration: 0.85, ease: SMOOTH_EASE, delay: 0.1 },
+                    opacity: { duration: 0.6, ease: "easeOut", delay: 0.1 },
                   }}
                   style={GPU_LAYER}
                   className="inline-block"
@@ -303,12 +291,12 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
             </h1>
           </div>
 
-          {/* 2. MIDDLE & WAIST SECTION: Desktop Grid vs Mobile Layout */}
+          {/* 2. MIDDLE SECTION: Desktop Grid vs Mobile Layout */}
           
           {/* DESKTOP LAYOUT (md:grid) */}
           <div className="hidden md:grid relative w-full grid-cols-12 items-end my-auto z-10 gap-0 -mt-20 lg:-mt-32">
             
-            {/* Left Column: Fade-In & Masked Reveal for "I'm Shahid" */}
+            {/* Left Column: "I'm Shahid" */}
             <div className="col-span-3 flex flex-col justify-center items-start z-20 space-y-8 pb-12 lg:pb-16 -translate-y-4 lg:-translate-y-8">
               <div className="text-left select-none">
                 <div className="overflow-hidden pb-1">
@@ -316,8 +304,8 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
                     initial={{ y: "120%", opacity: 0 }}
                     animate={isReady ? { y: "0%", opacity: 1 } : { y: "120%", opacity: 0 }}
                     transition={{
-                      y: { duration: 1.0, ease: SMOOTH_EASE, delay: 0.15 },
-                      opacity: { duration: 0.7, ease: "easeOut", delay: 0.15 },
+                      y: { duration: 0.9, ease: SMOOTH_EASE, delay: 0.12 },
+                      opacity: { duration: 0.6, ease: "easeOut", delay: 0.12 },
                     }}
                     style={GPU_LAYER}
                     className="block text-xl lg:text-2xl xl:text-3xl font-jakarta font-light tracking-[0.25em] bg-gradient-to-b from-zinc-100 via-zinc-300 to-zinc-500 bg-clip-text text-transparent leading-none uppercase"
@@ -330,8 +318,8 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
                     initial={{ y: "120%", opacity: 0 }}
                     animate={isReady ? { y: "0%", opacity: 1 } : { y: "120%", opacity: 0 }}
                     transition={{
-                      y: { duration: 1.1, ease: SMOOTH_EASE, delay: 0.22 },
-                      opacity: { duration: 0.7, ease: "easeOut", delay: 0.22 },
+                      y: { duration: 0.95, ease: SMOOTH_EASE, delay: 0.18 },
+                      opacity: { duration: 0.6, ease: "easeOut", delay: 0.18 },
                     }}
                     style={GPU_LAYER}
                     className="block text-7xl lg:text-[5.5rem] xl:text-[7.5rem] font-jakarta font-medium tracking-tight bg-gradient-to-b from-zinc-100 via-zinc-300 to-zinc-500 bg-clip-text text-transparent leading-[1.1] uppercase"
@@ -342,13 +330,13 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
               </div>
             </div>
 
-            {/* Center Column: Cutout Portrait Photo - QUICK FADE-IN & DEEP BOTTOM SLIDE */}
+            {/* Center Column: Cutout Portrait Photo */}
             <motion.div
-              initial={{ y: 220, opacity: 0 }}
-              animate={isReady ? { y: 0, opacity: 1 } : { y: 220, opacity: 0 }}
+              initial={{ y: 140, opacity: 0 }}
+              animate={isReady ? { y: 0, opacity: 1 } : { y: 140, opacity: 0 }}
               transition={{
-                y: { duration: 1.35, ease: SMOOTH_EASE, delay: 0.04 },
-                opacity: { duration: 0.25, ease: "easeOut", delay: 0.04 },
+                y: { duration: 1.1, ease: SMOOTH_EASE, delay: 0.04 },
+                opacity: { duration: 0.35, ease: "easeOut", delay: 0.04 },
               }}
               style={GPU_LAYER}
               className="col-span-6 flex justify-center items-end relative z-10"
@@ -365,9 +353,9 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
             {/* Right Column: Bio Paragraph + Animated Shape + Frontend Developer */}
             <div className="col-span-3 flex flex-col justify-center items-end z-20 space-y-8 pb-12 lg:pb-16 -translate-y-4 lg:-translate-y-8">
               <motion.p
-                initial={{ opacity: 0, y: 24 }}
-                animate={isReady ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
-                transition={{ duration: 0.95, ease: SMOOTH_EASE, delay: 0.22 }}
+                initial={{ opacity: 0, y: 18 }}
+                animate={isReady ? { opacity: 1, y: 0 } : { opacity: 0, y: 18 }}
+                transition={{ duration: 0.85, ease: SMOOTH_EASE, delay: 0.18 }}
                 style={GPU_LAYER}
                 className="text-xs sm:text-sm md:text-base text-zinc-400 font-normal leading-relaxed max-w-[220px] lg:max-w-[260px] text-right"
               >
@@ -376,9 +364,9 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
 
               <div className="flex items-center justify-end gap-3 lg:gap-4 select-none">
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.6, y: 15 }}
-                  animate={isReady ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.6, y: 15 }}
-                  transition={{ duration: 0.9, ease: SMOOTH_EASE, delay: 0.26 }}
+                  initial={{ opacity: 0, scale: 0.7, y: 12 }}
+                  animate={isReady ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.7, y: 12 }}
+                  transition={{ duration: 0.8, ease: SMOOTH_EASE, delay: 0.22 }}
                   style={GPU_LAYER}
                 >
                   <AnimatedShapeIcon className="w-12 h-12 lg:w-16 lg:h-16 xl:w-20 xl:h-20 shrink-0" />
@@ -390,8 +378,8 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
                       initial={{ y: "115%", opacity: 0 }}
                       animate={isReady ? { y: "0%", opacity: 1 } : { y: "115%", opacity: 0 }}
                       transition={{
-                        y: { duration: 1.0, ease: SMOOTH_EASE, delay: 0.25 },
-                        opacity: { duration: 0.7, ease: "easeOut", delay: 0.25 },
+                        y: { duration: 0.9, ease: SMOOTH_EASE, delay: 0.2 },
+                        opacity: { duration: 0.6, ease: "easeOut", delay: 0.2 },
                       }}
                       style={GPU_LAYER}
                       className="flex justify-between w-full text-2xl sm:text-3xl lg:text-[2.5rem] xl:text-[3.2rem] font-jakarta font-medium bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none"
@@ -404,8 +392,8 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
                       initial={{ y: "115%", opacity: 0 }}
                       animate={isReady ? { y: "0%", opacity: 0.5 } : { y: "115%", opacity: 0 }}
                       transition={{
-                        y: { duration: 1.0, ease: SMOOTH_EASE, delay: 0.3 },
-                        opacity: { duration: 0.7, ease: "easeOut", delay: 0.3 },
+                        y: { duration: 0.9, ease: SMOOTH_EASE, delay: 0.24 },
+                        opacity: { duration: 0.6, ease: "easeOut", delay: 0.24 },
                       }}
                       style={GPU_LAYER}
                       className="flex justify-between w-full text-2xl sm:text-3xl lg:text-[2.5rem] xl:text-[3.2rem] font-jakarta font-thin bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none"
@@ -422,13 +410,13 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
           {/* MOBILE LAYOUT (< md) */}
           <div className="flex md:hidden flex-col items-center w-full my-auto z-20 pt-0 pb-8 -mt-6 sm:-mt-8">
             
-            {/* Center Portrait Image - QUICK FADE-IN & DEEP BOTTOM SLIDE */}
+            {/* Center Portrait Image */}
             <motion.div
-              initial={{ y: 160, opacity: 0 }}
-              animate={isReady ? { y: 0, opacity: 1 } : { y: 160, opacity: 0 }}
+              initial={{ y: 100, opacity: 0 }}
+              animate={isReady ? { y: 0, opacity: 1 } : { y: 100, opacity: 0 }}
               transition={{
-                y: { duration: 1.25, ease: SMOOTH_EASE, delay: 0.04 },
-                opacity: { duration: 0.25, ease: "easeOut", delay: 0.04 },
+                y: { duration: 1.0, ease: SMOOTH_EASE, delay: 0.04 },
+                opacity: { duration: 0.35, ease: "easeOut", delay: 0.04 },
               }}
               style={GPU_LAYER}
               className="relative w-full max-w-[370px] sm:max-w-[450px] flex justify-center items-end py-0 z-10 -mb-2 -translate-y-1 sm:-translate-y-1"
@@ -448,8 +436,8 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
                     initial={{ y: "120%", opacity: 0 }}
                     animate={isReady ? { y: "0%", opacity: 1 } : { y: "120%", opacity: 0 }}
                     transition={{
-                      y: { duration: 0.95, ease: SMOOTH_EASE, delay: 0.15 },
-                      opacity: { duration: 0.7, ease: "easeOut", delay: 0.15 },
+                      y: { duration: 0.85, ease: SMOOTH_EASE, delay: 0.12 },
+                      opacity: { duration: 0.6, ease: "easeOut", delay: 0.12 },
                     }}
                     style={GPU_LAYER}
                     className="block text-xl sm:text-2xl font-jakarta font-light tracking-[0.25em] bg-gradient-to-b from-zinc-100 via-zinc-300 to-zinc-500 bg-clip-text text-transparent leading-none uppercase drop-shadow-md"
@@ -462,8 +450,8 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
                     initial={{ y: "120%", opacity: 0 }}
                     animate={isReady ? { y: "0%", opacity: 1 } : { y: "120%", opacity: 0 }}
                     transition={{
-                      y: { duration: 1.05, ease: SMOOTH_EASE, delay: 0.22 },
-                      opacity: { duration: 0.7, ease: "easeOut", delay: 0.22 },
+                      y: { duration: 0.9, ease: SMOOTH_EASE, delay: 0.18 },
+                      opacity: { duration: 0.6, ease: "easeOut", delay: 0.18 },
                     }}
                     style={GPU_LAYER}
                     className="block text-7xl sm:text-7xl font-jakarta font-medium tracking-tight bg-gradient-to-b from-zinc-100 via-zinc-300 to-zinc-500 bg-clip-text text-transparent leading-[1.1] uppercase drop-shadow-md"
@@ -475,9 +463,9 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
 
               <div className="flex items-center justify-center gap-2.5 sm:gap-3 select-none">
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.6, y: 15 }}
-                  animate={isReady ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.6, y: 15 }}
-                  transition={{ duration: 0.85, ease: SMOOTH_EASE, delay: 0.26 }}
+                  initial={{ opacity: 0, scale: 0.7, y: 12 }}
+                  animate={isReady ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.7, y: 12 }}
+                  transition={{ duration: 0.75, ease: SMOOTH_EASE, delay: 0.22 }}
                   style={GPU_LAYER}
                 >
                   <AnimatedShapeIcon className="w-10 h-10 sm:w-14 sm:h-14 shrink-0" />
@@ -488,8 +476,8 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
                       initial={{ y: "115%", opacity: 0 }}
                       animate={isReady ? { y: "0%", opacity: 1 } : { y: "115%", opacity: 0 }}
                       transition={{
-                        y: { duration: 0.95, ease: SMOOTH_EASE, delay: 0.25 },
-                        opacity: { duration: 0.7, ease: "easeOut", delay: 0.25 },
+                        y: { duration: 0.85, ease: SMOOTH_EASE, delay: 0.2 },
+                        opacity: { duration: 0.6, ease: "easeOut", delay: 0.2 },
                       }}
                       style={GPU_LAYER}
                       className="flex justify-between w-full text-2xl sm:text-3xl font-jakarta font-medium bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none drop-shadow-md"
@@ -502,8 +490,8 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
                       initial={{ y: "115%", opacity: 0 }}
                       animate={isReady ? { y: "0%", opacity: 0.35 } : { y: "115%", opacity: 0 }}
                       transition={{
-                        y: { duration: 0.95, ease: SMOOTH_EASE, delay: 0.3 },
-                        opacity: { duration: 0.7, ease: "easeOut", delay: 0.3 },
+                        y: { duration: 0.85, ease: SMOOTH_EASE, delay: 0.24 },
+                        opacity: { duration: 0.6, ease: "easeOut", delay: 0.24 },
                       }}
                       style={GPU_LAYER}
                       className="flex justify-between w-full text-2xl sm:text-3xl font-jakarta font-thin bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none drop-shadow-md"
@@ -517,9 +505,9 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
 
             {/* Bio Text Paragraph */}
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={isReady ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-              transition={{ duration: 0.9, ease: SMOOTH_EASE, delay: 0.34 }}
+              initial={{ opacity: 0, y: 16 }}
+              animate={isReady ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+              transition={{ duration: 0.8, ease: SMOOTH_EASE, delay: 0.28 }}
               style={GPU_LAYER}
               className="text-sm text-zinc-400 font-normal text-center max-w-[300px] px-4 mt-6 sm:mt-8 relative z-20"
             >
