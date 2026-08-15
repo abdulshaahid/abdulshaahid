@@ -178,12 +178,13 @@ export function Grainient({
     const container = containerRef.current;
     if (!container) return;
 
+    const isMobile = window.innerWidth < 768;
     const renderer = new Renderer({
       webgl: 2,
       alpha: true,
       antialias: false,
       powerPreference: "high-performance",
-      dpr: Math.min(window.devicePixelRatio || 1, 1.25),
+      dpr: isMobile ? 0.85 : 1.0,
     });
 
     const gl = renderer.gl;

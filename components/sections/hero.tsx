@@ -39,27 +39,28 @@ const SMOOTH_EASE = [0.16, 1, 0.3, 1] as const;
 
 // Hardware acceleration style snippet for locked 60/120fps compositor execution
 const GPU_LAYER = {
-  willChange: "transform, opacity",
   transform: "translateZ(0)",
   WebkitTransform: "translateZ(0)",
-  backfaceVisibility: "hidden",
-  WebkitBackfaceVisibility: "hidden",
-} as const;
+  backfaceVisibility: "hidden" as const,
+  WebkitBackfaceVisibility: "hidden" as const,
+};
 
 function AnimatedShapeIcon({ className }: { className?: string }) {
   const [shapeIndex, setShapeIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const [isSpinning, setIsSpinning] = useState(false);
   const rawId = useId();
   const gradientId = `shape-grad-${rawId.replace(/[^a-zA-Z0-9_-]/g, "")}`;
 
-  // Fast, crisp periodic shape morphing
+  // Start periodic morphing and rotation smoothly after entrance animation settles
   useEffect(() => {
     const timer = setTimeout(() => {
+      setIsSpinning(true);
       const interval = setInterval(() => {
         setShapeIndex((prev) => (prev + 1) % CURATED_SHAPE_PATHS.length);
-      }, 1100);
+      }, 1200);
       return () => clearInterval(interval);
-    }, 800);
+    }, 1200);
 
     return () => clearTimeout(timer);
   }, []);
@@ -76,9 +77,9 @@ function AnimatedShapeIcon({ className }: { className?: string }) {
     >
       {/* Continuously Rotating Vector Gyroscope */}
       <motion.div
-        animate={{ rotate: 360 }}
+        animate={isSpinning ? { rotate: 360 } : { rotate: 0 }}
         transition={{
-          duration: isHovered ? 6 : 12,
+          duration: isHovered ? 6 : 14,
           ease: "linear",
           repeat: Infinity,
         }}
@@ -165,7 +166,7 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.8, ease: "easeOut" }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
       className="w-full px-2 sm:px-3 md:px-4 pt-2 sm:pt-3 md:pt-4"
     >
       <section
@@ -179,17 +180,17 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
             color1="#175b43"
             color2="#0b3023"
             color3="#020e08"
-            timeSpeed={activeMobile ? 1.4 : 1.2}
+            timeSpeed={activeMobile ? 1.3 : 1.1}
             colorBalance={0.35}
-            warpStrength={activeMobile ? 3.1 : 2.8}
-            warpFrequency={activeMobile ? 5.8 : 5.5}
-            warpSpeed={activeMobile ? 2.2 : 2.0}
-            warpAmplitude={35.0}
+            warpStrength={activeMobile ? 2.8 : 2.5}
+            warpFrequency={activeMobile ? 5.5 : 5.0}
+            warpSpeed={activeMobile ? 2.0 : 1.8}
+            warpAmplitude={32.0}
             blendAngle={60.0}
             blendSoftness={0.45}
-            rotationAmount={activeMobile ? 380.0 : 350.0}
-            noiseScale={activeMobile ? 3.1 : 3.0}
-            grainAmount={0.12}
+            rotationAmount={activeMobile ? 360.0 : 340.0}
+            noiseScale={activeMobile ? 2.8 : 2.6}
+            grainAmount={0.10}
             grainScale={1.5}
             grainAnimated={true}
             contrast={1.1}
@@ -201,28 +202,36 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
           />
         </div>
 
-        {/* ===== PURE CSS BALANCED AMBIENT LIGHT BACKDROP OVERLAY ===== */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.92 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.4, ease: "easeOut" }}
-          className="absolute inset-0 pointer-events-none overflow-hidden -z-5 flex justify-center items-center"
-        >
-          {/* Central Full-Span Ambient Glow Bowl with 3D GPU Transform */}
+        {/* ===== HARDWARE-ACCELERATED AMBIENT LIGHT BACKDROP (ZERO GAUSSIAN BLUR LAG) ===== */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden -z-5 flex justify-center items-center">
+          {/* Central Full-Span Ambient Glow Bowl */}
           <div
-            className="w-[180vw] sm:w-[130vw] max-w-[1500px] h-[800px] sm:h-[1000px] rounded-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#37e5a5]/14 sm:from-[#37e5a5]/18 via-[#37e5a5]/4 to-transparent blur-3xl transition-transform duration-500 ease-out"
+            className="w-[140vw] sm:w-[110vw] max-w-[1300px] h-[600px] sm:h-[800px] rounded-full pointer-events-none transition-transform duration-500 ease-out"
             style={{
-              transform: `translate3d(${mousePosition.x * 15}px, ${mousePosition.y * 10}px, 0)`,
-              willChange: "transform",
+              background:
+                "radial-gradient(ellipse at center, rgba(55, 229, 165, 0.16) 0%, rgba(55, 229, 165, 0.04) 45%, transparent 70%)",
+              transform: `translate3d(${mousePosition.x * 12}px, ${mousePosition.y * 8}px, 0)`,
             }}
           />
 
           {/* Left Ambient Glow */}
-          <div className="absolute top-1/4 left-[-20%] sm:left-[0%] w-[350px] sm:w-[600px] h-[500px] sm:h-[700px] bg-gradient-to-br from-[#37e5a5]/10 via-[#37e5a5]/3 to-transparent rounded-full blur-[120px]" />
+          <div
+            className="absolute top-1/4 left-[-15%] sm:left-[0%] w-[320px] sm:w-[500px] h-[400px] sm:h-[600px] pointer-events-none"
+            style={{
+              background:
+                "radial-gradient(circle at 40% 40%, rgba(55, 229, 165, 0.08) 0%, rgba(55, 229, 165, 0.02) 50%, transparent 70%)",
+            }}
+          />
 
           {/* Right Ambient Glow */}
-          <div className="absolute bottom-10 right-[-20%] sm:right-[0%] w-[350px] sm:w-[600px] h-[500px] sm:h-[700px] bg-gradient-to-bl from-[#37e5a5]/10 via-[#37e5a5]/3 to-transparent rounded-full blur-[120px]" />
-        </motion.div>
+          <div
+            className="absolute bottom-10 right-[-15%] sm:right-[0%] w-[320px] sm:w-[500px] h-[400px] sm:h-[600px] pointer-events-none"
+            style={{
+              background:
+                "radial-gradient(circle at 60% 60%, rgba(55, 229, 165, 0.08) 0%, rgba(55, 229, 165, 0.02) 50%, transparent 70%)",
+            }}
+          />
+        </div>
 
         {/* Main Content Container */}
         <div className="relative z-10 w-full max-w-7xl mx-auto flex-1 flex flex-col items-center">
