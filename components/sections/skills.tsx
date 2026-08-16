@@ -56,6 +56,7 @@ const skillsData: SkillCategory[] = [
       { name: "Gemini", iconUrl: "/skills/gemini.svg" },
       { name: "ChatGPT", iconUrl: "/skills/openai-chatgpt.svg" },
       { name: "Copilot", iconUrl: "/skills/github-copilot.svg" },
+      { name: "MCP", iconUrl: "/skills/model-context-protocol.svg" },
       { name: "Git", iconUrl: "/skills/git.svg" },
       { name: "GitHub", iconUrl: "/skills/github.svg" },
     ],
