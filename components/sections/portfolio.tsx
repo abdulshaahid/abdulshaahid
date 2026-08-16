@@ -14,6 +14,7 @@ interface ProjectItem {
   githubUrl?: string
   videoUrl?: string
   imageUrl?: string
+  logoUrl?: string
 }
 
 function ProjectVideo({ src }: { src: string }) {
@@ -116,6 +117,7 @@ const projects: ProjectItem[] = [
     tags: ["React", "Next.js", "Tailwind CSS", "TypeScript"],
     liveUrl: "https://trawayl.com",
     imageUrl: "/agent-dashboard-mockup-grayscale.png",
+    logoUrl: "/projlogo/trawayl.png",
   },
   {
     id: "trawerse",
@@ -125,6 +127,7 @@ const projects: ProjectItem[] = [
     tags: ["React", "Tailwind CSS", "Framer Motion", "GSAP"],
     liveUrl: "https://trawerse.com/",
     videoUrl: "/projvid/trawerse.mp4",
+    logoUrl: "/projlogo/trawerse.ico",
   },
   {
     id: "flotilla",
@@ -134,6 +137,7 @@ const projects: ProjectItem[] = [
     tags: ["React", "Tailwind CSS", "Framer Motion"],
     liveUrl: "https://www.flotillagroup.com/",
     videoUrl: "/projvid/flotilla.mp4",
+    logoUrl: "/projlogo/flotilla.svg",
   },
   {
     id: "al-najwa",
@@ -142,6 +146,7 @@ const projects: ProjectItem[] = [
       "Premium interior design website focused on projects and visual storytelling.",
     tags: ["React", "Tailwind CSS", "GSAP"],
     videoUrl: "/projvid/alnajwa.mp4",
+    logoUrl: "/projlogo/alnlogo.png",
   },
   {
     id: "taj-al-safa",
@@ -151,6 +156,7 @@ const projects: ProjectItem[] = [
     tags: ["React", "Tailwind CSS", "Framer Motion"],
     liveUrl: "https://tajalsafa.com/",
     videoUrl: "/projvid/tajalsafa.mp4",
+    logoUrl: "/projlogo/tajlogo.png",
   },
   {
     id: "kerala-startup-carnival",
@@ -160,6 +166,7 @@ const projects: ProjectItem[] = [
     tags: ["React", "Tailwind CSS", "Framer Motion", "GSAP"],
     liveUrl: "https://keralastartupcarnival.com/",
     videoUrl: "/projvid/ksc.mp4",
+    logoUrl: "/projlogo/keralastartup.ico",
   },
   {
     id: "daily-regrets",
@@ -169,6 +176,7 @@ const projects: ProjectItem[] = [
     tags: ["React", "Tailwind CSS", "Framer Motion"],
     liveUrl: "https://dailyregrets.com/",
     videoUrl: "/projvid/dailyregrets.mp4",
+    logoUrl: "/projlogo/dailyregrets.ico",
   },
   {
     id: "deyno-technologies",
@@ -177,6 +185,7 @@ const projects: ProjectItem[] = [
       "Multi-product SaaS ecosystem showcasing ERP solutions across industries.",
     tags: ["Next.js", "Tailwind CSS", "Framer Motion", "GSAP"],
     videoUrl: "/projvid/deyno.mp4",
+    logoUrl: "/projlogo/deyno.ico",
   },
 ]
 
@@ -236,9 +245,22 @@ export function Portfolio() {
                   <div>
                     {/* Title with Bricolage Grotesque */}
                     <div className="flex items-center justify-between gap-2">
-                      <h3 className="font-bricolage text-base sm:text-lg lg:text-xl font-bold text-white group-hover:text-[#1fd38a] transition-colors tracking-tight">
-                        {project.title}
-                      </h3>
+                      <div className="flex items-center gap-2.5">
+                        {project.logoUrl && (
+                          <div className="w-6 h-6 sm:w-[26px] sm:h-[26px] relative shrink-0 flex items-center justify-center">
+                            <Image
+                              src={project.logoUrl}
+                              alt={`${project.title} logo`}
+                              width={26}
+                              height={26}
+                              className="w-full h-full rounded-[6px] object-contain"
+                            />
+                          </div>
+                        )}
+                        <h3 className="font-bricolage text-base sm:text-lg lg:text-xl font-bold text-white group-hover:text-[#1fd38a] transition-colors tracking-tight">
+                          {project.title}
+                        </h3>
+                      </div>
                       {project.liveUrl && (
                         <a
                           href={project.liveUrl}
