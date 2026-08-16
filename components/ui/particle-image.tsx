@@ -111,7 +111,7 @@ export function ParticleImage({
           // 1. Draw pristine full-resolution original photo
           ctx.drawImage(baseCanvas, 0, 0, width, height)
 
-          // 2. If particles are active, cleanly dissolve the disturbed area and render flying particles
+          // 2. If particles  are active, cleanly dissolve the disturbed area and render flying particles
           if (activeIndices.length > 0) {
             const spring = 0.24
             const damping = 0.74
