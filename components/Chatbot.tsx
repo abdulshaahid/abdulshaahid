@@ -6,8 +6,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import {
   X,
   Send,
+  ArrowUp,
   Volume2,
-  VolumeX,
   RotateCcw,
   Sparkles,
   Copy,
@@ -26,6 +26,7 @@ interface Message {
   content: string
   createdAt?: Date
   liked?: boolean | null
+  stopped?: boolean
 }
 
 const INITIAL_SUGGESTIONS = [
@@ -218,6 +219,7 @@ export function Chatbot() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
+  const readerRef = useRef<ReadableStreamDefaultReader<Uint8Array> | null>(null)
   const recognitionRef = useRef<any>(null)
   const speechSynthRef = useRef<SpeechSynthesis | null>(null)
 
@@ -433,6 +435,8 @@ export function Chatbot() {
 
   // Toggle Microphone (STT)
   const toggleSpeechRecognition = async () => {
+    if (isLoading) return // Block recording while response is processing
+
     if (!sttSupported || !recognitionRef.current) {
       alert(
         "Voice input is not supported in this browser. Please use Chrome, Edge, or Safari."
@@ -509,8 +513,29 @@ export function Chatbot() {
     setTimeout(() => setCopiedId(null), 2000)
   }
 
-  // Send message and stream response
-  const handleSendMessage = async (textToSend?: string) => {
+  // Regenerate response in-place
+  const handleRegenerate = (assistantId: string) => {
+    if (isLoading) return
+    const msgIndex = messages.findIndex((m) => m.id === assistantId)
+    if (msgIndex >= 0) {
+      let prevUserPrompt = ""
+      for (let i = msgIndex - 1; i >= 0; i--) {
+        if (messages[i].role === "user") {
+          prevUserPrompt = messages[i].content
+          break
+        }
+      }
+      if (prevUserPrompt) {
+        handleSendMessage(prevUserPrompt, assistantId)
+      }
+    }
+  }
+
+  // Send message and stream response (or retry in-place if retryAssistantId is provided)
+  const handleSendMessage = async (
+    textToSend?: string,
+    retryAssistantId?: string
+  ) => {
     const messageContent = (textToSend || input).trim()
     if (!messageContent || isLoading) return
 
@@ -521,27 +546,48 @@ export function Chatbot() {
       } catch {}
     }
 
-    const userMessage: Message = {
-      id: `user-${Date.now()}`,
-      role: "user",
-      content: messageContent,
-      createdAt: new Date(),
+    let contextMessages: Message[]
+    let assistantId: string
+
+    if (retryAssistantId) {
+      assistantId = retryAssistantId
+      const msgIndex = messages.findIndex((m) => m.id === retryAssistantId)
+      if (msgIndex >= 0) {
+        // AI context includes everything up to the preceding user message
+        contextMessages = messages.slice(0, msgIndex)
+        // Reset that specific message in place
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === retryAssistantId
+              ? { ...m, content: "", stopped: false, liked: null }
+              : m
+          )
+        )
+      } else {
+        return
+      }
+    } else {
+      const userMessage: Message = {
+        id: `user-${Date.now()}`,
+        role: "user",
+        content: messageContent,
+        createdAt: new Date(),
+      }
+
+      contextMessages = [...messages, userMessage]
+      setInput("")
+      assistantId = `assistant-${Date.now()}`
+      const assistantPlaceholder: Message = {
+        id: assistantId,
+        role: "assistant",
+        content: "",
+        createdAt: new Date(),
+      }
+
+      setMessages([...contextMessages, assistantPlaceholder])
     }
 
-    const updatedMessages = [...messages, userMessage]
-    setMessages(updatedMessages)
-    setInput("")
     setIsLoading(true)
-
-    const assistantId = `assistant-${Date.now()}`
-    const assistantPlaceholder: Message = {
-      id: assistantId,
-      role: "assistant",
-      content: "",
-      createdAt: new Date(),
-    }
-
-    setMessages([...updatedMessages, assistantPlaceholder])
 
     const abortController = new AbortController()
     abortControllerRef.current = abortController
@@ -551,7 +597,7 @@ export function Chatbot() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: updatedMessages.map((m) => ({
+          messages: contextMessages.map((m) => ({
             role: m.role,
             content: m.content,
           })),
@@ -568,89 +614,101 @@ export function Chatbot() {
       }
 
       const reader = response.body.getReader()
+      readerRef.current = reader
       const decoder = new TextDecoder()
       let accumulatedText = ""
 
       const contentType = response.headers.get("content-type") || ""
       const isEventStream = contentType.includes("text/event-stream")
 
-      if (!isEventStream) {
-        while (true) {
-          const { value, done } = await reader.read()
-          if (done) break
+      try {
+        if (!isEventStream) {
+          while (true) {
+            if (abortController.signal.aborted) break
+            const { value, done } = await reader.read()
+            if (done || abortController.signal.aborted) break
 
-          const textChunk = decoder.decode(value, { stream: true })
-          accumulatedText += textChunk
+            const textChunk = decoder.decode(value, { stream: true })
+            accumulatedText += textChunk
 
-          setMessages((prev) =>
-            prev.map((msg) =>
-              msg.id === assistantId
-                ? { ...msg, content: accumulatedText }
-                : msg
+            setMessages((prev) =>
+              prev.map((msg) =>
+                msg.id === assistantId
+                  ? { ...msg, content: accumulatedText }
+                  : msg
+              )
             )
-          )
-        }
-      } else {
-        let buffer = ""
-        while (true) {
-          const { value, done } = await reader.read()
-          if (done) break
+          }
+        } else {
+          let buffer = ""
+          while (true) {
+            if (abortController.signal.aborted) break
+            const { value, done } = await reader.read()
+            if (done || abortController.signal.aborted) break
 
-          buffer += decoder.decode(value, { stream: true })
-          const lines = buffer.split("\n")
-          buffer = lines.pop() || ""
+            buffer += decoder.decode(value, { stream: true })
+            const lines = buffer.split("\n")
+            buffer = lines.pop() || ""
 
-          for (const line of lines) {
-            const trimmed = line.trim()
-            if (!trimmed) continue
+            for (const line of lines) {
+              const trimmed = line.trim()
+              if (!trimmed) continue
 
-            if (trimmed.startsWith("0:")) {
-              try {
-                const parsed = JSON.parse(trimmed.slice(2))
-                if (typeof parsed === "string") {
-                  accumulatedText += parsed
-                } else if (parsed && typeof parsed.text === "string") {
-                  accumulatedText += parsed.text
-                } else if (parsed && typeof parsed.delta === "string") {
-                  accumulatedText += parsed.delta
+              if (trimmed.startsWith("0:")) {
+                try {
+                  const parsed = JSON.parse(trimmed.slice(2))
+                  if (typeof parsed === "string") {
+                    accumulatedText += parsed
+                  } else if (parsed && typeof parsed.text === "string") {
+                    accumulatedText += parsed.text
+                  } else if (parsed && typeof parsed.delta === "string") {
+                    accumulatedText += parsed.delta
+                  }
+                } catch {
+                  accumulatedText += trimmed.slice(2)
                 }
-              } catch {
-                accumulatedText += trimmed.slice(2)
-              }
-            } else if (trimmed.startsWith("data:")) {
-              const dataStr = trimmed.slice(5).trim()
-              if (dataStr === "[DONE]") continue
-              try {
-                const parsed = JSON.parse(dataStr)
-                if (typeof parsed === "string") {
-                  accumulatedText += parsed
-                } else if (parsed && typeof parsed.text === "string") {
-                  accumulatedText += parsed.text
-                } else if (parsed && typeof parsed.delta === "string") {
-                  accumulatedText += parsed.delta
+              } else if (trimmed.startsWith("data:")) {
+                const dataStr = trimmed.slice(5).trim()
+                if (dataStr === "[DONE]") continue
+                try {
+                  const parsed = JSON.parse(dataStr)
+                  if (typeof parsed === "string") {
+                    accumulatedText += parsed
+                  } else if (parsed && typeof parsed.text === "string") {
+                    accumulatedText += parsed.text
+                  } else if (parsed && typeof parsed.delta === "string") {
+                    accumulatedText += parsed.delta
+                  }
+                } catch {
+                  accumulatedText += dataStr
                 }
-              } catch {
-                accumulatedText += dataStr
               }
             }
-          }
 
-          setMessages((prev) =>
-            prev.map((msg) =>
-              msg.id === assistantId
-                ? { ...msg, content: accumulatedText }
-                : msg
+            setMessages((prev) =>
+              prev.map((msg) =>
+                msg.id === assistantId
+                  ? { ...msg, content: accumulatedText }
+                  : msg
+              )
             )
-          )
+          }
         }
-      }
 
-      if (accumulatedText && !isMuted) {
-        speakText(accumulatedText)
+        if (accumulatedText && !isMuted && !abortController.signal.aborted) {
+          speakText(accumulatedText)
+        }
+      } finally {
+        readerRef.current = null
       }
     } catch (err: any) {
-      if (err.name === "AbortError") {
+      if (err?.name === "AbortError" || abortController.signal.aborted) {
         console.log("Chat generation stopped by user")
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === assistantId ? { ...msg, stopped: true } : msg
+          )
+        )
       } else {
         console.error("Chat error:", err)
         setMessages((prev) =>
@@ -668,21 +726,44 @@ export function Chatbot() {
     } finally {
       setIsLoading(false)
       abortControllerRef.current = null
+      readerRef.current = null
     }
   }
 
   const handleStopGenerating = () => {
     if (abortControllerRef.current) {
-      abortControllerRef.current.abort()
+      try {
+        abortControllerRef.current.abort()
+      } catch {}
       abortControllerRef.current = null
-      setIsLoading(false)
     }
+    if (readerRef.current) {
+      try {
+        readerRef.current.cancel()
+      } catch {}
+      readerRef.current = null
+    }
+    stopSpeaking()
+    setIsLoading(false)
+
+    setMessages((prev) => {
+      if (prev.length === 0) return prev
+      const lastIndex = prev.length - 1
+      if (prev[lastIndex].role === "assistant") {
+        return prev.map((m, idx) =>
+          idx === lastIndex ? { ...m, stopped: true } : m
+        )
+      }
+      return prev
+    })
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
-      handleSendMessage()
+      if (!isLoading && input.trim()) {
+        handleSendMessage()
+      }
     }
   }
 
@@ -812,20 +893,6 @@ export function Chatbot() {
 
                 {/* Right: Round Minimal Action Pills */}
                 <div className="flex items-center gap-1.5">
-                  {/* Voice Output Toggle */}
-                  <button
-                    onClick={toggleMute}
-                    title={isMuted ? "Unmute Voice" : "Mute Voice"}
-                    className={`w-7 h-7 rounded-full transition-colors flex items-center justify-center ${
-                      isMuted
-                        ? "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/60"
-                        : "text-blue-400 bg-blue-500/10 hover:bg-blue-500/20"
-                    }`}
-                    aria-label={isMuted ? "Unmute Voice" : "Mute Voice"}
-                  >
-                    {isMuted ? <VolumeX size={13} /> : <Volume2 size={13} />}
-                  </button>
-
                   {/* New Conversation (+) */}
                   <button
                     onClick={handleResetChat}
@@ -880,8 +947,9 @@ export function Chatbot() {
                       {INITIAL_SUGGESTIONS.map((suggestion, i) => (
                         <button
                           key={i}
+                          disabled={isLoading}
                           onClick={() => handleSendMessage(suggestion)}
-                          className="text-left text-xs px-3.5 py-2.5 rounded-xl bg-zinc-900/60 hover:bg-zinc-800/80 text-zinc-300 hover:text-white transition-all flex items-center justify-between group"
+                          className="text-left text-xs px-3.5 py-2.5 rounded-xl bg-zinc-900/60 hover:bg-zinc-800/80 text-zinc-300 hover:text-white transition-all flex items-center justify-between group disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none"
                         >
                           <span className="truncate">{suggestion}</span>
                           <Send
@@ -915,66 +983,91 @@ export function Chatbot() {
                         <div className="w-full space-y-2 text-zinc-200 text-[14px]">
                           {message.content ? (
                             <MarkdownContent content={message.content} />
-                          ) : (
+                          ) : !message.stopped ? (
                             <div className="flex items-center gap-1.5 py-1 text-zinc-400">
                               <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" />
                               <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce [animation-delay:0.2s]" />
                               <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce [animation-delay:0.4s]" />
                             </div>
+                          ) : null}
+
+                          {/* "You stopped this response" Indicator matching screenshot */}
+                          {message.stopped && (
+                            <div className="w-full flex items-center gap-3 my-2.5 text-xs text-zinc-500 select-none">
+                              <div className="flex-1 h-[1px] bg-zinc-800" />
+                              <span className="text-[12px] font-normal text-zinc-400 whitespace-nowrap">
+                                You stopped this response
+                              </span>
+                              <div className="flex-1 h-[1px] bg-zinc-800" />
+                            </div>
                           )}
 
-                          {/* Action Feedback Bar (ThumbsUp, ThumbsDown, Copy, Speaker) */}
-                          {message.content && (
-                            <div className="flex items-center gap-3 pt-1 text-zinc-400">
-                              {/* Thumbs Up */}
+                          {/* Action Feedback Bar (Regenerate, ThumbsUp, ThumbsDown, Copy, Speaker) */}
+                          {(message.content || message.stopped) && (
+                            <div className="flex items-center gap-3 pt-0.5 text-zinc-400">
+                              {/* Regenerate / Retry button */}
                               <button
-                                onClick={() => handleFeedback(message.id, true)}
-                                title="Helpful"
-                                className={`transition-colors hover:text-zinc-200 ${
-                                  message.liked === true
-                                    ? "text-blue-400"
-                                    : "text-zinc-500"
-                                }`}
+                                onClick={() => handleRegenerate(message.id)}
+                                disabled={isLoading}
+                                title="Regenerate response"
+                                className="text-zinc-500 hover:text-zinc-200 transition-colors disabled:opacity-40 cursor-pointer"
                               >
-                                <ThumbsUp size={14} className={message.liked === true ? "fill-current" : ""} />
+                                <RotateCcw size={13.5} />
                               </button>
 
-                              {/* Thumbs Down */}
-                              <button
-                                onClick={() => handleFeedback(message.id, false)}
-                                title="Not helpful"
-                                className={`transition-colors hover:text-zinc-200 ${
-                                  message.liked === false
-                                    ? "text-red-400"
-                                    : "text-zinc-500"
-                                }`}
-                              >
-                                <ThumbsDown size={14} className={message.liked === false ? "fill-current" : ""} />
-                              </button>
+                              {message.content && (
+                                <>
+                                  {/* Thumbs Up */}
+                                  <button
+                                    onClick={() => handleFeedback(message.id, true)}
+                                    title="Helpful"
+                                    className={`transition-colors hover:text-zinc-200 ${
+                                      message.liked === true
+                                        ? "text-blue-400"
+                                        : "text-zinc-500"
+                                    }`}
+                                  >
+                                    <ThumbsUp size={14} className={message.liked === true ? "fill-current" : ""} />
+                                  </button>
 
-                              {/* Copy Message */}
-                              <button
-                                onClick={() =>
-                                  handleCopyMessage(message.id, message.content)
-                                }
-                                title="Copy response"
-                                className="text-zinc-500 hover:text-zinc-200 transition-colors"
-                              >
-                                {copiedId === message.id ? (
-                                  <Check size={14} className="text-emerald-400" />
-                                ) : (
-                                  <Copy size={14} />
-                                )}
-                              </button>
+                                  {/* Thumbs Down */}
+                                  <button
+                                    onClick={() => handleFeedback(message.id, false)}
+                                    title="Not helpful"
+                                    className={`transition-colors hover:text-zinc-200 ${
+                                      message.liked === false
+                                        ? "text-red-400"
+                                        : "text-zinc-500"
+                                    }`}
+                                  >
+                                    <ThumbsDown size={14} className={message.liked === false ? "fill-current" : ""} />
+                                  </button>
 
-                              {/* Speak text */}
-                              <button
-                                onClick={() => speakText(message.content)}
-                                title="Listen aloud"
-                                className="text-zinc-500 hover:text-blue-400 transition-colors"
-                              >
-                                <Volume2 size={14} />
-                              </button>
+                                  {/* Copy Message */}
+                                  <button
+                                    onClick={() =>
+                                      handleCopyMessage(message.id, message.content)
+                                    }
+                                    title="Copy response"
+                                    className="text-zinc-500 hover:text-zinc-200 transition-colors"
+                                  >
+                                    {copiedId === message.id ? (
+                                      <Check size={14} className="text-emerald-400" />
+                                    ) : (
+                                      <Copy size={14} />
+                                    )}
+                                  </button>
+
+                                  {/* Speak text */}
+                                  <button
+                                    onClick={() => speakText(message.content)}
+                                    title="Listen aloud"
+                                    className="text-zinc-500 hover:text-blue-400 transition-colors"
+                                  >
+                                    <Volume2 size={14} />
+                                  </button>
+                                </>
+                              )}
                             </div>
                           )}
                         </div>
@@ -1025,7 +1118,7 @@ export function Chatbot() {
                 </AnimatePresence>
 
                 {/* Floating Rounded Input Capsule */}
-                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#18181d] shadow-inner focus-within:ring-1 focus-within:ring-blue-500/50 transition-all">
+                <div className="flex items-center gap-2 pl-4 pr-1.5 py-1.5 rounded-full bg-[#18181d] shadow-inner focus-within:ring-1 focus-within:ring-gray-500/30 transition-all">
                   <input
                     ref={inputRef}
                     id="chatbot-input"
@@ -1037,35 +1130,47 @@ export function Chatbot() {
                     }}
                     onKeyDown={handleKeyDown}
                     placeholder={
-                      isListening ? "Listening..." : "Type a message..."
+                      isLoading
+                        ? "Generating response..."
+                        : isListening
+                        ? "Listening..."
+                        : "Type a message..."
                     }
-                    disabled={isLoading && !isListening}
-                    className="flex-1 bg-transparent text-zinc-100 placeholder-zinc-500 text-[16px] sm:text-[13.5px] focus:outline-none"
+                    disabled={isLoading}
+                    className="flex-1 bg-transparent text-zinc-100 placeholder-zinc-500 text-[16px] sm:text-[13.5px] focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed py-1"
                   />
 
-                  {/* Black Circular Waveform / Send Button Pill */}
+                  {/* Action Button: While processing, ONLY show Stop button */}
                   {isLoading ? (
                     <button
-                      onClick={handleStopGenerating}
+                      id="chatbot-stop-btn"
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        handleStopGenerating()
+                      }}
                       title="Stop generating"
-                      className="w-8 h-8 rounded-full bg-[#0a0a0d] hover:bg-black text-zinc-300 flex items-center justify-center transition-colors shadow-sm"
+                      className="w-8 h-8 shrink-0 rounded-full bg-zinc-800 hover:bg-zinc-700 text-white flex items-center justify-center transition-all shadow-md cursor-pointer hover:scale-105 active:scale-95"
                       aria-label="Stop Generating"
                     >
-                      <Square size={12} className="fill-current text-zinc-400" />
+                      <Square size={11} className="fill-current text-zinc-200" />
                     </button>
                   ) : input.trim() ? (
                     <button
                       id="chatbot-send-btn"
+                      type="button"
                       onClick={() => handleSendMessage()}
                       title="Send message"
-                      className="w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center transition-all shadow-md shadow-blue-600/20 cursor-pointer"
+                      className="w-8 h-8 shrink-0 rounded-full bg-[#2563eb]/70 hover:bg-[#2563eb]/60 text-white flex items-center justify-center transition-all  cursor-pointer hover:scale-105 active:scale-95"
                       aria-label="Send Message"
                     >
-                      <Send size={13} />
+                      <ArrowUp size={17} strokeWidth={2.4} className="text-white" />
                     </button>
                   ) : (
                     <button
                       onClick={toggleSpeechRecognition}
+                      type="button"
                       title={
                         isListening
                           ? "Stop listening"
@@ -1073,12 +1178,12 @@ export function Chatbot() {
                           ? "Speaking"
                           : "Voice Assistant (Click to Speak)"
                       }
-                      className={`w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-sm ${
+                      className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center transition-all shadow-sm ${
                         isListening
                           ? "bg-red-500/25 ring-2 ring-red-500/70 scale-105"
                           : isSpeaking
                           ? "bg-emerald-500/25 ring-2 ring-emerald-500/70 scale-105"
-                          : "bg-[#0a0a0d] hover:bg-zinc-900 hover:scale-105"
+                          : "bg-[#0a0a0d] hover:bg-zinc-900 hover:scale-105 cursor-pointer"
                       }`}
                       aria-label="Voice Waveform"
                     >
@@ -1094,7 +1199,7 @@ export function Chatbot() {
                 {/* Subtle Centered Footer Note */}
                 <div className="text-center mt-2">
                   <span className="text-[10.5px] font-sans text-zinc-500 font-normal tracking-tight">
-                    Powered by Gemini 3.6 Flash
+                    Powered by Gemini 2.5 Flash
                   </span>
                 </div>
               </div>

@@ -34,18 +34,11 @@ export async function POST(req: Request) {
     const recentMessages = formattedMessages.slice(-10)
 
     const result = streamText({
-      model: google("gemini-3.6-flash"),
+      model: google("gemini-3.5-flash-lite"),
       system: SYSTEM_PROMPT,
       messages: recentMessages,
       maxOutputTokens: 600,
       temperature: 0.5,
-      providerOptions: {
-        google: {
-          thinkingConfig: {
-            thinkingLevel: "minimal",
-          },
-        },
-      },
     })
 
     // Return text stream response consumed by custom fetch reader in client
