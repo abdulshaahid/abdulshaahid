@@ -6,8 +6,6 @@ import { motion, AnimatePresence } from "framer-motion"
 import {
   X,
   Send,
-  Mic,
-  MicOff,
   Volume2,
   VolumeX,
   RotateCcw,
@@ -20,11 +18,7 @@ import {
   ThumbsDown,
   ArrowUpRight,
   Square,
-  PhoneOff,
-  Radio,
-  MessageSquare,
 } from "lucide-react"
-import { SYSTEM_PROMPT } from "@/lib/system-prompt"
 
 interface Message {
   id: string
@@ -33,16 +27,6 @@ interface Message {
   createdAt?: Date
   liked?: boolean | null
 }
-
-type LiveState = "idle" | "connecting" | "listening" | "speaking" | "error"
-
-const AVAILABLE_VOICES = [
-  { name: "Puck", label: "Puck (Energetic)" },
-  { name: "Charon", label: "Charon (Calm)" },
-  { name: "Kore", label: "Kore (Warm)" },
-  { name: "Fenrir", label: "Fenrir (Deep)" },
-  { name: "Aoede", label: "Aoede (Expressive)" },
-]
 
 const INITIAL_SUGGESTIONS = [
   "💼 What is Shahid's work experience?",
@@ -155,31 +139,64 @@ function parseInlineMarkdown(text: string): React.ReactNode[] {
   })
 }
 
-// Waveform sound animation bars
-function WaveformBars({ active = false }: { active?: boolean }) {
+// Animated soundwave bars with idle breathing and active voice animation
+function WaveformBars({
+  active = false,
+  isListening = false,
+  isSpeaking = false,
+}: {
+  active?: boolean
+  isListening?: boolean
+  isSpeaking?: boolean
+}) {
+  const barConfigs = [
+    {
+      activeValues: [0.3, 1.0, 0.45, 0.85, 0.3],
+      idleValues: [0.4, 0.75, 0.4],
+      dur: 0.65,
+      delay: 0,
+    },
+    {
+      activeValues: [0.6, 0.35, 1.0, 0.5, 0.6],
+      idleValues: [0.65, 1.0, 0.65],
+      dur: 0.75,
+      delay: 0.1,
+    },
+    {
+      activeValues: [0.4, 0.9, 0.3, 0.95, 0.4],
+      idleValues: [0.85, 0.5, 0.85],
+      dur: 0.6,
+      delay: 0.2,
+    },
+    {
+      activeValues: [0.75, 0.4, 0.85, 0.35, 0.75],
+      idleValues: [0.5, 0.8, 0.5],
+      dur: 0.7,
+      delay: 0.15,
+    },
+  ]
+
   return (
-    <div className="flex items-center gap-[2.5px] h-4">
-      {[0.4, 0.8, 1, 0.6, 0.9].map((height, i) => (
+    <div className="flex items-center justify-center gap-[2.5px] h-4 w-4">
+      {barConfigs.map((bar, i) => (
         <motion.span
           key={i}
-          animate={
-            active
-              ? {
-                  scaleY: [0.3, 1, 0.4, 0.9, 0.3],
-                }
-              : { scaleY: height }
-          }
-          transition={
-            active
-              ? {
-                  duration: 0.8,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                  delay: i * 0.12,
-                }
-              : { duration: 0.2 }
-          }
-          className="w-[2.5px] h-3.5 bg-white rounded-full origin-center"
+          animate={{
+            scaleY: active ? bar.activeValues : bar.idleValues,
+          }}
+          transition={{
+            duration: active ? bar.dur : 1.6,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: bar.delay,
+          }}
+          className={`w-[2px] h-3.5 rounded-full origin-center transition-colors duration-300 ${
+            isListening
+              ? "bg-red-400 shadow-[0_0_8px_rgba(248,113,113,0.9)]"
+              : isSpeaking
+              ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)]"
+              : "bg-zinc-300"
+          }`}
         />
       ))}
     </div>
@@ -198,32 +215,11 @@ export function Chatbot() {
   const [sttSupported, setSttSupported] = useState(true)
   const [keyboardHeight, setKeyboardHeight] = useState(0)
 
-  // ===== GEMINI LIVE BIDIRECTIONAL SPEECH-TO-SPEECH STATE =====
-  const [isLiveMode, setIsLiveMode] = useState(false)
-  const [liveState, setLiveState] = useState<LiveState>("idle")
-  const [liveVoice, setLiveVoice] = useState("Puck")
-  const [liveMicMuted, setLiveMicMuted] = useState(false)
-  const [liveTranscript, setLiveTranscript] = useState("")
-  const [liveErrorMessage, setLiveErrorMessage] = useState<string | null>(null)
-  const [inputVolume, setInputVolume] = useState(0)
-  const [outputVolume, setOutputVolume] = useState(0)
-
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
   const recognitionRef = useRef<any>(null)
   const speechSynthRef = useRef<SpeechSynthesis | null>(null)
-
-  // Live WebSocket & Audio Refs
-  const wsRef = useRef<WebSocket | null>(null)
-  const micStreamRef = useRef<MediaStream | null>(null)
-  const micAudioContextRef = useRef<AudioContext | null>(null)
-  const playbackAudioContextRef = useRef<AudioContext | null>(null)
-  const activeSourcesRef = useRef<AudioBufferSourceNode[]>([])
-  const nextPlayTimeRef = useRef<number>(0)
-  const animFrameRef = useRef<number | null>(null)
-  const liveMicMutedRef = useRef(liveMicMuted)
-  liveMicMutedRef.current = liveMicMuted
 
   // Auto-scroll on messages change
   const scrollToBottom = useCallback((smooth = true) => {
@@ -318,8 +314,17 @@ export function Chatbot() {
           }
 
           recognition.onerror = (event: any) => {
-            if (event.error !== "no-speech" && event.error !== "aborted" && event.error !== "audio-capture") {
-              console.warn("Speech recognition notice:", event.error)
+            if (event.error === "no-speech" || event.error === "aborted") {
+              // Benign user silence or intentional abort
+              setIsListening(false)
+              return
+            }
+            if (event.error === "audio-capture" || event.error === "not-allowed") {
+              console.warn(
+                "Microphone is unavailable, not connected, or permission was not granted."
+              )
+            } else {
+              console.warn("Speech recognition error:", event.error)
             }
             setIsListening(false)
           }
@@ -330,7 +335,7 @@ export function Chatbot() {
 
           recognitionRef.current = recognition
         } catch (e) {
-          console.warn("SpeechRecognition init failed", e)
+          console.warn("Speech recognition initialization failed:", e)
           setSttSupported(false)
         }
       } else {
@@ -339,453 +344,181 @@ export function Chatbot() {
     }
 
     return () => {
-      if (speechSynthRef.current) {
-        speechSynthRef.current.cancel()
-      }
       if (recognitionRef.current) {
         try {
           recognitionRef.current.abort()
-        } catch (e) {}
+        } catch {}
+      }
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel()
       }
     }
   }, [])
 
-  // Text to Speech output
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages, isLoading, scrollToBottom])
+
+  // Focus input when opened
+  useEffect(() => {
+    if (isOpen) {
+      setTimeout(() => {
+        inputRef.current?.focus()
+        scrollToBottom(false)
+      }, 150)
+    } else {
+      stopSpeaking()
+      if (recognitionRef.current && isListening) {
+        recognitionRef.current.stop()
+      }
+    }
+  }, [isOpen, scrollToBottom, isListening])
+
+  // Text to Speech playback function
   const speakText = useCallback(
-    (text: string) => {
-      if (isMuted || !speechSynthRef.current) return
-
-      speechSynthRef.current.cancel()
-      const cleanText = cleanTextForSpeech(text)
-      if (!cleanText) return
-
-      const utterance = new SpeechSynthesisUtterance(cleanText)
-      utterance.rate = 1.05
-      utterance.pitch = 1.0
-      utterance.lang = "en-US"
-
-      const voices = speechSynthRef.current.getVoices()
-      const preferredVoice = voices.find(
-        (v) =>
-          v.lang.startsWith("en") &&
-          (v.name.includes("Google") ||
-            v.name.includes("Natural") ||
-            v.name.includes("Samantha") ||
-            v.name.includes("Daniel") ||
-            v.name.includes("Karen"))
-      )
-      if (preferredVoice) {
-        utterance.voice = preferredVoice
+    (rawText: string) => {
+      if (
+        isMuted ||
+        typeof window === "undefined" ||
+        !("speechSynthesis" in window)
+      ) {
+        return
       }
 
-      utterance.onstart = () => setIsSpeaking(true)
-      utterance.onend = () => setIsSpeaking(false)
-      utterance.onerror = () => setIsSpeaking(false)
+      const cleanText = cleanTextForSpeech(rawText)
+      if (!cleanText) return
 
-      speechSynthRef.current.speak(utterance)
+      try {
+        window.speechSynthesis.cancel()
+
+        const utterance = new SpeechSynthesisUtterance(cleanText)
+        utterance.rate = 1.05
+        utterance.pitch = 1.0
+
+        const voices = window.speechSynthesis.getVoices()
+        const preferredVoice =
+          voices.find(
+            (v) =>
+              v.lang.startsWith("en") &&
+              (v.name.includes("Google") ||
+                v.name.includes("Natural") ||
+                v.name.includes("Samantha") ||
+                v.name.includes("Daniel") ||
+                v.name.includes("Premium"))
+          ) || voices.find((v) => v.lang.startsWith("en"))
+
+        if (preferredVoice) {
+          utterance.voice = preferredVoice
+        }
+
+        utterance.onstart = () => setIsSpeaking(true)
+        utterance.onend = () => setIsSpeaking(false)
+        utterance.onerror = () => setIsSpeaking(false)
+
+        window.speechSynthesis.speak(utterance)
+      } catch (err) {
+        console.warn("TTS Error:", err)
+        setIsSpeaking(false)
+      }
     },
     [isMuted]
   )
 
-  // Toggle standard speech recognition
-  const toggleSpeechRecognition = () => {
-    if (!recognitionRef.current) return
+  const stopSpeaking = () => {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel()
+      setIsSpeaking(false)
+    }
+  }
+
+  // Toggle Microphone (STT)
+  const toggleSpeechRecognition = async () => {
+    if (!sttSupported || !recognitionRef.current) {
+      alert(
+        "Voice input is not supported in this browser. Please use Chrome, Edge, or Safari."
+      )
+      return
+    }
 
     if (isListening) {
       try {
         recognitionRef.current.stop()
-      } catch (e) {}
+      } catch {}
       setIsListening(false)
     } else {
+      stopSpeaking()
       try {
-        if (speechSynthRef.current) {
-          speechSynthRef.current.cancel()
-          setIsSpeaking(false)
+        // Check/warm microphone permission if getUserMedia is supported
+        if (typeof navigator !== "undefined" && navigator.mediaDevices?.getUserMedia) {
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+            stream.getTracks().forEach((track) => track.stop())
+          } catch (micErr) {
+            console.warn("Microphone access not granted or unavailable:", micErr)
+          }
         }
         recognitionRef.current.start()
-      } catch (e) {
-        console.error("Speech recognition start failed:", e)
-      }
-    }
-  }
-
-  // =========================================================================
-  // GEMINI LIVE REAL-TIME SPEECH-TO-SPEECH AUDIO PIPELINE
-  // =========================================================================
-  const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
-    let binary = ""
-    const bytes = new Uint8Array(buffer)
-    const len = bytes.byteLength
-    for (let i = 0; i < len; i++) {
-      binary += String.fromCharCode(bytes[i])
-    }
-    return btoa(binary)
-  }
-
-  const base64PcmToAudioBuffer = (
-    base64Pcm: string,
-    audioContext: AudioContext
-  ): AudioBuffer => {
-    const binary = atob(base64Pcm)
-    const len = binary.length
-    const bytes = new Uint8Array(len)
-    for (let i = 0; i < len; i++) {
-      bytes[i] = binary.charCodeAt(i)
-    }
-
-    const int16Array = new Int16Array(bytes.buffer)
-    const numSamples = int16Array.length
-    const audioBuffer = audioContext.createBuffer(1, numSamples, 24000)
-    const channelData = audioBuffer.getChannelData(0)
-
-    for (let i = 0; i < numSamples; i++) {
-      channelData[i] = int16Array[i] / 32768.0
-    }
-
-    return audioBuffer
-  }
-
-  const cleanupLiveCall = useCallback(() => {
-    if (wsRef.current) {
-      try {
-        wsRef.current.close()
-      } catch (e) {}
-      wsRef.current = null
-    }
-
-    if (micStreamRef.current) {
-      micStreamRef.current.getTracks().forEach((track) => track.stop())
-      micStreamRef.current = null
-    }
-
-    activeSourcesRef.current.forEach((src) => {
-      try {
-        src.stop()
-      } catch (e) {}
-    })
-    activeSourcesRef.current = []
-
-    if (micAudioContextRef.current) {
-      try {
-        micAudioContextRef.current.close()
-      } catch (e) {}
-      micAudioContextRef.current = null
-    }
-
-    if (playbackAudioContextRef.current) {
-      try {
-        playbackAudioContextRef.current.close()
-      } catch (e) {}
-      playbackAudioContextRef.current = null
-    }
-
-    if (animFrameRef.current) {
-      cancelAnimationFrame(animFrameRef.current)
-      animFrameRef.current = null
-    }
-
-    nextPlayTimeRef.current = 0
-    setInputVolume(0)
-    setOutputVolume(0)
-    setLiveState("idle")
-    setLiveErrorMessage(null)
-  }, [])
-
-  const startLiveCall = async () => {
-    setIsLiveMode(true)
-    setLiveState("connecting")
-    setLiveErrorMessage(null)
-    setLiveTranscript("")
-
-    // Stop any ongoing text-to-speech or listening
-    if (speechSynthRef.current) speechSynthRef.current.cancel()
-    if (recognitionRef.current && isListening) {
-      try {
-        recognitionRef.current.stop()
-      } catch (e) {}
-      setIsListening(false)
-    }
-
-    try {
-      // 1. Fetch ephemeral token from /api/session
-      const tokenRes = await fetch("/api/session", { method: "POST" })
-      if (!tokenRes.ok) throw new Error("Could not retrieve session token")
-      const { token } = await tokenRes.json()
-      if (!token) throw new Error("Invalid session token received")
-
-      // 2. Playback AudioContext (24kHz output)
-      const PlaybackCtx = window.AudioContext || (window as any).webkitAudioContext
-      const playbackCtx = new PlaybackCtx({ sampleRate: 24000 })
-      if (playbackCtx.state === "suspended") {
-        await playbackCtx.resume()
-      }
-      playbackAudioContextRef.current = playbackCtx
-      nextPlayTimeRef.current = playbackCtx.currentTime
-
-      // 3. Connect to Gemini Live WebSocket
-      const wsUrl = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key=${encodeURIComponent(
-        token
-      )}`
-      const ws = new WebSocket(wsUrl)
-      wsRef.current = ws
-
-      ws.onopen = async () => {
-        // Send initial setup frame
-        const setupFrame = {
-          setup: {
-            model: "models/gemini-2.0-flash-exp",
-            generationConfig: {
-              responseModalities: ["AUDIO"],
-              speechConfig: {
-                voiceConfig: {
-                  prebuiltVoiceConfig: {
-                    voiceName: liveVoice,
-                  },
-                },
-              },
-            },
-            systemInstruction: {
-              parts: [{ text: SYSTEM_PROMPT }],
-            },
-          },
+      } catch (err: any) {
+        if (err?.name !== "InvalidStateError") {
+          console.warn("Error starting speech recognition:", err)
         }
-
-        ws.send(JSON.stringify(setupFrame))
-
-        // 4. Initialize Microphone Input Audio Pipeline
-        try {
-          const micStream = await navigator.mediaDevices.getUserMedia({
-            audio: {
-              sampleRate: 16000,
-              channelCount: 1,
-              echoCancellation: true,
-              noiseSuppression: true,
-              autoGainControl: true,
-            },
-          })
-          micStreamRef.current = micStream
-
-          const MicCtx = window.AudioContext || (window as any).webkitAudioContext
-          const micCtx = new MicCtx({ sampleRate: 16000 })
-          if (micCtx.state === "suspended") {
-            await micCtx.resume()
-          }
-          micAudioContextRef.current = micCtx
-
-          await micCtx.audioWorklet.addModule("/audio-processor.js")
-          const workletNode = new AudioWorkletNode(micCtx, "audio-processor")
-          const sourceNode = micCtx.createMediaStreamSource(micStream)
-
-          // Volume meter
-          const analyser = micCtx.createAnalyser()
-          analyser.fftSize = 64
-          sourceNode.connect(analyser)
-          sourceNode.connect(workletNode)
-
-          const dataArray = new Uint8Array(analyser.frequencyBinCount)
-          const checkVolume = () => {
-            if (!micStreamRef.current) return
-            analyser.getByteFrequencyData(dataArray)
-            let sum = 0
-            for (let i = 0; i < dataArray.length; i++) {
-              sum += dataArray[i]
-            }
-            const avg = sum / dataArray.length
-            setInputVolume(Math.min(avg / 128, 1))
-            animFrameRef.current = requestAnimationFrame(checkVolume)
-          }
-          checkVolume()
-
-          // Send 16-bit PCM chunks to Gemini WebSocket
-          workletNode.port.onmessage = (event: MessageEvent) => {
-            if (
-              ws.readyState === WebSocket.OPEN &&
-              !liveMicMutedRef.current &&
-              event.data instanceof ArrayBuffer
-            ) {
-              const base64Data = arrayBufferToBase64(event.data)
-              const audioMessage = {
-                realtimeInput: {
-                  mediaChunks: [
-                    {
-                      mimeType: "audio/pcm;rate=16000",
-                      data: base64Data,
-                    },
-                  ],
-                },
-              }
-              ws.send(JSON.stringify(audioMessage))
-            }
-          }
-
-          setLiveState("listening")
-        } catch (micErr: any) {
-          console.error("Microphone access error:", micErr)
-          setLiveErrorMessage(
-            micErr.name === "NotAllowedError"
-              ? "Microphone access was denied. Please allow microphone permissions."
-              : "Unable to start audio input. Please check your microphone."
-          )
-          setLiveState("error")
-        }
+        setIsListening(false)
       }
-
-      // Handle server responses (model audio output & transcripts)
-      ws.onmessage = async (event: MessageEvent) => {
-        try {
-          let responseData = event.data
-          if (responseData instanceof Blob) {
-            responseData = await responseData.text()
-          }
-
-          const parsed = JSON.parse(responseData)
-
-          // 1. Check if model interrupted previous speech
-          if (parsed.serverContent?.interrupted) {
-            activeSourcesRef.current.forEach((src) => {
-              try {
-                src.stop()
-              } catch (e) {}
-            })
-            activeSourcesRef.current = []
-            if (playbackAudioContextRef.current) {
-              nextPlayTimeRef.current = playbackAudioContextRef.current.currentTime
-            }
-            setOutputVolume(0)
-            setLiveState("listening")
-            return
-          }
-
-          // 2. Check for model parts (audio & text)
-          const parts = parsed.serverContent?.modelTurn?.parts
-          if (Array.isArray(parts)) {
-            for (const part of parts) {
-              if (part.inlineData?.data) {
-                const base64Audio = part.inlineData.data
-                const ctx = playbackAudioContextRef.current
-                if (ctx) {
-                  const buffer = base64PcmToAudioBuffer(base64Audio, ctx)
-                  const source = ctx.createBufferSource()
-                  source.buffer = buffer
-
-                  const curTime = ctx.currentTime
-                  const startTime = Math.max(nextPlayTimeRef.current, curTime)
-                  source.start(startTime)
-                  nextPlayTimeRef.current = startTime + buffer.duration
-
-                  source.connect(ctx.destination)
-                  activeSourcesRef.current.push(source)
-                  setLiveState("speaking")
-                  setOutputVolume(0.85)
-
-                  source.onended = () => {
-                    const idx = activeSourcesRef.current.indexOf(source)
-                    if (idx > -1) activeSourcesRef.current.splice(idx, 1)
-                    if (activeSourcesRef.current.length === 0) {
-                      setOutputVolume(0)
-                      setLiveState("listening")
-                    }
-                  }
-                }
-              }
-
-              if (part.text) {
-                setLiveTranscript((prev) => prev + " " + part.text)
-              }
-            }
-          }
-
-          // 3. Check turn completion
-          if (parsed.serverContent?.turnComplete) {
-            if (activeSourcesRef.current.length === 0) {
-              setLiveState("listening")
-            }
-          }
-        } catch (msgErr) {
-          console.error("Error processing live websocket frame:", msgErr)
-        }
-      }
-
-      ws.onerror = (err) => {
-        console.error("Gemini Live WebSocket error:", err)
-        setLiveErrorMessage("Connection to Gemini Live was interrupted.")
-        setLiveState("error")
-      }
-
-      ws.onclose = () => {
-        if (liveState !== "error") {
-          setLiveState("idle")
-        }
-      }
-    } catch (err: any) {
-      console.error("Failed to start Gemini Live call:", err)
-      setLiveErrorMessage(err.message || "Failed to establish live session")
-      setLiveState("error")
     }
   }
 
-  const endLiveCall = () => {
-    cleanupLiveCall()
-    setIsLiveMode(false)
+  // Toggle Mute (TTS)
+  const toggleMute = () => {
+    if (!isMuted) {
+      stopSpeaking()
+      setIsMuted(true)
+    } else {
+      setIsMuted(false)
+    }
   }
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      cleanupLiveCall()
-    }
-  }, [cleanupLiveCall])
-
-  // Clear messages / Reset chat
+  // Clear chat
   const handleResetChat = () => {
-    if (speechSynthRef.current) {
-      speechSynthRef.current.cancel()
-      setIsSpeaking(false)
-    }
     if (abortControllerRef.current) {
       abortControllerRef.current.abort()
-      abortControllerRef.current = null
     }
-    cleanupLiveCall()
-    setIsLiveMode(false)
+    stopSpeaking()
     setMessages([])
-    setInput("")
     setIsLoading(false)
   }
 
-  // Feedback thumb actions
-  const handleLike = (id: string, liked: boolean) => {
+  // Close modal and reset conversation
+  const handleCloseAndResetChat = () => {
+    handleResetChat()
+    setIsOpen(false)
+  }
+
+  // Like / Dislike message
+  const handleFeedback = (id: string, liked: boolean) => {
     setMessages((prev) =>
-      prev.map((msg) =>
-        msg.id === id
-          ? { ...msg, liked: msg.liked === liked ? null : liked }
-          : msg
+      prev.map((m) =>
+        m.id === id ? { ...m, liked: m.liked === liked ? null : liked } : m
       )
     )
   }
 
-  // Copy response action
-  const handleCopy = (id: string, content: string) => {
-    navigator.clipboard.writeText(content)
+  // Copy message text
+  const handleCopyMessage = (id: string, text: string) => {
+    navigator.clipboard.writeText(text)
     setCopiedId(id)
     setTimeout(() => setCopiedId(null), 2000)
   }
 
-  // Send message handler (streaming POST /api/chat)
+  // Send message and stream response
   const handleSendMessage = async (textToSend?: string) => {
     const messageContent = (textToSend || input).trim()
     if (!messageContent || isLoading) return
 
-    if (speechSynthRef.current) {
-      speechSynthRef.current.cancel()
-      setIsSpeaking(false)
-    }
-
-    if (recognitionRef.current && isListening) {
+    stopSpeaking()
+    if (isListening && recognitionRef.current) {
       try {
         recognitionRef.current.stop()
-      } catch (e) {}
-      setIsListening(false)
+      } catch {}
     }
 
     const userMessage: Message = {
@@ -795,25 +528,25 @@ export function Chatbot() {
       createdAt: new Date(),
     }
 
+    const updatedMessages = [...messages, userMessage]
+    setMessages(updatedMessages)
+    setInput("")
+    setIsLoading(true)
+
     const assistantId = `assistant-${Date.now()}`
-    const placeholderAssistantMessage: Message = {
+    const assistantPlaceholder: Message = {
       id: assistantId,
       role: "assistant",
       content: "",
       createdAt: new Date(),
     }
 
-    const updatedMessages = [...messages, userMessage]
-    setMessages([...updatedMessages, placeholderAssistantMessage])
-    setInput("")
-    setIsLoading(true)
+    setMessages([...updatedMessages, assistantPlaceholder])
 
-    setTimeout(() => scrollToBottom(true), 100)
+    const abortController = new AbortController()
+    abortControllerRef.current = abortController
 
     try {
-      const abortController = new AbortController()
-      abortControllerRef.current = abortController
-
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -966,7 +699,7 @@ export function Chatbot() {
                 whileHover={{ opacity: 1, x: 0, scale: 1 }}
                 className="hidden sm:group-hover:flex absolute right-full mr-3 items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-950/90 text-zinc-200 text-xs font-medium shadow-2xl backdrop-blur-md whitespace-nowrap pointer-events-none transition-all duration-200"
               >
-                <span>Ask Shahid AI</span>
+                <span>Ask Shahid's AI assistant</span>
                 <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping" />
               </motion.div>
 
@@ -1002,6 +735,7 @@ export function Chatbot() {
 
                 {/* Core #151515 round button without border */}
                 <div className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#151515] flex items-center justify-center shadow-lg overflow-hidden">
+                  {/* Periodic Spin + Enlarge + Pause Animation */}
                   <motion.div
                     animate={{
                       rotate: [0, 180, 360, 360],
@@ -1043,7 +777,7 @@ export function Chatbot() {
               transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
               className="fixed inset-0 sm:relative pointer-events-auto w-full h-[100dvh] sm:w-[390px] sm:h-[590px] sm:max-h-[660px] flex flex-col rounded-none sm:rounded-[32px] bg-[#0f0f13] sm:bg-[#0f0f13]/95 backdrop-blur-2xl shadow-none sm:shadow-[0_25px_70px_-15px_rgba(0,0,0,0.85),0_0_50px_-10px_rgba(49,134,255,0.18)] overflow-hidden font-sans text-zinc-100"
             >
-              {/* Animated Gemini Ambient Light Aura */}
+              {/* Animated Gemini Ambient Light Aura (Subtle multi-color glow around the borderless frame) */}
               <div
                 className="absolute -inset-10 rounded-[45px] opacity-35 blur-3xl pointer-events-none animate-pulse"
                 style={{
@@ -1065,331 +799,163 @@ export function Chatbot() {
                       className="w-3.5 h-3.5 object-contain"
                     />
                   </div>
-                  <span className="text-xs font-medium text-zinc-300 tracking-wide font-jakarta">
-                    {isLiveMode ? "Gemini Live" : "Shahid AI"}
+                  <span className="text-xs font-medium text-zinc-300 tracking-wide">
+                    Shahid's AI assistant
                   </span>
-                  {isLiveMode && (
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                  {isSpeaking && (
+                    <span className="flex items-center gap-1 text-[11px] text-emerald-400 font-mono">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                      Speaking
+                    </span>
                   )}
                 </div>
 
-                {/* Right: Minimalist action icons */}
-                <div className="flex items-center gap-1.5 text-zinc-400">
-                  {isLiveMode ? (
-                    <>
-                      {/* Voice selector in live mode */}
-                      <select
-                        value={liveVoice}
-                        onChange={(e) => {
-                          setLiveVoice(e.target.value)
-                          cleanupLiveCall()
-                          setTimeout(() => startLiveCall(), 150)
-                        }}
-                        className="text-[11px] bg-[#181822] text-zinc-300 border border-white/10 rounded-full px-2 py-0.5 outline-none cursor-pointer hover:border-white/20 transition-colors"
-                      >
-                        {AVAILABLE_VOICES.map((v) => (
-                          <option key={v.name} value={v.name} className="bg-[#121216] text-white">
-                            {v.label}
-                          </option>
-                        ))}
-                      </select>
-
-                      {/* Switch back to Text Chat */}
-                      <button
-                        onClick={endLiveCall}
-                        title="Switch to Text Mode"
-                        className="w-7 h-7 rounded-full bg-[#1c1c22] hover:bg-[#282830] text-zinc-300 hover:text-white flex items-center justify-center transition-colors"
-                      >
-                        <MessageSquare size={13} />
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      {/* Mute/Unmute TTS Audio */}
-                      <button
-                        onClick={() => {
-                          setIsMuted(!isMuted)
-                          if (!isMuted && speechSynthRef.current) {
-                            speechSynthRef.current.cancel()
-                            setIsSpeaking(false)
-                          }
-                        }}
-                        title={isMuted ? "Unmute sound" : "Mute sound"}
-                        className={`w-7 h-7 rounded-full bg-[#1c1c22] hover:bg-[#282830] flex items-center justify-center transition-colors ${
-                          isMuted
-                            ? "text-zinc-500 hover:text-zinc-400"
-                            : "text-zinc-300 hover:text-white"
-                        }`}
-                      >
-                        {isMuted ? <VolumeX size={13} /> : <Volume2 size={13} />}
-                      </button>
-
-                      {/* New Chat (+) */}
-                      <button
-                        onClick={handleResetChat}
-                        title="New chat"
-                        className="w-7 h-7 rounded-full bg-[#1c1c22] hover:bg-[#282830] text-zinc-300 hover:text-white flex items-center justify-center transition-colors"
-                      >
-                        <Plus size={14} />
-                      </button>
-                    </>
-                  )}
-
-                  {/* Close (X) */}
+                {/* Right: Round Minimal Action Pills */}
+                <div className="flex items-center gap-1.5">
+                  {/* Voice Output Toggle */}
                   <button
-                    onClick={() => {
-                      if (isLiveMode) endLiveCall()
-                      setIsOpen(false)
-                    }}
+                    onClick={toggleMute}
+                    title={isMuted ? "Unmute Voice" : "Mute Voice"}
+                    className={`w-7 h-7 rounded-full transition-colors flex items-center justify-center ${
+                      isMuted
+                        ? "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/60"
+                        : "text-blue-400 bg-blue-500/10 hover:bg-blue-500/20"
+                    }`}
+                    aria-label={isMuted ? "Unmute Voice" : "Mute Voice"}
+                  >
+                    {isMuted ? <VolumeX size={13} /> : <Volume2 size={13} />}
+                  </button>
+
+                  {/* New Conversation (+) */}
+                  <button
+                    onClick={handleResetChat}
+                    title="New Conversation"
+                    className="w-7 h-7 rounded-full bg-zinc-800/60 hover:bg-zinc-700/70 text-zinc-400 hover:text-white transition-colors flex items-center justify-center"
+                    aria-label="New Conversation"
+                  >
+                    <Plus size={14} />
+                  </button>
+
+                  {/* Minimize / Down Arrow */}
+                  <button
+                    onClick={() => setIsOpen(false)}
+                    title="Minimize"
+                    className="w-7 h-7 rounded-full bg-zinc-800/60 hover:bg-zinc-700/70 text-zinc-400 hover:text-white transition-colors flex items-center justify-center"
+                    aria-label="Minimize"
+                  >
+                    <ChevronDown size={14} />
+                  </button>
+
+                  {/* Close & Reset Button (X) */}
+                  <button
+                    onClick={handleCloseAndResetChat}
                     title="Close"
-                    className="w-7 h-7 rounded-full bg-[#1c1c22] hover:bg-[#282830] text-zinc-300 hover:text-white flex items-center justify-center transition-colors"
+                    className="w-7 h-7 rounded-full bg-zinc-800/60 hover:bg-red-500/20 text-zinc-400 hover:text-red-400 transition-colors flex items-center justify-center"
+                    aria-label="Close and Reset"
                   >
                     <X size={13} />
                   </button>
                 </div>
               </div>
 
-              {/* ========================================================= */}
-              {/* BODY: GEMINI LIVE VIEW OR TEXT CHAT STREAM */}
-              {/* ========================================================= */}
-              {isLiveMode ? (
-                /* ===== GEMINI LIVE VIEW ===== */
-                <div className="relative flex-1 flex flex-col items-center justify-between p-6 z-10 select-none">
-                  {/* Visualizer Aura Orb */}
-                  <div className="relative w-40 h-40 my-auto flex items-center justify-center">
-                    <motion.div
-                      animate={{
-                        scale:
-                          liveState === "speaking"
-                            ? [1, 1.25 + outputVolume * 0.4, 1]
-                            : liveState === "listening"
-                            ? [1, 1.1 + inputVolume * 0.35, 1]
-                            : 1,
-                        opacity: liveState === "speaking" ? 0.85 : 0.45,
-                      }}
-                      transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
-                      className="absolute inset-0 rounded-full bg-gradient-to-tr from-[#3186FF]/35 via-[#14BB69]/25 to-[#FA4340]/30 blur-2xl pointer-events-none"
-                    />
-
-                    <motion.div
-                      animate={{
-                        scale:
-                          liveState === "speaking"
-                            ? [1, 1.12, 1]
-                            : liveState === "listening"
-                            ? [1, 1.06, 1]
-                            : 1,
-                        rotate: 360,
-                      }}
-                      transition={{
-                        scale: { repeat: Infinity, duration: 1.5, ease: "easeInOut" },
-                        rotate: { repeat: Infinity, duration: 16, ease: "linear" },
-                      }}
-                      className="w-28 h-28 rounded-full border border-white/20 bg-gradient-to-tr from-[#12121a] via-[#1a1a24] to-[#121218] flex items-center justify-center shadow-2xl relative z-10"
-                    >
-                      {liveState === "connecting" && (
-                        <Sparkles size={28} className="text-[#3186FF] animate-spin" />
-                      )}
-
-                      {liveState === "listening" && (
-                        <Mic
-                          size={28}
-                          className={`${
-                            liveMicMuted ? "text-red-400" : "text-emerald-400 animate-pulse"
-                          }`}
-                        />
-                      )}
-
-                      {liveState === "speaking" && (
-                        <div className="flex items-center gap-1">
-                          <span className="w-1.5 h-5 rounded-full bg-[#3186FF] animate-pulse" />
-                          <span className="w-1.5 h-8 rounded-full bg-[#14BB69] animate-pulse delay-75" />
-                          <span className="w-1.5 h-10 rounded-full bg-[#F6C013] animate-pulse delay-150" />
-                          <span className="w-1.5 h-7 rounded-full bg-[#FA4340] animate-pulse delay-200" />
-                          <span className="w-1.5 h-4 rounded-full bg-[#3186FF] animate-pulse delay-300" />
-                        </div>
-                      )}
-
-                      {liveState === "error" && (
-                        <PhoneOff size={28} className="text-red-400" />
-                      )}
-
-                      {liveState === "idle" && (
-                        <Sparkles size={28} className="text-zinc-400" />
-                      )}
-                    </motion.div>
-                  </div>
-
-                  {/* Status Headline */}
-                  <div className="text-center mb-4">
-                    <h3 className="text-base font-medium text-white font-jakarta">
-                      {liveState === "connecting" && "Connecting to Gemini Live..."}
-                      {liveState === "listening" &&
-                        (liveMicMuted ? "Microphone Muted" : "Listening to you...")}
-                      {liveState === "speaking" && "Shahid's AI is speaking..."}
-                      {liveState === "error" && "Connection Error"}
-                    </h3>
-
-                    <p className="text-xs text-zinc-400 mt-1 max-w-[260px] mx-auto">
-                      {liveState === "listening" &&
-                        "Speak naturally. Interrupt anytime — the AI stops instantly."}
-                      {liveState === "speaking" && "Speak or tap mute to interrupt."}
-                      {liveState === "connecting" && "Starting real-time speech pipeline..."}
-                      {liveErrorMessage && (
-                        <span className="text-red-400">{liveErrorMessage}</span>
-                      )}
-                    </p>
-                  </div>
-
-                  {/* Live Transcript Snippet */}
-                  {liveTranscript && (
-                    <div className="w-full mb-4 p-3 rounded-2xl bg-[#14141c] border border-white/5 max-h-24 overflow-y-auto text-left">
-                      <p className="text-xs text-zinc-300 leading-relaxed font-sans">
-                        {liveTranscript}
+              {/* Messages Content Stream */}
+              <div
+                id="chatbot-messages"
+                className="relative flex-1 overflow-y-auto overscroll-contain chatbot-scrollbar px-4 py-3 sm:px-5 sm:py-3 space-y-4 scroll-smooth z-10"
+              >
+                {/* Empty / Welcome State */}
+                {messages.length === 0 && (
+                  <div className="h-full flex flex-col justify-end space-y-4 pb-2">
+                    <div className="space-y-2">
+                      <h4 className="text-base font-medium text-white tracking-tight">
+                        Hello! Welcome to Shahid's Portfolio.
+                      </h4>
+                      <p className="text-[13.5px] text-zinc-400 leading-relaxed">
+                        I'm his AI assistant powered by Gemini. Ask me about his projects, skills, experience, or hiring him!
                       </p>
                     </div>
-                  )}
 
-                  {/* Live Controls Bar */}
-                  <div className="w-full flex items-center justify-center gap-4 pt-2">
-                    {/* Mute Button */}
-                    <button
-                      onClick={() => setLiveMicMuted(!liveMicMuted)}
-                      disabled={liveState === "connecting" || liveState === "error"}
-                      className={`p-3 rounded-full border transition-all ${
-                        liveMicMuted
-                          ? "bg-red-500/20 border-red-500/40 text-red-400 hover:bg-red-500/30"
-                          : "bg-[#181822] border-white/10 text-white hover:bg-white/10"
-                      }`}
-                      title={liveMicMuted ? "Unmute Microphone" : "Mute Microphone"}
-                    >
-                      {liveMicMuted ? <MicOff size={18} /> : <Mic size={18} />}
-                    </button>
-
-                    {/* End Live Call Button */}
-                    <button
-                      onClick={endLiveCall}
-                      className="p-3 rounded-full bg-red-600/90 text-white hover:bg-red-500 transition-colors shadow-lg shadow-red-600/30"
-                      title="End Live Voice Mode"
-                    >
-                      <PhoneOff size={18} />
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                /* ===== TEXT CHAT VIEW ===== */
-                <>
-                  {/* Messages Content Stream */}
-                  <div
-                    id="chatbot-messages"
-                    className="relative flex-1 overflow-y-auto overscroll-contain chatbot-scrollbar px-4 py-3 sm:px-5 sm:py-3 space-y-4 scroll-smooth z-10"
-                  >
-                    {/* Empty / Welcome State */}
-                    {messages.length === 0 && (
-                      <div className="h-full flex flex-col items-center justify-center text-center px-2 py-4 space-y-4">
-                        <div className="relative">
-                          <div className="w-14 h-14 rounded-full bg-[#181820] flex items-center justify-center shadow-lg border border-white/5">
-                            <Image
-                              src="/skills/gemini.svg"
-                              alt="Gemini AI"
-                              width={32}
-                              height={32}
-                              className="w-8 h-8 object-contain"
-                            />
-                          </div>
-                          <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-[#0f0f13] flex items-center justify-center">
-                            <Sparkles size={8} className="text-white" />
-                          </span>
-                        </div>
-
-                        <div className="space-y-1">
-                          <h4 className="text-[15px] font-semibold text-zinc-100 tracking-tight">
-                            Hi, I'm Shahid's AI Assistant
-                          </h4>
-                          <p className="text-xs text-zinc-400 max-w-[260px] leading-relaxed">
-                            Ask anything about my projects, tech stack, experience, or collaborate with me.
-                          </p>
-                        </div>
-
-                        {/* Quick Prompts */}
-                        <div className="w-full space-y-1.5 pt-2">
-                          <span className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider block mb-1">
-                            Suggested Questions
-                          </span>
-                          {INITIAL_SUGGESTIONS.map((suggestion, idx) => (
-                            <button
-                              key={idx}
-                              onClick={() => handleSendMessage(suggestion)}
-                              className="w-full text-left text-[12.5px] px-3.5 py-2 rounded-xl bg-[#181820]/90 hover:bg-[#20202a] text-zinc-300 hover:text-white border border-white/5 transition-all shadow-xs"
-                            >
-                              {suggestion}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Messages Flow */}
-                    {messages.map((message) => {
-                      const isUser = message.role === "user"
-
-                      return (
-                        <div
-                          key={message.id}
-                          className={`flex flex-col ${
-                            isUser ? "items-end" : "items-start"
-                          } space-y-1.5`}
+                    {/* Minimal Suggestion Chips */}
+                    <div className="flex flex-col gap-1.5 pt-1">
+                      {INITIAL_SUGGESTIONS.map((suggestion, i) => (
+                        <button
+                          key={i}
+                          onClick={() => handleSendMessage(suggestion)}
+                          className="text-left text-xs px-3.5 py-2.5 rounded-xl bg-zinc-900/60 hover:bg-zinc-800/80 text-zinc-300 hover:text-white transition-all flex items-center justify-between group"
                         >
-                          {/* Message Bubble */}
-                          <div
-                            className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-[14px] leading-relaxed transition-all ${
-                              isUser
-                                ? "bg-[#3186FF] text-white rounded-br-xs shadow-md shadow-blue-500/10"
-                                : "bg-[#181820] text-zinc-200 rounded-bl-xs border border-white/5"
-                            }`}
-                          >
-                            {isUser ? (
-                              <p className="whitespace-pre-wrap">{message.content}</p>
-                            ) : message.content ? (
-                              <MarkdownContent content={message.content} />
-                            ) : (
-                              <div className="flex items-center gap-1.5 py-1 text-zinc-400">
-                                <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" />
-                                <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce delay-100" />
-                                <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce delay-200" />
-                              </div>
-                            )}
-                          </div>
+                          <span className="truncate">{suggestion}</span>
+                          <Send
+                            size={12}
+                            className="text-zinc-600 group-hover:text-blue-400 opacity-0 group-hover:opacity-100 transition-all shrink-0 ml-2"
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-                          {/* Inline Feedback & Action Controls for Assistant Responses */}
-                          {!isUser && message.content && (
-                            <div className="flex items-center gap-2.5 px-1 py-0.5 select-none text-zinc-500">
+                {/* Message List */}
+                {messages.map((message) => {
+                  const isUser = message.role === "user"
+
+                  return (
+                    <div
+                      key={message.id}
+                      className={`flex flex-col ${
+                        isUser ? "items-end" : "items-start"
+                      } space-y-1.5`}
+                    >
+                      {/* User message: clean soft pill */}
+                      {isUser ? (
+                        <div className="bg-[#242429] text-zinc-100 rounded-2xl rounded-tr-xs px-4 py-2 text-[13.5px] max-w-[82%] shadow-xs leading-relaxed">
+                          <p className="whitespace-pre-wrap">{message.content}</p>
+                        </div>
+                      ) : (
+                        /* Assistant message: borderless natural text matching screenshot */
+                        <div className="w-full space-y-2 text-zinc-200 text-[14px]">
+                          {message.content ? (
+                            <MarkdownContent content={message.content} />
+                          ) : (
+                            <div className="flex items-center gap-1.5 py-1 text-zinc-400">
+                              <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" />
+                              <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce [animation-delay:0.2s]" />
+                              <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce [animation-delay:0.4s]" />
+                            </div>
+                          )}
+
+                          {/* Action Feedback Bar (ThumbsUp, ThumbsDown, Copy, Speaker) */}
+                          {message.content && (
+                            <div className="flex items-center gap-3 pt-1 text-zinc-400">
                               {/* Thumbs Up */}
                               <button
-                                onClick={() => handleLike(message.id, true)}
-                                title="Good response"
-                                className={`hover:text-zinc-200 transition-colors ${
-                                  message.liked === true ? "text-blue-400" : ""
+                                onClick={() => handleFeedback(message.id, true)}
+                                title="Helpful"
+                                className={`transition-colors hover:text-zinc-200 ${
+                                  message.liked === true
+                                    ? "text-blue-400"
+                                    : "text-zinc-500"
                                 }`}
                               >
-                                <ThumbsUp size={13} />
+                                <ThumbsUp size={14} className={message.liked === true ? "fill-current" : ""} />
                               </button>
 
                               {/* Thumbs Down */}
                               <button
-                                onClick={() => handleLike(message.id, false)}
-                                title="Bad response"
-                                className={`hover:text-zinc-200 transition-colors ${
-                                  message.liked === false ? "text-red-400" : ""
+                                onClick={() => handleFeedback(message.id, false)}
+                                title="Not helpful"
+                                className={`transition-colors hover:text-zinc-200 ${
+                                  message.liked === false
+                                    ? "text-red-400"
+                                    : "text-zinc-500"
                                 }`}
                               >
-                                <ThumbsDown size={13} />
+                                <ThumbsDown size={14} className={message.liked === false ? "fill-current" : ""} />
                               </button>
 
-                              {/* Copy message */}
+                              {/* Copy Message */}
                               <button
                                 onClick={() =>
-                                  handleCopy(message.id, message.content)
+                                  handleCopyMessage(message.id, message.content)
                                 }
                                 title="Copy response"
                                 className="text-zinc-500 hover:text-zinc-200 transition-colors"
@@ -1397,7 +963,7 @@ export function Chatbot() {
                                 {copiedId === message.id ? (
                                   <Check size={14} className="text-emerald-400" />
                                 ) : (
-                                  <Copy size={13} />
+                                  <Copy size={14} />
                                 )}
                               </button>
 
@@ -1412,119 +978,126 @@ export function Chatbot() {
                             </div>
                           )}
                         </div>
-                      )
-                    })}
-
-                    <div ref={messagesEndRef} />
-                  </div>
-
-                  {/* Bottom Input Area */}
-                  <div
-                    style={{
-                      paddingBottom:
-                        keyboardHeight > 0
-                          ? `${keyboardHeight + 6}px`
-                          : "max(env(safe-area-inset-bottom), 0.85rem)",
-                      transition: "padding-bottom 0.15s ease-out",
-                    }}
-                    className="relative px-4 pt-1 sm:px-5 sm:pb-3 select-none z-10"
-                  >
-                    {/* Listening Alert Pill */}
-                    {isListening && (
-                      <div className="mb-2 px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-between text-xs text-red-400 animate-pulse">
-                        <div className="flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-                          <span>Listening... Speak now</span>
-                        </div>
-                        <button
-                          onClick={toggleSpeechRecognition}
-                          className="underline text-[11px] font-medium text-red-300 hover:text-white"
-                        >
-                          Done
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Floating Rounded Input Capsule */}
-                    <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#18181d] shadow-inner focus-within:ring-1 focus-within:ring-blue-500/50 transition-all">
-                      <input
-                        ref={inputRef}
-                        id="chatbot-input"
-                        type="text"
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        onFocus={() => {
-                          setTimeout(() => scrollToBottom(true), 200)
-                        }}
-                        onKeyDown={handleKeyDown}
-                        placeholder={
-                          isListening ? "Listening..." : "Type a message..."
-                        }
-                        disabled={isLoading && !isListening}
-                        className="flex-1 bg-transparent text-zinc-100 placeholder-zinc-500 text-[16px] sm:text-[13.5px] focus:outline-none"
-                      />
-
-                      {/* Microphone STT Icon */}
-                      <button
-                        id="chatbot-mic-btn"
-                        onClick={toggleSpeechRecognition}
-                        disabled={isLoading}
-                        title={
-                          isListening ? "Stop listening" : "Speech-to-Text Voice"
-                        }
-                        className={`p-1.5 rounded-full transition-colors flex items-center justify-center ${
-                          isListening
-                            ? "text-red-400 animate-pulse"
-                            : "text-zinc-400 hover:text-white"
-                        }`}
-                        aria-label="Toggle Voice Input"
-                      >
-                        {isListening ? <MicOff size={17} /> : <Mic size={17} />}
-                      </button>
-
-                      {/* Black Circular Waveform (Gemini Live) / Send Button Pill */}
-                      {isLoading ? (
-                        <button
-                          onClick={handleStopGenerating}
-                          title="Stop generating"
-                          className="w-8 h-8 rounded-full bg-[#0a0a0d] hover:bg-black text-zinc-300 flex items-center justify-center transition-colors shadow-sm"
-                          aria-label="Stop Generating"
-                        >
-                          <Square size={12} className="fill-current text-zinc-400" />
-                        </button>
-                      ) : input.trim() ? (
-                        <button
-                          id="chatbot-send-btn"
-                          onClick={() => handleSendMessage()}
-                          title="Send message"
-                          className="w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center transition-all shadow-md shadow-blue-600/20 cursor-pointer"
-                          aria-label="Send Message"
-                        >
-                          <Send size={13} />
-                        </button>
-                      ) : (
-                        <button
-                          onClick={startLiveCall}
-                          title="Talk Live with Gemini AI"
-                          className="group relative w-8 h-8 rounded-full bg-[#0a0a0d] hover:bg-[#1a1a24] text-white flex items-center justify-center transition-all shadow-sm hover:scale-105"
-                          aria-label="Gemini Live Voice Assistant"
-                        >
-                          {/* Soft Gemini live indicator glow */}
-                          <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#14BB69] animate-ping" />
-                          <WaveformBars active={false} />
-                        </button>
                       )}
                     </div>
+                  )
+                })}
 
-                    {/* Subtle Centered Footer Note */}
-                    <div className="text-center mt-2 flex items-center justify-center gap-1.5">
-                      <span className="text-[10.5px] font-sans text-zinc-500 font-normal tracking-tight">
-                        Powered by Gemini Live & Flash
-                      </span>
-                    </div>
-                  </div>
-                </>
-              )}
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* Bottom Input Area matching screenshot layout */}
+              <div
+                style={{
+                  paddingBottom:
+                    keyboardHeight > 0
+                      ? `${keyboardHeight + 6}px`
+                      : "max(env(safe-area-inset-bottom), 0.85rem)",
+                  transition: "padding-bottom 0.15s ease-out",
+                }}
+                className="relative px-4 pt-1 sm:px-5 sm:pb-3 select-none z-10"
+              >
+                {/* Listening Alert Pill */}
+                <AnimatePresence>
+                  {isListening && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 6, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 4, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                      className="mb-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-red-500/20 via-rose-500/20 to-red-500/10 border border-red-500/30 flex items-center justify-between text-xs text-red-300 backdrop-blur-md shadow-lg shadow-red-500/10"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="relative flex h-2.5 w-2.5">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500" />
+                        </span>
+                        <span className="font-medium tracking-wide">Listening... Speak now</span>
+                      </div>
+                      <button
+                        onClick={toggleSpeechRecognition}
+                        className="px-2.5 py-0.5 rounded-full bg-red-500/30 hover:bg-red-500/50 text-[11px] font-semibold text-white transition-colors"
+                      >
+                        Done
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Floating Rounded Input Capsule */}
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#18181d] shadow-inner focus-within:ring-1 focus-within:ring-blue-500/50 transition-all">
+                  <input
+                    ref={inputRef}
+                    id="chatbot-input"
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onFocus={() => {
+                      setTimeout(() => scrollToBottom(true), 200)
+                    }}
+                    onKeyDown={handleKeyDown}
+                    placeholder={
+                      isListening ? "Listening..." : "Type a message..."
+                    }
+                    disabled={isLoading && !isListening}
+                    className="flex-1 bg-transparent text-zinc-100 placeholder-zinc-500 text-[16px] sm:text-[13.5px] focus:outline-none"
+                  />
+
+                  {/* Black Circular Waveform / Send Button Pill */}
+                  {isLoading ? (
+                    <button
+                      onClick={handleStopGenerating}
+                      title="Stop generating"
+                      className="w-8 h-8 rounded-full bg-[#0a0a0d] hover:bg-black text-zinc-300 flex items-center justify-center transition-colors shadow-sm"
+                      aria-label="Stop Generating"
+                    >
+                      <Square size={12} className="fill-current text-zinc-400" />
+                    </button>
+                  ) : input.trim() ? (
+                    <button
+                      id="chatbot-send-btn"
+                      onClick={() => handleSendMessage()}
+                      title="Send message"
+                      className="w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center transition-all shadow-md shadow-blue-600/20 cursor-pointer"
+                      aria-label="Send Message"
+                    >
+                      <Send size={13} />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={toggleSpeechRecognition}
+                      title={
+                        isListening
+                          ? "Stop listening"
+                          : isSpeaking
+                          ? "Speaking"
+                          : "Voice Assistant (Click to Speak)"
+                      }
+                      className={`w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-sm ${
+                        isListening
+                          ? "bg-red-500/25 ring-2 ring-red-500/70 scale-105"
+                          : isSpeaking
+                          ? "bg-emerald-500/25 ring-2 ring-emerald-500/70 scale-105"
+                          : "bg-[#0a0a0d] hover:bg-zinc-900 hover:scale-105"
+                      }`}
+                      aria-label="Voice Waveform"
+                    >
+                      <WaveformBars
+                        active={isListening || isSpeaking}
+                        isListening={isListening}
+                        isSpeaking={isSpeaking}
+                      />
+                    </button>
+                  )}
+                </div>
+
+                {/* Subtle Centered Footer Note */}
+                <div className="text-center mt-2">
+                  <span className="text-[10.5px] font-sans text-zinc-500 font-normal tracking-tight">
+                    Powered by Gemini 3.6 Flash
+                  </span>
+                </div>
+              </div>
             </motion.div>
           </div>
         )}
@@ -1532,3 +1105,5 @@ export function Chatbot() {
     </>
   )
 }
+
+export default Chatbot
