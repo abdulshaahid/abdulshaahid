@@ -78,6 +78,26 @@ const skillsData: SkillCategory[] = [
   },
 ]
 
+function SkillBadge({ skill }: { skill: SkillItem }) {
+  return (
+    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#131316] hover:bg-[#18181d] border border-zinc-800/90 hover:border-zinc-700 transition-all duration-150 cursor-default shrink-0 group select-none">
+      <div className="w-4 h-4 relative shrink-0 flex items-center justify-center">
+        <Image
+          src={skill.iconUrl}
+          alt={skill.name}
+          width={16}
+          height={16}
+          className="w-full h-full object-contain"
+          style={{ width: "auto", height: "auto" }}
+        />
+      </div>
+      <span className="text-xs sm:text-[13px] font-mono font-medium text-zinc-300 group-hover:text-white transition-colors whitespace-nowrap">
+        {skill.name}
+      </span>
+    </div>
+  )
+}
+
 export function Skills() {
   return (
     <section id="skills" className="relative scroll-mt-24 w-full">
@@ -95,45 +115,88 @@ export function Skills() {
 
         {/* Horizontal Categorized Rows */}
         <div className="divide-y divide-zinc-800/80">
-          {skillsData.map((category) => (
-            <div
-              key={category.num}
-              className="flex flex-col sm:flex-row items-start sm:items-center hover:bg-white/[0.015] transition-colors group/row"
-            >
-              {/* Left Column: Number + Category Title with dashed vertical divider */}
-              <div className="w-full sm:w-[200px] md:w-[230px] lg:w-[260px] shrink-0 px-6 sm:px-8 py-4 sm:py-5 flex items-center gap-3.5 sm:border-r sm:border-dashed border-zinc-800/80 self-stretch">
-                <span className="font-mono text-xs sm:text-[13px] text-zinc-500 font-semibold tracking-wider">
-                  {category.num}
-                </span>
-                <h3 className="font-bricolage text-sm sm:text-base font-semibold text-zinc-200 group-hover/row:text-white transition-colors">
-                  {category.title}
-                </h3>
-              </div>
+          {skillsData.map((category, categoryIndex) => {
+            const mid = Math.ceil(category.skills.length / 2)
+            const row1Skills = category.skills.slice(0, mid)
+            const row2Skills = category.skills.slice(mid)
 
-              {/* Right Column: Pill Badges */}
-              <div className="flex-1 px-6 sm:px-8 py-4 sm:py-5 flex flex-wrap items-center gap-2 sm:gap-2.5">
-                {category.skills.map((skill) => (
+            return (
+              <div
+                key={category.num}
+                className="flex flex-col sm:flex-row items-start sm:items-center hover:bg-white/[0.015] transition-colors group/row overflow-hidden"
+              >
+                {/* Left Column: Number + Category Title with dashed vertical divider */}
+                <div className="w-full sm:w-[200px] md:w-[230px] lg:w-[260px] shrink-0 px-6 sm:px-8 py-3.5 sm:py-5 flex items-center gap-3.5 sm:border-r sm:border-dashed border-zinc-800/80 self-stretch bg-[#09090b] z-10">
+                  <span className="font-mono text-xs sm:text-[13px] text-zinc-500 font-semibold tracking-wider">
+                    {category.num}
+                  </span>
+                  <h3 className="font-bricolage text-sm sm:text-base font-semibold text-zinc-200 group-hover/row:text-white transition-colors">
+                    {category.title}
+                  </h3>
+                </div>
+
+                {/* Desktop View: Single Continuous Rolling Marquee */}
+                <div className="hidden sm:block flex-1 w-full overflow-hidden py-4 sm:py-5 relative min-w-0 [mask-image:linear-gradient(to_right,transparent,black_20px,black_calc(100%-20px),transparent)]">
                   <div
-                    key={skill.name}
-                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#131316] hover:bg-[#18181d] border border-zinc-800/90 hover:border-zinc-700 transition-all duration-150 cursor-default group"
+                    className={`flex items-center gap-2 sm:gap-2.5 ${
+                      categoryIndex % 2 === 0
+                        ? "animate-skills-left"
+                        : "animate-skills-right"
+                    }`}
+                    style={{
+                      animationDuration: `${55 + categoryIndex * 4}s`,
+                    }}
                   >
-                    <div className="w-4 h-4 relative shrink-0 flex items-center justify-center">
-                      <Image
-                        src={skill.iconUrl}
-                        alt={skill.name}
-                        width={16}
-                        height={16}
-                        className="w-full h-full object-contain"
-                      />
-                    </div>
-                    <span className="text-xs sm:text-[13px] font-mono font-medium text-zinc-300 group-hover:text-white transition-colors whitespace-nowrap">
-                      {skill.name}
-                    </span>
+                    {[...Array(4)].flatMap((_, setIndex) =>
+                      category.skills.map((skill, skillIndex) => (
+                        <SkillBadge
+                          key={`desk-${category.num}-${setIndex}-${skill.name}-${skillIndex}`}
+                          skill={skill}
+                        />
+                      ))
+                    )}
                   </div>
-                ))}
+                </div>
+
+                {/* Mobile View: 2 Rolling Rows in each section */}
+                <div className="sm:hidden flex-1 w-full overflow-hidden py-3 space-y-2 relative min-w-0 [mask-image:linear-gradient(to_right,transparent,black_16px,black_calc(100%-16px),transparent)]">
+                  {/* Mobile Row 1 */}
+                  <div
+                    className="flex items-center gap-2 animate-skills-left"
+                    style={{
+                      animationDuration: `${42 + categoryIndex * 3}s`,
+                    }}
+                  >
+                    {[...Array(5)].flatMap((_, setIndex) =>
+                      row1Skills.map((skill, skillIndex) => (
+                        <SkillBadge
+                          key={`mob1-${category.num}-${setIndex}-${skill.name}-${skillIndex}`}
+                          skill={skill}
+                        />
+                      ))
+                    )}
+                  </div>
+
+                  {/* Mobile Row 2 */}
+                  <div
+                    className="flex items-center gap-2 animate-skills-right"
+                    style={{
+                      animationDuration: `${46 + categoryIndex * 3}s`,
+                    }}
+                  >
+                    {[...Array(5)].flatMap((_, setIndex) =>
+                      row2Skills.map((skill, skillIndex) => (
+                        <SkillBadge
+                          key={`mob2-${category.num}-${setIndex}-${skill.name}-${skillIndex}`}
+                          skill={skill}
+                        />
+                      ))
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
 
         {/* Bottom Specs  Bar */}

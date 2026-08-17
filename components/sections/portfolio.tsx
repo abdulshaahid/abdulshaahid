@@ -260,24 +260,24 @@ export function Portfolio() {
           </p>
         </div>
 
-        {/* 2-Column Grid on Desktop with Video on Left & Text on Right in Each Card */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 relative">
+        {/* Grid: 1 Column on Mobile, iPad, and iPad Pro (< xl), 2 Columns on Desktop (xl+) */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 relative">
           {projects.map((project, index) => {
             const isLeftCol = index % 2 === 0
 
             return (
               <article
                 key={project.id}
-                className={`relative flex flex-col sm:flex-row items-start sm:items-center gap-5 p-6 sm:p-7 hover:bg-white/[0.015] transition-colors duration-150 border-b border-dashed border-zinc-800/90 group ${
-                  isLeftCol ? "lg:border-r border-dashed border-zinc-800/90" : ""
+                className={`relative flex flex-col sm:flex-row items-start sm:items-center gap-5 p-6 sm:p-7 md:p-8 hover:bg-white/[0.015] transition-colors duration-150 border-b border-dashed border-zinc-800/90 group ${
+                  isLeftCol ? "xl:border-r border-dashed border-zinc-800/90" : ""
                 }`}
               >
-                {/* Crosshair Markers: Render top-left (hidden on lg for right column to avoid duplicate center marker) and top-right */}
-                <CrosshairMarker className={`top-0 left-0 ${!isLeftCol ? "lg:hidden" : ""}`} />
+                {/* Crosshair Markers: Render top-left (hidden on xl for right column to avoid duplicate center marker) and top-right */}
+                <CrosshairMarker className={`top-0 left-0 ${!isLeftCol ? "xl:hidden" : ""}`} />
                 <CrosshairMarker className="top-0 left-full" />
 
                 {/* Left Side: 16:9 Video / Image Preview */}
-                <div className="relative aspect-video w-full sm:w-[200px] md:w-[220px] lg:w-[210px] xl:w-[240px] shrink-0 overflow-hidden rounded-xl bg-zinc-950 shadow-lg shadow-black/60 group-hover:shadow-xl group-hover:shadow-black/80 transition-shadow">
+                <div className="relative aspect-video w-full sm:w-[220px] md:w-[250px] lg:w-[280px] xl:w-[240px] shrink-0 overflow-hidden rounded-xl bg-zinc-950 shadow-lg shadow-black/60 group-hover:shadow-xl group-hover:shadow-black/80 transition-shadow">
                   {project.videoUrl ? (
                     <ProjectVideo src={project.videoUrl} />
                   ) : project.imageUrl ? (
@@ -345,11 +345,9 @@ export function Portfolio() {
                             className="inline-flex items-center gap-1.5 rounded-full bg-zinc-900 border border-zinc-800/80 px-2.5 py-1 text-[11px] font-mono text-zinc-300 leading-none hover:border-zinc-700 transition-colors"
                           >
                             {iconUrl && (
-                              <Image
+                              <img
                                 src={iconUrl}
-                                alt={`${tag} icon`}
-                                width={12}
-                                height={12}
+                                alt=""
                                 className="w-3 h-3 object-contain shrink-0"
                               />
                             )}
@@ -392,10 +390,9 @@ export function Portfolio() {
           })}
 
           {/* Bottom center intersection crosshair for desktop 2-column divider */}
-          <CrosshairMarker className="hidden lg:flex top-full left-1/2" />
+          <CrosshairMarker className="hidden xl:flex top-full left-1/2" />
         </div>
       </div>
     </section>
   )
 }
-

@@ -123,3 +123,41 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes marquee-scroll-left {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes marquee-scroll-right {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.animate-skills-left {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+  animation: marquee-scroll-left 35s linear infinite;
+}
+
+.animate-skills-right {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+  animation: marquee-scroll-right 35s linear infinite;
+}
+
+.animate-skills-left:hover,
+.animate-skills-right:hover {
+  animation-play-state: paused;
+}
+
