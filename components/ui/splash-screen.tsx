@@ -117,7 +117,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
         await Promise.all([
           fontsReady.then(() => bumpProgress(0.3)),
           preloadImage("/head.webp").then(() => bumpProgress(0.55)),
-          preloadImage("/me.png").then(() => bumpProgress(0.8)),
+          preloadImage("/me.webp").then(() => bumpProgress(0.8)),
           Promise.all(shapeSrcs.map(preloadImage)).then(() => bumpProgress(0.92)),
           windowLoaded.then(() => bumpProgress(0.95)),
         ]);

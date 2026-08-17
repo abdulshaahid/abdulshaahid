@@ -173,7 +173,7 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
       <section
         id="home"
         aria-label="Hero"
-        className="relative w-full min-h-[calc(100svh-1rem)] md:portrait:min-h-0 lg:portrait:min-h-0 lg:landscape:min-h-[calc(100svh-1rem)] text-white flex flex-col justify-start overflow-hidden pt-28 sm:pt-32 md:pt-16 pb-12 px-4 sm:px-6 md:px-12 lg:px-16 select-none rounded-[24px] sm:rounded-[32px] md:rounded-[36px] lg:rounded-[40px] shadow-2xl bg-black z-10"
+        className="relative w-full min-h-[100dvh] md:portrait:min-h-0 lg:portrait:min-h-0 lg:landscape:min-h-[calc(100vh-1rem)] text-white flex flex-col justify-start overflow-hidden pt-28 sm:pt-32 md:pt-16 pb-12 md:portrait:pb-20 lg:portrait:pb-24 px-4 sm:px-6 md:px-12 lg:px-16 select-none rounded-[24px] sm:rounded-[32px] md:rounded-[36px] lg:rounded-[40px] shadow-2xl bg-black z-10"
       >
         {/* ===== GRAINIENT WEBGL ANIMATED BACKGROUND (HARDWARE OPTIMIZED) ===== */}
         <div className="absolute inset-0 h-full w-full pointer-events-none -z-10 opacity-40">

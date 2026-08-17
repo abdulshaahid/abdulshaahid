@@ -1,7 +1,6 @@
 "use client"
 
 import React, { useEffect, useRef, useState, useCallback } from "react"
-import Image from "next/image"
 
 interface ParticleImageProps {
   src: string
@@ -25,10 +24,11 @@ export function ParticleImage({
   src,
   alt = "Portrait",
   className = "",
-  priority = true,
 }: ParticleImageProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const imgCacheRef = useRef<HTMLImageElement | null>(null)
+  const lastWidthRef = useRef<number>(0)
   const [isLoaded, setIsLoaded] = useState(false)
 
   const stateRef = useRef<{
@@ -111,13 +111,13 @@ export function ParticleImage({
           // 1. Draw pristine full-resolution original photo
           ctx.drawImage(baseCanvas, 0, 0, width, height)
 
-          // 2. If particles  are active, cleanly dissolve the disturbed area and render flying particles
+          // 2. If particles are active, cleanly dissolve the disturbed area and render flying particles
           if (activeIndices.length > 0) {
             const spring = 0.24
             const damping = 0.74
             const stillActive: number[] = []
 
-            // Smooth clean radial eraser under the cursor & active clusters (Zero jagged silhouette lines!)
+            // Smooth clean radial eraser under the cursor & active clusters
             ctx.globalCompositeOperation = "destination-out"
 
             if (mouse.isInteracting && mouse.x > -100) {
@@ -216,156 +216,164 @@ export function ParticleImage({
     state.animId = requestAnimationFrame(loop)
   }, [])
 
-  // Initialize and sample the image
-  const initCanvas = useCallback(() => {
+  // Build canvas and physics grid from preloaded image
+  const buildFromImage = useCallback((img: HTMLImageElement) => {
     const container = containerRef.current
     const canvas = canvasRef.current
     if (!container || !canvas) return
 
-    // Clear previous inline styles to re-measure cleanly on resize/rotation
-    canvas.style.width = ""
-    canvas.style.height = ""
-
     const rect = container.getBoundingClientRect()
     if (rect.width === 0 || rect.height === 0) return
 
-    const isMobile = window.innerWidth < 640 || "ontouchstart" in window
-    const dpr = Math.min(window.devicePixelRatio || 1, 2.5)
+    const isMobile = typeof window !== "undefined" && (window.innerWidth < 640 || "ontouchstart" in window)
+    const dpr = Math.min(typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1, 2.5)
     stateRef.current.dpr = dpr
+
+    const imgAspect = img.naturalWidth / img.naturalHeight
+    let renderWidth = rect.width
+    let renderHeight = rect.width / imgAspect
+
+    if (renderHeight > rect.height) {
+      renderHeight = rect.height
+      renderWidth = rect.height * imgAspect
+    }
+
+    stateRef.current.width = renderWidth
+    stateRef.current.height = renderHeight
+
+    canvas.width = Math.floor(renderWidth * dpr)
+    canvas.height = Math.floor(renderHeight * dpr)
+    canvas.style.width = `${renderWidth}px`
+    canvas.style.height = `${renderHeight}px`
+
+    // 1. Pristine High-Resolution Base Canvas
+    const baseCanvas = document.createElement("canvas")
+    baseCanvas.width = Math.floor(renderWidth * dpr)
+    baseCanvas.height = Math.floor(renderHeight * dpr)
+    const baseCtx = baseCanvas.getContext("2d")
+    if (!baseCtx) return
+
+    baseCtx.imageSmoothingEnabled = true
+    baseCtx.imageSmoothingQuality = "high"
+    baseCtx.scale(dpr, dpr)
+    baseCtx.drawImage(img, 0, 0, renderWidth, renderHeight)
+
+    // Soft bottom gradient fade mask
+    baseCtx.globalCompositeOperation = "destination-in"
+    const fadeGrad = baseCtx.createLinearGradient(0, 0, 0, renderHeight)
+    fadeGrad.addColorStop(0, "black")
+    fadeGrad.addColorStop(0.68, "black")
+    fadeGrad.addColorStop(1.0, "transparent")
+    baseCtx.fillStyle = fadeGrad
+    baseCtx.fillRect(0, 0, renderWidth, renderHeight)
+    baseCtx.globalCompositeOperation = "source-over"
+
+    stateRef.current.baseCanvas = baseCanvas
+
+    // 2. Sample pixel data for particle physics grid
+    const sampleCanvas = document.createElement("canvas")
+    sampleCanvas.width = Math.floor(renderWidth)
+    sampleCanvas.height = Math.floor(renderHeight)
+    const sampleCtx = sampleCanvas.getContext("2d", { willReadFrequently: true })
+    if (!sampleCtx) return
+
+    sampleCtx.imageSmoothingEnabled = true
+    sampleCtx.imageSmoothingQuality = "high"
+    sampleCtx.drawImage(img, 0, 0, renderWidth, renderHeight)
+    const imgData = sampleCtx.getImageData(0, 0, renderWidth, renderHeight)
+    const data = imgData.data
+
+    const gridStep = isMobile ? 2.0 : 2.0
+    const pSize = Math.max(gridStep * 1.35, 2.4)
+
+    const cols = Math.ceil(renderWidth / gridStep)
+    const rows = Math.ceil(renderHeight / gridStep)
+    stateRef.current.particleGrid = new Uint8Array(cols * rows)
+
+    const cellSize = 30
+    const gridBucketCols = Math.ceil(renderWidth / cellSize)
+    const gridBucketRows = Math.ceil(renderHeight / cellSize)
+    const buckets: number[][] = Array.from({ length: gridBucketCols * gridBucketRows }, () => [])
+
+    const particles: Particle[] = []
+
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const x = c * gridStep
+        const y = r * gridStep
+        const px = Math.min(Math.floor(x), renderWidth - 1)
+        const py = Math.min(Math.floor(y), renderHeight - 1)
+        const idx = (py * Math.floor(renderWidth) + px) * 4
+
+        const a = data[idx + 3]
+        if (a > 30) {
+          const yNorm = y / renderHeight
+          let fadeA = 1.0
+          if (yNorm > 0.68) {
+            fadeA = Math.max(0, 1.0 - (yNorm - 0.68) / 0.32)
+          }
+
+          if (fadeA <= 0.05) continue
+
+          const red = data[idx]
+          const green = data[idx + 1]
+          const blue = data[idx + 2]
+
+          const pIndex = particles.length
+          particles.push({
+            ox: x,
+            oy: y,
+            cx: x,
+            cy: y,
+            vx: 0,
+            vy: 0,
+            color: `rgb(${red},${green},${blue})`,
+            size: pSize,
+          })
+
+          const bc = Math.min(Math.floor(x / cellSize), gridBucketCols - 1)
+          const br = Math.min(Math.floor(y / cellSize), gridBucketRows - 1)
+          buckets[br * gridBucketCols + bc].push(pIndex)
+        }
+      }
+    }
+
+    stateRef.current.particles = particles
+    stateRef.current.activeIndices = []
+    stateRef.current.spatialGrid = {
+      cellSize,
+      cols: gridBucketCols,
+      rows: gridBucketRows,
+      buckets,
+    }
+
+    // Initial clean draw of the pristine photo
+    const ctx = canvas.getContext("2d")
+    if (ctx) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      ctx.drawImage(baseCanvas, 0, 0, canvas.width, canvas.height)
+    }
+
+    lastWidthRef.current = rect.width
+    setIsLoaded(true)
+  }, [])
+
+  // Initialize and sample the image
+  const initCanvas = useCallback(() => {
+    if (imgCacheRef.current && imgCacheRef.current.complete) {
+      buildFromImage(imgCacheRef.current)
+      return
+    }
 
     const img = new window.Image()
     img.crossOrigin = "anonymous"
     img.src = src
 
     img.onload = () => {
-      const imgAspect = img.naturalWidth / img.naturalHeight
-      let renderWidth = rect.width
-      let renderHeight = rect.width / imgAspect
-
-      if (renderHeight > rect.height) {
-        renderHeight = rect.height
-        renderWidth = rect.height * imgAspect
-      }
-
-      stateRef.current.width = renderWidth
-      stateRef.current.height = renderHeight
-
-      canvas.width = Math.floor(renderWidth * dpr)
-      canvas.height = Math.floor(renderHeight * dpr)
-      canvas.style.width = `${renderWidth}px`
-      canvas.style.height = `${renderHeight}px`
-
-      // 1. Pristine High-Resolution Base Canvas
-      const baseCanvas = document.createElement("canvas")
-      baseCanvas.width = Math.floor(renderWidth * dpr)
-      baseCanvas.height = Math.floor(renderHeight * dpr)
-      const baseCtx = baseCanvas.getContext("2d")
-      if (!baseCtx) return
-
-      baseCtx.imageSmoothingEnabled = true
-      baseCtx.imageSmoothingQuality = "high"
-      baseCtx.scale(dpr, dpr)
-      baseCtx.drawImage(img, 0, 0, renderWidth, renderHeight)
-
-      // Soft bottom gradient fade mask
-      baseCtx.globalCompositeOperation = "destination-in"
-      const fadeGrad = baseCtx.createLinearGradient(0, 0, 0, renderHeight)
-      fadeGrad.addColorStop(0, "black")
-      fadeGrad.addColorStop(0.65, "black")
-      fadeGrad.addColorStop(1.0, "transparent")
-      baseCtx.fillStyle = fadeGrad
-      baseCtx.fillRect(0, 0, renderWidth, renderHeight)
-      baseCtx.globalCompositeOperation = "source-over"
-
-      stateRef.current.baseCanvas = baseCanvas
-
-      // 2. Sample pixel data for particle physics grid
-      const sampleCanvas = document.createElement("canvas")
-      sampleCanvas.width = Math.floor(renderWidth)
-      sampleCanvas.height = Math.floor(renderHeight)
-      const sampleCtx = sampleCanvas.getContext("2d", { willReadFrequently: true })
-      if (!sampleCtx) return
-
-      sampleCtx.imageSmoothingEnabled = true
-      sampleCtx.imageSmoothingQuality = "high"
-      sampleCtx.drawImage(img, 0, 0, renderWidth, renderHeight)
-      const imgData = sampleCtx.getImageData(0, 0, renderWidth, renderHeight)
-      const data = imgData.data
-
-      const gridStep = isMobile ? 1.8 : 2.0
-      const pSize = Math.max(gridStep * 1.35, 2.4)
-
-      const cols = Math.ceil(renderWidth / gridStep)
-      const rows = Math.ceil(renderHeight / gridStep)
-      stateRef.current.particleGrid = new Uint8Array(cols * rows)
-
-      const cellSize = 30
-      const gridBucketCols = Math.ceil(renderWidth / cellSize)
-      const gridBucketRows = Math.ceil(renderHeight / cellSize)
-      const buckets: number[][] = Array.from({ length: gridBucketCols * gridBucketRows }, () => [])
-
-      const particles: Particle[] = []
-
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          const x = c * gridStep
-          const y = r * gridStep
-          const px = Math.min(Math.floor(x), renderWidth - 1)
-          const py = Math.min(Math.floor(y), renderHeight - 1)
-          const idx = (py * Math.floor(renderWidth) + px) * 4
-
-          const a = data[idx + 3]
-          if (a > 30) {
-            const yNorm = y / renderHeight
-            let fadeA = 1.0
-            if (yNorm > 0.65) {
-              fadeA = Math.max(0, 1.0 - (yNorm - 0.65) / 0.35)
-            }
-
-            if (fadeA <= 0.05) continue
-
-            const red = data[idx]
-            const green = data[idx + 1]
-            const blue = data[idx + 2]
-
-            const pIndex = particles.length
-            particles.push({
-              ox: x,
-              oy: y,
-              cx: x,
-              cy: y,
-              vx: 0,
-              vy: 0,
-              color: `rgb(${red},${green},${blue})`,
-              size: pSize,
-            })
-
-            const bc = Math.min(Math.floor(x / cellSize), gridBucketCols - 1)
-            const br = Math.min(Math.floor(y / cellSize), gridBucketRows - 1)
-            buckets[br * gridBucketCols + bc].push(pIndex)
-          }
-        }
-      }
-
-      stateRef.current.particles = particles
-      stateRef.current.activeIndices = []
-      stateRef.current.spatialGrid = {
-        cellSize,
-        cols: gridBucketCols,
-        rows: gridBucketRows,
-        buckets,
-      }
-
-      // Initial clean draw of the pristine photo
-      const ctx = canvas.getContext("2d")
-      if (ctx) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
-        ctx.drawImage(baseCanvas, 0, 0, canvas.width, canvas.height)
-      }
-
-      setIsLoaded(true)
+      imgCacheRef.current = img
+      buildFromImage(img)
     }
-  }, [src])
+  }, [src, buildFromImage])
 
   useEffect(() => {
     initCanvas()
@@ -520,35 +528,28 @@ export function ParticleImage({
     }
   }, [handleInteractionAt, handleInteractionEnd])
 
-  // Resize & Orientation Listener using ResizeObserver + window events
+  // Resize & Orientation Listener - ONLY trigger when container width meaningfully changes
   useEffect(() => {
     let timer: NodeJS.Timeout
     const handleResize = () => {
       clearTimeout(timer)
       timer = setTimeout(() => {
-        initCanvas()
-      }, 80)
-    }
-
-    const parent = containerRef.current?.parentElement || containerRef.current
-    let resizeObserver: ResizeObserver | null = null
-
-    if (parent && typeof ResizeObserver !== "undefined") {
-      resizeObserver = new ResizeObserver(() => {
-        handleResize()
-      })
-      resizeObserver.observe(parent)
+        if (!containerRef.current) return
+        const newWidth = containerRef.current.getBoundingClientRect().width
+        // Ignore mobile browser toolbar collapse height changes (only react if width changed by > 5px)
+        if (Math.abs(newWidth - lastWidthRef.current) > 5) {
+          initCanvas()
+        }
+      }, 100)
     }
 
     window.addEventListener("resize", handleResize, { passive: true })
     window.addEventListener("orientationchange", () => {
-      setTimeout(initCanvas, 50)
-      setTimeout(initCanvas, 250)
+      setTimeout(initCanvas, 100)
     }, { passive: true })
 
     return () => {
       clearTimeout(timer)
-      if (resizeObserver) resizeObserver.disconnect()
       window.removeEventListener("resize", handleResize)
     }
   }, [initCanvas])
@@ -581,26 +582,31 @@ export function ParticleImage({
       onPointerLeave={handleInteractionEnd}
       onPointerDown={(e) => handleInteractionAt(e.clientX, e.clientY)}
       onPointerUp={handleInteractionEnd}
-      className={`relative w-full h-full flex justify-center items-end select-none cursor-crosshair ${className}`}
+      className={`relative w-full h-full flex justify-center items-end select-none cursor-crosshair overflow-hidden ${className}`}
       style={{ touchAction: "none" }}
     >
       {/* High-Resolution Dynamic Canvas */}
       <canvas
         ref={canvasRef}
-        className={`transition-opacity duration-700 ease-out pointer-events-auto ${
+        style={{
+          maxWidth: "100%",
+          maxHeight: "100%",
+          objectFit: "contain",
+        }}
+        className={`max-w-full max-h-full object-contain pointer-events-auto block transition-opacity duration-300 ${
           isLoaded ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
       />
 
-      {/* Fallback while loading */}
+      {/* Instant Fallback while loading */}
       {!isLoaded && (
         <img
           src={src}
           alt={alt}
-          className="w-full h-auto object-contain transition-opacity duration-500"
+          className="w-full h-full object-contain pointer-events-none"
           style={{
-            maskImage: "linear-gradient(to bottom, black 65%, transparent 100%)",
-            WebkitMaskImage: "linear-gradient(to bottom, black 65%, transparent 100%)",
+            maskImage: "linear-gradient(to bottom, black 68%, transparent 100%)",
+            WebkitMaskImage: "linear-gradient(to bottom, black 68%, transparent 100%)",
           }}
         />
       )}

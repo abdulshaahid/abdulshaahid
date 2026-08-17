@@ -182,7 +182,7 @@ export function Chatbot() {
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [sttSupported, setSttSupported] = useState(true)
-  const [keyboardOffset, setKeyboardOffset] = useState(0)
+  const [keyboardHeight, setKeyboardHeight] = useState(0)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -200,18 +200,43 @@ export function Chatbot() {
     }
   }, [])
 
-  // Listen to visualViewport for mobile virtual keyboard open/close
+  // Lock background scroll on mobile and desktop when chat is open
+  useEffect(() => {
+    if (typeof window === "undefined") return
+
+    if (isOpen) {
+      const scrollY = window.scrollY
+      document.body.style.position = "fixed"
+      document.body.style.top = `-${scrollY}px`
+      document.body.style.width = "100%"
+      document.body.style.overflow = "hidden"
+
+      return () => {
+        document.body.style.position = ""
+        document.body.style.top = ""
+        document.body.style.width = ""
+        document.body.style.overflow = ""
+        window.scrollTo(0, scrollY)
+      }
+    }
+  }, [isOpen])
+
+  // Track virtual keyboard height on mobile to raise ONLY the input box
   useEffect(() => {
     if (typeof window === "undefined" || !window.visualViewport) return
 
     const handleViewportChange = () => {
       if (!window.visualViewport) return
-      const windowHeight = window.innerHeight
-      const visualHeight = window.visualViewport.height
-      const offset = Math.max(0, windowHeight - visualHeight)
-      setKeyboardOffset(offset)
-      if (offset > 0) {
-        setTimeout(() => scrollToBottom(true), 150)
+      if (window.innerWidth < 640) {
+        const winHeight = window.innerHeight
+        const visualHeight = window.visualViewport.height
+        const diff = Math.max(0, winHeight - visualHeight)
+        setKeyboardHeight(diff > 80 ? diff : 0)
+        if (diff > 80) {
+          setTimeout(() => scrollToBottom(true), 150)
+        }
+      } else {
+        setKeyboardHeight(0)
       }
     }
 
@@ -689,20 +714,14 @@ export function Chatbot() {
       {/* Redesigned Clean, Borderless Dark Chat Window Modal with Gemini Ambient Lights */}
       <AnimatePresence>
         {isOpen && (
-          <div
-            style={{
-              bottom: keyboardOffset > 0 ? `${keyboardOffset + 12}px` : undefined,
-              transition: "bottom 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
-            }}
-            className="fixed inset-x-3 bottom-3 sm:inset-x-auto sm:right-6 sm:bottom-6 z-50 flex items-center justify-center pointer-events-none"
-          >
+          <div className="fixed inset-0 z-50 pointer-events-none sm:inset-auto sm:right-6 sm:bottom-6 sm:w-[390px]">
             <motion.div
               id="chatbot-window"
-              initial={{ opacity: 0, y: 25, scale: 0.96 }}
+              initial={{ opacity: 0, y: 15, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 20, scale: 0.96 }}
-              transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
-              className="relative pointer-events-auto sm:w-[390px] h-[75dvh] sm:h-[590px] max-h-[calc(100dvh-1.5rem)] sm:max-h-[660px] flex flex-col rounded-[28px] sm:rounded-[32px] bg-[#0f0f13]/95 backdrop-blur-2xl shadow-[0_25px_70px_-15px_rgba(0,0,0,0.85),0_0_50px_-10px_rgba(49,134,255,0.18)] overflow-hidden font-sans text-zinc-100"
+              exit={{ opacity: 0, y: 15, scale: 0.98 }}
+              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+              className="fixed inset-0 sm:relative pointer-events-auto w-full h-[100dvh] sm:w-[390px] sm:h-[590px] sm:max-h-[660px] flex flex-col rounded-none sm:rounded-[32px] bg-[#0f0f13] sm:bg-[#0f0f13]/95 backdrop-blur-2xl shadow-none sm:shadow-[0_25px_70px_-15px_rgba(0,0,0,0.85),0_0_50px_-10px_rgba(49,134,255,0.18)] overflow-hidden font-sans text-zinc-100"
             >
               {/* Animated Gemini Ambient Light Aura (Subtle multi-color glow around the borderless frame) */}
               <div
@@ -714,7 +733,7 @@ export function Chatbot() {
               />
 
               {/* Top Minimalist Header */}
-              <div className="relative px-5 pt-4 pb-2 flex items-center justify-between select-none z-10">
+              <div className="relative px-4 pt-[max(env(safe-area-inset-top),1rem)] pb-2 sm:px-5 sm:pt-4 sm:pb-2 flex items-center justify-between select-none z-10">
                 {/* Left: Subtle branding */}
                 <div className="flex items-center gap-2">
                   <div className="w-6 h-6 rounded-full bg-[#1c1c22] flex items-center justify-center shadow-xs">
@@ -788,7 +807,7 @@ export function Chatbot() {
               {/* Messages Content Stream */}
               <div
                 id="chatbot-messages"
-                className="relative flex-1 overflow-y-auto chatbot-scrollbar px-5 py-3 space-y-4 scroll-smooth z-10"
+                className="relative flex-1 overflow-y-auto overscroll-contain chatbot-scrollbar px-4 py-3 sm:px-5 sm:py-3 space-y-4 scroll-smooth z-10"
               >
                 {/* Empty / Welcome State */}
                 {messages.length === 0 && (
@@ -914,7 +933,16 @@ export function Chatbot() {
               </div>
 
               {/* Bottom Input Area matching screenshot layout */}
-              <div className="relative px-5 pt-1 pb-3 select-none z-10">
+              <div
+                style={{
+                  paddingBottom:
+                    keyboardHeight > 0
+                      ? `${keyboardHeight + 6}px`
+                      : "max(env(safe-area-inset-bottom), 0.85rem)",
+                  transition: "padding-bottom 0.15s ease-out",
+                }}
+                className="relative px-4 pt-1 sm:px-5 sm:pb-3 select-none z-10"
+              >
                 {/* Listening Alert Pill */}
                 {isListening && (
                   <div className="mb-2 px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-between text-xs text-red-400 animate-pulse">
