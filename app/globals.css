@@ -286,28 +286,93 @@
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15), 0 0 40px rgba(255, 255, 255, 0.08) inset;
 }
 
-/* ===== THIN FULL-BLACK CUSTOM SCROLLBAR ===== */
-html {
-  scrollbar-width: thin;
-  scrollbar-color: #141414 #000000;
+/* ===== ULTRA-THIN TRANSPARENT FLOATING PILL SCROLLBAR (NO BACKGROUND, NO ARROWS) ===== */
+* {
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent !important;
 }
 
-::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+::-webkit-scrollbar,
+*::-webkit-scrollbar {
+  width: 4px !important;
+  height: 4px !important;
 }
 
-::-webkit-scrollbar-track {
-  background: #000000;
+::-webkit-scrollbar-track,
+*::-webkit-scrollbar-track {
+  background: transparent !important;
+  border: none !important;
 }
 
-::-webkit-scrollbar-thumb {
-  background: #141414;
-  border-radius: 9999px;
+::-webkit-scrollbar-track-piece,
+*::-webkit-scrollbar-track-piece {
+  background: transparent !important;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #222222;
+::-webkit-scrollbar-button,
+*::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+::-webkit-scrollbar-corner,
+*::-webkit-scrollbar-corner {
+  background: transparent !important;
+}
+
+::-webkit-scrollbar-thumb,
+*::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18) !important;
+  border-radius: 9999px !important;
+  border: none !important;
+}
+
+::-webkit-scrollbar-thumb:hover,
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.38) !important;
+}
+
+/* Chatbot & Custom Container Scrollbar Utility */
+.chatbot-scrollbar,
+.scrollbar-transparent-thin {
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent !important;
+}
+
+.chatbot-scrollbar::-webkit-scrollbar,
+.scrollbar-transparent-thin::-webkit-scrollbar {
+  width: 4px !important;
+  height: 4px !important;
+}
+
+.chatbot-scrollbar::-webkit-scrollbar-track,
+.scrollbar-transparent-thin::-webkit-scrollbar-track {
+  background: transparent !important;
+  border: none !important;
+}
+
+.chatbot-scrollbar::-webkit-scrollbar-track-piece,
+.scrollbar-transparent-thin::-webkit-scrollbar-track-piece {
+  background: transparent !important;
+}
+
+.chatbot-scrollbar::-webkit-scrollbar-button,
+.scrollbar-transparent-thin::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.chatbot-scrollbar::-webkit-scrollbar-thumb,
+.scrollbar-transparent-thin::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18) !important;
+  border-radius: 9999px !important;
+}
+
+.chatbot-scrollbar::-webkit-scrollbar-thumb:hover,
+.scrollbar-transparent-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.38) !important;
 }
 
 /* ===== INFINITE MARQUEE SKILLS ROLLING ANIMATIONS (ULTRA-SMOOTH GPU 120FPS) ===== */

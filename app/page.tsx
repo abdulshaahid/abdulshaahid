@@ -133,15 +133,6 @@ export default function Page() {
 
           {/* 7. Footer */}
           <Footer />
-
-          {/* Minimalist Back to Top Pill Button */}
-          <a
-            href="#top"
-            aria-label="Back to top"
-            className="fixed bottom-6 right-6 inline-flex h-8 w-8 items-center justify-center z-40 rounded-full bg-zinc-900/90 text-zinc-400 hover:text-white border border-zinc-800 hover:border-zinc-600 shadow-xl backdrop-blur-md transition-all text-xs font-mono"
-          >
-            ↑
-          </a>
         </main>
       </MouseBackground>
     </>
