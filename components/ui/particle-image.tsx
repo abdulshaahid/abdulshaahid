@@ -222,6 +222,10 @@ export function ParticleImage({
     const canvas = canvasRef.current
     if (!container || !canvas) return
 
+    // Clear previous inline styles to re-measure cleanly on resize/rotation
+    canvas.style.width = ""
+    canvas.style.height = ""
+
     const rect = container.getBoundingClientRect()
     if (rect.width === 0 || rect.height === 0) return
 
@@ -516,22 +520,36 @@ export function ParticleImage({
     }
   }, [handleInteractionAt, handleInteractionEnd])
 
-  // Resize & Orientation Listener
+  // Resize & Orientation Listener using ResizeObserver + window events
   useEffect(() => {
     let timer: NodeJS.Timeout
     const handleResize = () => {
       clearTimeout(timer)
       timer = setTimeout(() => {
         initCanvas()
-      }, 150)
+      }, 80)
+    }
+
+    const parent = containerRef.current?.parentElement || containerRef.current
+    let resizeObserver: ResizeObserver | null = null
+
+    if (parent && typeof ResizeObserver !== "undefined") {
+      resizeObserver = new ResizeObserver(() => {
+        handleResize()
+      })
+      resizeObserver.observe(parent)
     }
 
     window.addEventListener("resize", handleResize, { passive: true })
-    window.addEventListener("orientationchange", handleResize, { passive: true })
+    window.addEventListener("orientationchange", () => {
+      setTimeout(initCanvas, 50)
+      setTimeout(initCanvas, 250)
+    }, { passive: true })
+
     return () => {
       clearTimeout(timer)
+      if (resizeObserver) resizeObserver.disconnect()
       window.removeEventListener("resize", handleResize)
-      window.removeEventListener("orientationchange", handleResize)
     }
   }, [initCanvas])
 

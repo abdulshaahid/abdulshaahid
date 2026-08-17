@@ -173,7 +173,7 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
       <section
         id="home"
         aria-label="Hero"
-        className="relative w-full min-h-0 xl:min-h-[calc(100svh-1rem)] text-white flex flex-col justify-between overflow-hidden pt-20 sm:pt-24 md:pt-24 lg:pt-24 xl:pt-16 pb-10 sm:pb-12 md:pb-12 lg:pb-14 xl:pb-14 px-4 sm:px-6 md:px-10 lg:px-12 xl:px-16 select-none rounded-[24px] sm:rounded-[32px] md:rounded-[36px] lg:rounded-[40px] shadow-2xl bg-black z-10"
+        className="relative w-full min-h-[calc(100svh-1rem)] md:portrait:min-h-0 lg:portrait:min-h-0 lg:landscape:min-h-[calc(100svh-1rem)] text-white flex flex-col justify-start overflow-hidden pt-28 sm:pt-32 md:pt-16 pb-12 px-4 sm:px-6 md:px-12 lg:px-16 select-none rounded-[24px] sm:rounded-[32px] md:rounded-[36px] lg:rounded-[40px] shadow-2xl bg-black z-10"
       >
         {/* ===== GRAINIENT WEBGL ANIMATED BACKGROUND (HARDWARE OPTIMIZED) ===== */}
         <div className="absolute inset-0 h-full w-full pointer-events-none -z-10 opacity-40">
@@ -226,8 +226,8 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
           
           {/* 1. TOP SCRIPT TITLE: "Hey, there" */}
           <div className="relative w-full pointer-events-none pt-2 sm:pt-4 z-0 flex justify-center">
-            {/* Desktop Script Title */}
-            <h1 className="hidden xl:flex font-script italic text-[8rem] xl:text-[9.5rem] 2xl:text-[10.5rem] text-zinc-100/90 leading-none font-thin tracking-wide drop-shadow-sm items-center justify-center gap-24 lg:gap-32 mx-auto">
+            {/* Desktop Script Title (PC / Laptops in Landscape >= lg) */}
+            <h1 className="hidden lg:landscape:flex font-script italic text-[7.5rem] md:text-[7rem] lg:text-[9rem] xl:text-[10.5rem] text-zinc-100/90 leading-none font-thin tracking-wide drop-shadow-sm items-center justify-center gap-24 lg:gap-32 mx-auto">
               <span className="inline-flex overflow-hidden pb-4 -mb-4 pt-1">
                 <motion.span
                   initial={{ y: "115%", opacity: 0 }}
@@ -258,8 +258,40 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
               </span>
             </h1>
 
-            {/* Mobile & Tablet Script Title (Phones, iPad Mini, iPad Air, iPad Pro) */}
-            <h1 className="block xl:hidden font-script italic text-6xl sm:text-7xl md:text-8xl lg:text-9xl text-zinc-100/90 leading-none font-thin tracking-wide drop-shadow-sm text-center">
+            {/* iPad / Tablet Script Title (iPad Mini, iPad Air, iPad Pro) */}
+            <h1 className="hidden md:flex lg:landscape:hidden font-script italic text-7xl md:text-8xl lg:text-9xl text-zinc-100/90 leading-none font-thin tracking-wide drop-shadow-sm items-center justify-center gap-12 mx-auto translate-y-6 md:translate-y-8 lg:portrait:translate-y-10">
+              <span className="inline-flex overflow-hidden pb-2 -mb-2">
+                <motion.span
+                  initial={{ y: "115%", opacity: 0 }}
+                  animate={isReady ? { y: "0%", opacity: 1 } : { y: "115%", opacity: 0 }}
+                  transition={{
+                    y: { duration: 0.85, ease: SMOOTH_EASE, delay: 0.04 },
+                    opacity: { duration: 0.6, ease: "easeOut", delay: 0.04 },
+                  }}
+                  style={GPU_LAYER}
+                  className="text-[#27bf88] inline-block"
+                >
+                  Hey,
+                </motion.span>
+              </span>
+              <span className="inline-flex overflow-hidden pb-2 -mb-2">
+                <motion.span
+                  initial={{ y: "115%", opacity: 0 }}
+                  animate={isReady ? { y: "0%", opacity: 1 } : { y: "115%", opacity: 0 }}
+                  transition={{
+                    y: { duration: 0.85, ease: SMOOTH_EASE, delay: 0.1 },
+                    opacity: { duration: 0.6, ease: "easeOut", delay: 0.1 },
+                  }}
+                  style={GPU_LAYER}
+                  className="inline-block"
+                >
+                  there
+                </motion.span>
+              </span>
+            </h1>
+
+            {/* Mobile Script Title (< md - Phones) */}
+            <h1 className="block md:hidden font-script italic text-7xl sm:text-8xl text-zinc-100/90 leading-none font-thin tracking-wide drop-shadow-sm text-center">
               <span className="inline-flex overflow-hidden pb-2 -mb-2">
                 <motion.span
                   initial={{ y: "115%", opacity: 0 }}
@@ -291,10 +323,10 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
             </h1>
           </div>
 
-          {/* 2. MIDDLE SECTION: Desktop Grid vs Mobile Layout */}
+          {/* 2. MIDDLE SECTION: Desktop Grid vs iPad Tablet vs Mobile Layout */}
           
-          {/* DESKTOP LAYOUT (xl:grid) */}
-          <div className="hidden xl:grid relative w-full grid-cols-12 items-end my-auto z-10 gap-0 -mt-16 xl:-mt-24 2xl:-mt-32">
+          {/* DESKTOP LAYOUT (PC & Laptops in Landscape) */}
+          <div className="hidden lg:landscape:grid relative w-full grid-cols-12 items-end my-auto z-10 gap-0 -mt-20 lg:-mt-32">
             
             {/* Left Column: "I'm Shahid" */}
             <div className="col-span-3 flex flex-col justify-center items-start z-20 space-y-8 pb-12 lg:pb-16 -translate-y-4 lg:-translate-y-8">
@@ -407,8 +439,8 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
 
           </div>
 
-          {/* MOBILE & TABLET LAYOUT (< xl) */}
-          <div className="flex xl:hidden flex-col items-center w-full my-auto z-20 pt-0 pb-4 sm:pb-6 md:pb-8 lg:pb-10 -mt-4 sm:-mt-6 md:-mt-8 lg:-mt-10">
+          {/* DEDICATED IPAD & TABLET LAYOUT (iPad Mini, iPad Air, iPad Pro) */}
+          <div className="hidden md:flex lg:landscape:hidden flex-col items-center w-full my-auto z-20 pt-0 pb-6 -mt-6">
             
             {/* Center Portrait Image */}
             <motion.div
@@ -419,17 +451,17 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
                 opacity: { duration: 0.35, ease: "easeOut", delay: 0.04 },
               }}
               style={GPU_LAYER}
-              className="relative w-full max-w-[340px] sm:max-w-[420px] md:max-w-[480px] lg:max-w-[540px] flex justify-center items-end py-0 z-10 -mb-2"
+              className="relative w-full max-w-[420px] md:max-w-[460px] flex justify-center items-end py-0 z-10 -mb-2"
             >
               <ParticleImage
                 src="/me.webp"
                 alt="Mohamed Abdul Shahid"
-                className="w-full h-auto max-h-[48vh] sm:max-h-[55vh] md:max-h-[58vh] lg:max-h-[60vh]"
+                className="w-full h-auto max-h-[46vh] md:max-h-[50vh]"
               />
             </motion.div>
 
-            {/* Mobile & Tablet Headlines Stack */}
-            <div className="w-full flex flex-col items-center justify-center space-y-4 sm:space-y-5 md:space-y-6 lg:space-y-7 z-20 -mt-16 sm:-mt-20 md:-mt-24 lg:-mt-28 relative pointer-events-none">
+            {/* iPad Headlines Stack */}
+            <div className="w-full flex flex-col items-center justify-center space-y-4 md:space-y-5 z-20 -mt-20 md:-mt-24 relative pointer-events-none">
               <div className="text-center select-none flex flex-col items-center">
                 <div className="overflow-hidden pb-1">
                   <motion.span
@@ -440,7 +472,7 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
                       opacity: { duration: 0.6, ease: "easeOut", delay: 0.12 },
                     }}
                     style={GPU_LAYER}
-                    className="block text-lg sm:text-xl md:text-2xl lg:text-3xl font-jakarta font-light tracking-[0.25em] bg-gradient-to-b from-zinc-100 via-zinc-300 to-zinc-500 bg-clip-text text-transparent leading-none uppercase drop-shadow-md"
+                    className="block text-xl md:text-2xl font-jakarta font-light tracking-[0.25em] bg-gradient-to-b from-zinc-100 via-zinc-300 to-zinc-500 bg-clip-text text-transparent leading-none uppercase drop-shadow-md"
                   >
                     I'm
                   </motion.span>
@@ -454,23 +486,23 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
                       opacity: { duration: 0.6, ease: "easeOut", delay: 0.18 },
                     }}
                     style={GPU_LAYER}
-                    className="block text-6xl sm:text-7xl md:text-8xl lg:text-[6.5rem] font-jakarta font-medium tracking-tight bg-gradient-to-b from-zinc-100 via-zinc-300 to-zinc-500 bg-clip-text text-transparent leading-[1.1] uppercase drop-shadow-md"
+                    className="block text-7xl md:text-8xl font-jakarta font-medium tracking-tight bg-gradient-to-b from-zinc-100 via-zinc-300 to-zinc-500 bg-clip-text text-transparent leading-[1.1] uppercase drop-shadow-md"
                   >
                     Shahid
                   </motion.span>
                 </div>
               </div>
 
-              <div className="flex items-center justify-center gap-2.5 sm:gap-3 md:gap-4 lg:gap-5 select-none">
+              <div className="flex items-center justify-center gap-3 select-none">
                 <motion.div
                   initial={{ opacity: 0, scale: 0.7, y: 12 }}
                   animate={isReady ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.7, y: 12 }}
                   transition={{ duration: 0.75, ease: SMOOTH_EASE, delay: 0.22 }}
                   style={GPU_LAYER}
                 >
-                  <AnimatedShapeIcon className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 shrink-0" />
+                  <AnimatedShapeIcon className="w-12 h-12 md:w-14 md:h-14 shrink-0" />
                 </motion.div>
-                <div className="w-[195px] sm:w-[245px] md:w-[300px] lg:w-[360px] flex flex-col justify-center gap-0.5">
+                <div className="w-[230px] md:w-[270px] flex flex-col justify-center gap-0.5">
                   <div className="overflow-hidden py-0.5">
                     <motion.div
                       initial={{ y: "115%", opacity: 0 }}
@@ -480,7 +512,7 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
                         opacity: { duration: 0.6, ease: "easeOut", delay: 0.2 },
                       }}
                       style={GPU_LAYER}
-                      className="flex justify-between w-full text-2xl sm:text-3xl md:text-[2.2rem] lg:text-[2.6rem] font-jakarta font-medium bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none drop-shadow-md"
+                      className="flex justify-between w-full text-2xl md:text-3xl font-jakarta font-medium bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none drop-shadow-md"
                     >
                       <span>F</span><span>R</span><span>O</span><span>N</span><span>T</span><span>E</span><span>N</span><span>D</span>
                     </motion.div>
@@ -494,7 +526,115 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
                         opacity: { duration: 0.6, ease: "easeOut", delay: 0.24 },
                       }}
                       style={GPU_LAYER}
-                      className="flex justify-between w-full text-2xl sm:text-3xl md:text-[2.2rem] lg:text-[2.6rem] font-jakarta font-thin bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none drop-shadow-md"
+                      className="flex justify-between w-full text-2xl md:text-3xl font-jakarta font-thin bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none drop-shadow-md"
+                    >
+                      <span>D</span><span>E</span><span>V</span><span>E</span><span>L</span><span>O</span><span>P</span><span>E</span><span>R</span>
+                    </motion.div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* iPad Bio Text Paragraph */}
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              animate={isReady ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+              transition={{ duration: 0.8, ease: SMOOTH_EASE, delay: 0.28 }}
+              style={GPU_LAYER}
+              className="text-sm md:text-base text-zinc-400 font-normal text-center max-w-[360px] md:max-w-[420px] px-4 mt-6 relative z-20"
+            >
+              Specialized in Web Design, UX / UI, Webflow, and Front End Development.
+            </motion.p>
+          </div>
+
+          {/* MOBILE LAYOUT (< md - Phones) */}
+          <div className="flex md:hidden flex-col items-center w-full my-auto z-20 pt-0 pb-8 -mt-6 sm:-mt-8">
+            
+            {/* Center Portrait Image */}
+            <motion.div
+              initial={{ y: 100, opacity: 0 }}
+              animate={isReady ? { y: 0, opacity: 1 } : { y: 100, opacity: 0 }}
+              transition={{
+                y: { duration: 1.0, ease: SMOOTH_EASE, delay: 0.04 },
+                opacity: { duration: 0.35, ease: "easeOut", delay: 0.04 },
+              }}
+              style={GPU_LAYER}
+              className="relative w-full max-w-[370px] sm:max-w-[450px] flex justify-center items-end py-0 z-10 -mb-2 -translate-y-1 sm:-translate-y-1"
+            >
+              <ParticleImage
+                src="/me.webp"
+                alt="Mohamed Abdul Shahid"
+                className="w-full h-auto max-h-[52vh] sm:max-h-[62vh]"
+              />
+            </motion.div>
+
+            {/* Mobile Headlines Stack */}
+            <div className="w-full flex flex-col items-center justify-center space-y-4 z-20 -mt-20 sm:-mt-28 relative pointer-events-none">
+              <div className="text-center select-none flex flex-col items-center">
+                <div className="overflow-hidden pb-1">
+                  <motion.span
+                    initial={{ y: "120%", opacity: 0 }}
+                    animate={isReady ? { y: "0%", opacity: 1 } : { y: "120%", opacity: 0 }}
+                    transition={{
+                      y: { duration: 0.85, ease: SMOOTH_EASE, delay: 0.12 },
+                      opacity: { duration: 0.6, ease: "easeOut", delay: 0.12 },
+                    }}
+                    style={GPU_LAYER}
+                    className="block text-xl sm:text-2xl font-jakarta font-light tracking-[0.25em] bg-gradient-to-b from-zinc-100 via-zinc-300 to-zinc-500 bg-clip-text text-transparent leading-none uppercase drop-shadow-md"
+                  >
+                    I'm
+                  </motion.span>
+                </div>
+                <div className="overflow-hidden pb-1">
+                  <motion.span
+                    initial={{ y: "120%", opacity: 0 }}
+                    animate={isReady ? { y: "0%", opacity: 1 } : { y: "120%", opacity: 0 }}
+                    transition={{
+                      y: { duration: 0.9, ease: SMOOTH_EASE, delay: 0.18 },
+                      opacity: { duration: 0.6, ease: "easeOut", delay: 0.18 },
+                    }}
+                    style={GPU_LAYER}
+                    className="block text-7xl sm:text-7xl font-jakarta font-medium tracking-tight bg-gradient-to-b from-zinc-100 via-zinc-300 to-zinc-500 bg-clip-text text-transparent leading-[1.1] uppercase drop-shadow-md"
+                  >
+                    Shahid
+                  </motion.span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-center gap-2.5 sm:gap-3 select-none">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.7, y: 12 }}
+                  animate={isReady ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.7, y: 12 }}
+                  transition={{ duration: 0.75, ease: SMOOTH_EASE, delay: 0.22 }}
+                  style={GPU_LAYER}
+                >
+                  <AnimatedShapeIcon className="w-10 h-10 sm:w-14 sm:h-14 shrink-0" />
+                </motion.div>
+                <div className="w-[195px] sm:w-[250px] flex flex-col justify-center gap-0.5">
+                  <div className="overflow-hidden py-0.5">
+                    <motion.div
+                      initial={{ y: "115%", opacity: 0 }}
+                      animate={isReady ? { y: "0%", opacity: 1 } : { y: "115%", opacity: 0 }}
+                      transition={{
+                        y: { duration: 0.85, ease: SMOOTH_EASE, delay: 0.2 },
+                        opacity: { duration: 0.6, ease: "easeOut", delay: 0.2 },
+                      }}
+                      style={GPU_LAYER}
+                      className="flex justify-between w-full text-2xl sm:text-3xl font-jakarta font-medium bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none drop-shadow-md"
+                    >
+                      <span>F</span><span>R</span><span>O</span><span>N</span><span>T</span><span>E</span><span>N</span><span>D</span>
+                    </motion.div>
+                  </div>
+                  <div className="overflow-hidden py-0.5">
+                    <motion.div
+                      initial={{ y: "115%", opacity: 0 }}
+                      animate={isReady ? { y: "0%", opacity: 0.35 } : { y: "115%", opacity: 0 }}
+                      transition={{
+                        y: { duration: 0.85, ease: SMOOTH_EASE, delay: 0.24 },
+                        opacity: { duration: 0.6, ease: "easeOut", delay: 0.24 },
+                      }}
+                      style={GPU_LAYER}
+                      className="flex justify-between w-full text-2xl sm:text-3xl font-jakarta font-thin bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none drop-shadow-md"
                     >
                       <span>D</span><span>E</span><span>V</span><span>E</span><span>L</span><span>O</span><span>P</span><span>E</span><span>R</span>
                     </motion.div>
@@ -509,7 +649,7 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
               animate={isReady ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
               transition={{ duration: 0.8, ease: SMOOTH_EASE, delay: 0.28 }}
               style={GPU_LAYER}
-              className="text-xs sm:text-sm md:text-base lg:text-lg text-zinc-400 font-normal text-center max-w-[320px] md:max-w-[440px] lg:max-w-[540px] px-4 mt-5 sm:mt-6 md:mt-8 lg:mt-10 relative z-20"
+              className="text-sm text-zinc-400 font-normal text-center max-w-[300px] px-4 mt-6 sm:mt-8 relative z-20"
             >
               Specialized in Web Design, UX / UI, Webflow, and Front End Development.
             </motion.p>
