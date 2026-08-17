@@ -191,11 +191,9 @@ function WaveformBars({
             ease: "easeInOut",
             delay: bar.delay,
           }}
-          className={`w-[2px] h-3.5 rounded-full origin-center transition-colors duration-300 ${
-            isListening
-              ? "bg-red-400 shadow-[0_0_8px_rgba(248,113,113,0.9)]"
-              : isSpeaking
-              ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)]"
+          className={`w-[2px] h-3.5 rounded-full origin-center transition-colors duration-200 ${
+            isListening || isSpeaking
+              ? "bg-blue-400"
               : "bg-zinc-300"
           }`}
         />
@@ -214,6 +212,7 @@ export function Chatbot() {
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [sttSupported, setSttSupported] = useState(true)
+  const [micError, setMicError] = useState<string | null>(null)
   const [keyboardHeight, setKeyboardHeight] = useState(0)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -222,6 +221,15 @@ export function Chatbot() {
   const readerRef = useRef<ReadableStreamDefaultReader<Uint8Array> | null>(null)
   const recognitionRef = useRef<any>(null)
   const speechSynthRef = useRef<SpeechSynthesis | null>(null)
+  const micErrorTimerRef = useRef<NodeJS.Timeout | null>(null)
+
+  const showMicError = useCallback((message: string) => {
+    if (micErrorTimerRef.current) clearTimeout(micErrorTimerRef.current)
+    setMicError(message)
+    micErrorTimerRef.current = setTimeout(() => {
+      setMicError(null)
+    }, 4500)
+  }, [])
 
   // Auto-scroll on messages change
   const scrollToBottom = useCallback((smooth = true) => {
@@ -316,17 +324,23 @@ export function Chatbot() {
           }
 
           recognition.onerror = (event: any) => {
-            if (event.error === "no-speech" || event.error === "aborted") {
-              // Benign user silence or intentional abort
+            if (event.error === "no-speech") {
+              showMicError("No speech detected. Speak closer to the mic.")
               setIsListening(false)
               return
             }
-            if (event.error === "audio-capture" || event.error === "not-allowed") {
-              console.warn(
-                "Microphone is unavailable, not connected, or permission was not granted."
-              )
+            if (event.error === "aborted") {
+              setIsListening(false)
+              return
+            }
+            if (event.error === "audio-capture") {
+              showMicError("No microphone found or audio capture failed.")
+            } else if (event.error === "not-allowed" || event.error === "permission-denied") {
+              showMicError("Microphone blocked. Allow mic access in browser settings.")
+            } else if (event.error === "network") {
+              showMicError("Speech service network error. Please try again.")
             } else {
-              console.warn("Speech recognition error:", event.error)
+              showMicError(`Microphone error: ${event.error || "unavailable"}`)
             }
             setIsListening(false)
           }
@@ -438,9 +452,7 @@ export function Chatbot() {
     if (isLoading) return // Block recording while response is processing
 
     if (!sttSupported || !recognitionRef.current) {
-      alert(
-        "Voice input is not supported in this browser. Please use Chrome, Edge, or Safari."
-      )
+      showMicError("Voice input is not supported in this browser. Use Chrome or Safari.")
       return
     }
 
@@ -451,20 +463,29 @@ export function Chatbot() {
       setIsListening(false)
     } else {
       stopSpeaking()
+      setMicError(null)
       try {
         // Check/warm microphone permission if getUserMedia is supported
         if (typeof navigator !== "undefined" && navigator.mediaDevices?.getUserMedia) {
           try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
             stream.getTracks().forEach((track) => track.stop())
-          } catch (micErr) {
-            console.warn("Microphone access not granted or unavailable:", micErr)
+          } catch (micErr: any) {
+            if (micErr?.name === "NotAllowedError" || micErr?.name === "PermissionDeniedError") {
+              showMicError("Microphone permission blocked. Please allow mic access.")
+              setIsListening(false)
+              return
+            } else if (micErr?.name === "NotFoundError" || micErr?.name === "DevicesNotFoundError") {
+              showMicError("No microphone hardware found on your device.")
+              setIsListening(false)
+              return
+            }
           }
         }
         recognitionRef.current.start()
       } catch (err: any) {
         if (err?.name !== "InvalidStateError") {
-          console.warn("Error starting speech recognition:", err)
+          showMicError("Failed to start voice input. Please try again.")
         }
         setIsListening(false)
       }
@@ -885,7 +906,6 @@ export function Chatbot() {
                   </span>
                   {isSpeaking && (
                     <span className="flex items-center gap-1 text-[11px] text-emerald-400 font-mono">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
                       Speaking
                     </span>
                   )}
@@ -1090,28 +1110,52 @@ export function Chatbot() {
                 }}
                 className="relative px-4 pt-1 sm:px-5 sm:pb-3 select-none z-10"
               >
-                {/* Listening Alert Pill */}
+                {/* Listening Alert Pill & Mic Error Indicator Pill - Clean Borderless Gemini Design */}
                 <AnimatePresence>
                   {isListening && (
                     <motion.div
-                      initial={{ opacity: 0, y: 6, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 4, scale: 0.95 }}
-                      transition={{ duration: 0.2 }}
-                      className="mb-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-red-500/20 via-rose-500/20 to-red-500/10 border border-red-500/30 flex items-center justify-between text-xs text-red-300 backdrop-blur-md shadow-lg shadow-red-500/10"
+                      key="listening-pill"
+                      initial={{ opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 4 }}
+                      transition={{ duration: 0.15 }}
+                      className="mb-2 px-3.5 py-1.5 rounded-full bg-[#1e1e24] flex items-center justify-between text-xs text-zinc-300 select-none"
                     >
                       <div className="flex items-center gap-2">
-                        <span className="relative flex h-2.5 w-2.5">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500" />
-                        </span>
-                        <span className="font-medium tracking-wide">Listening... Speak now</span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+                        <span className="text-[12px] text-zinc-300 font-normal">Listening... Speak now</span>
                       </div>
                       <button
                         onClick={toggleSpeechRecognition}
-                        className="px-2.5 py-0.5 rounded-full bg-red-500/30 hover:bg-red-500/50 text-[11px] font-semibold text-white transition-colors"
+                        className="text-[11px] text-zinc-400 hover:text-white transition-colors font-medium ml-3 cursor-pointer"
                       >
                         Done
+                      </button>
+                    </motion.div>
+                  )}
+
+                  {micError && (
+                    <motion.div
+                      key="mic-error-pill"
+                      initial={{ opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 4 }}
+                      transition={{ duration: 0.15 }}
+                      className="mb-2 px-3.5 py-1.5 rounded-full bg-[#1e1e24] flex items-center justify-between text-xs text-zinc-300 select-none"
+                    >
+                      <div className="flex items-center gap-2 truncate mr-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 shrink-0" />
+                        <span className="text-[12px] text-zinc-300 font-normal truncate">
+                          {micError}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => setMicError(null)}
+                        className="text-zinc-500 hover:text-zinc-300 transition-colors p-0.5 cursor-pointer"
+                        title="Dismiss"
+                        aria-label="Dismiss error"
+                      >
+                        <X size={12} />
                       </button>
                     </motion.div>
                   )}
@@ -1151,7 +1195,7 @@ export function Chatbot() {
                         handleStopGenerating()
                       }}
                       title="Stop generating"
-                      className="w-8 h-8 shrink-0 rounded-full bg-zinc-800 hover:bg-zinc-700 text-white flex items-center justify-center transition-all shadow-md cursor-pointer hover:scale-105 active:scale-95"
+                      className="w-8 h-8 shrink-0 rounded-full bg-zinc-800 hover:bg-zinc-700 text-white flex items-center justify-center transition-all cursor-pointer hover:scale-105 active:scale-95"
                       aria-label="Stop Generating"
                     >
                       <Square size={11} className="fill-current text-zinc-200" />
@@ -1162,7 +1206,7 @@ export function Chatbot() {
                       type="button"
                       onClick={() => handleSendMessage()}
                       title="Send message"
-                      className="w-8 h-8 shrink-0 rounded-full bg-[#2563eb]/70 hover:bg-[#2563eb]/60 text-white flex items-center justify-center transition-all  cursor-pointer hover:scale-105 active:scale-95"
+                      className="w-8 h-8 shrink-0 rounded-full bg-[#2563eb]/70 hover:bg-[#2563eb]/60 text-white flex items-center justify-center transition-all cursor-pointer hover:scale-105 active:scale-95"
                       aria-label="Send Message"
                     >
                       <ArrowUp size={17} strokeWidth={2.4} className="text-white" />
@@ -1178,11 +1222,9 @@ export function Chatbot() {
                           ? "Speaking"
                           : "Voice Assistant (Click to Speak)"
                       }
-                      className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center transition-all shadow-sm ${
-                        isListening
-                          ? "bg-red-500/25 ring-2 ring-red-500/70 scale-105"
-                          : isSpeaking
-                          ? "bg-emerald-500/25 ring-2 ring-emerald-500/70 scale-105"
+                      className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center transition-all ${
+                        isListening || isSpeaking
+                          ? "bg-[#282830] text-white scale-105"
                           : "bg-[#0a0a0d] hover:bg-zinc-900 hover:scale-105 cursor-pointer"
                       }`}
                       aria-label="Voice Waveform"
