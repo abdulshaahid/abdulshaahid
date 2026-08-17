@@ -182,12 +182,48 @@ export function Chatbot() {
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [sttSupported, setSttSupported] = useState(true)
+  const [keyboardOffset, setKeyboardOffset] = useState(0)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
   const recognitionRef = useRef<any>(null)
   const speechSynthRef = useRef<SpeechSynthesis | null>(null)
+
+  // Auto-scroll on messages change
+  const scrollToBottom = useCallback((smooth = true) => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({
+        behavior: smooth ? "smooth" : "auto",
+        block: "end",
+      })
+    }
+  }, [])
+
+  // Listen to visualViewport for mobile virtual keyboard open/close
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.visualViewport) return
+
+    const handleViewportChange = () => {
+      if (!window.visualViewport) return
+      const windowHeight = window.innerHeight
+      const visualHeight = window.visualViewport.height
+      const offset = Math.max(0, windowHeight - visualHeight)
+      setKeyboardOffset(offset)
+      if (offset > 0) {
+        setTimeout(() => scrollToBottom(true), 150)
+      }
+    }
+
+    const vv = window.visualViewport
+    vv.addEventListener("resize", handleViewportChange)
+    vv.addEventListener("scroll", handleViewportChange)
+
+    return () => {
+      vv.removeEventListener("resize", handleViewportChange)
+      vv.removeEventListener("scroll", handleViewportChange)
+    }
+  }, [scrollToBottom])
 
   // Initialize Speech Synthesis and Speech Recognition
   useEffect(() => {
@@ -249,16 +285,6 @@ export function Chatbot() {
       if (typeof window !== "undefined" && "speechSynthesis" in window) {
         window.speechSynthesis.cancel()
       }
-    }
-  }, [])
-
-  // Auto-scroll on messages change
-  const scrollToBottom = useCallback((smooth = true) => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({
-        behavior: smooth ? "smooth" : "auto",
-        block: "end",
-      })
     }
   }, [])
 
@@ -663,14 +689,20 @@ export function Chatbot() {
       {/* Redesigned Clean, Borderless Dark Chat Window Modal with Gemini Ambient Lights */}
       <AnimatePresence>
         {isOpen && (
-          <div className="fixed inset-x-3 bottom-3 sm:inset-x-auto sm:right-6 sm:bottom-6 z-50 flex items-center justify-center pointer-events-none">
+          <div
+            style={{
+              bottom: keyboardOffset > 0 ? `${keyboardOffset + 12}px` : undefined,
+              transition: "bottom 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+            }}
+            className="fixed inset-x-3 bottom-3 sm:inset-x-auto sm:right-6 sm:bottom-6 z-50 flex items-center justify-center pointer-events-none"
+          >
             <motion.div
               id="chatbot-window"
               initial={{ opacity: 0, y: 25, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.96 }}
               transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
-              className="relative pointer-events-auto sm:w-[390px] h-[85vh] sm:h-[590px] max-h-[660px] flex flex-col rounded-[28px] sm:rounded-[32px] bg-[#0f0f13]/95 backdrop-blur-2xl shadow-[0_25px_70px_-15px_rgba(0,0,0,0.85),0_0_50px_-10px_rgba(49,134,255,0.18)] overflow-hidden font-sans text-zinc-100"
+              className="relative pointer-events-auto sm:w-[390px] h-[75dvh] sm:h-[590px] max-h-[calc(100dvh-1.5rem)] sm:max-h-[660px] flex flex-col rounded-[28px] sm:rounded-[32px] bg-[#0f0f13]/95 backdrop-blur-2xl shadow-[0_25px_70px_-15px_rgba(0,0,0,0.85),0_0_50px_-10px_rgba(49,134,255,0.18)] overflow-hidden font-sans text-zinc-100"
             >
               {/* Animated Gemini Ambient Light Aura (Subtle multi-color glow around the borderless frame) */}
               <div
@@ -907,12 +939,15 @@ export function Chatbot() {
                     type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
+                    onFocus={() => {
+                      setTimeout(() => scrollToBottom(true), 200)
+                    }}
                     onKeyDown={handleKeyDown}
                     placeholder={
                       isListening ? "Listening..." : "Type a message..."
                     }
                     disabled={isLoading && !isListening}
-                    className="flex-1 bg-transparent text-zinc-100 placeholder-zinc-500 text-xs sm:text-[13.5px] focus:outline-none"
+                    className="flex-1 bg-transparent text-zinc-100 placeholder-zinc-500 text-[16px] sm:text-[13.5px] focus:outline-none"
                   />
 
                   {/* Microphone STT Icon */}
