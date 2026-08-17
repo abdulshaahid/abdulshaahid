@@ -116,7 +116,7 @@ const projects: ProjectItem[] = [
       "Travel package marketplace with custom itinerary discovery and instant booking workflows.",
     tags: ["React", "Next.js", "Tailwind CSS", "TypeScript"],
     liveUrl: "https://trawayl.com",
-    imageUrl: "/agent-dashboard-mockup-grayscale.png",
+    imageUrl: "/projvid/trawayl.png",
     logoUrl: "/projlogo/trawayl.png",
   },
   {
@@ -128,6 +128,25 @@ const projects: ProjectItem[] = [
     liveUrl: "https://trawerse.com/",
     videoUrl: "/projvid/trawerse.mp4",
     logoUrl: "/projlogo/trawerse.ico",
+  },
+  {
+    id: "deyno-technologies",
+    title: "Deyno Technologies",
+    description:
+      "Multi-product SaaS ecosystem showcasing ERP solutions across industries.",
+    tags: ["Next.js", "Tailwind CSS", "Framer Motion", "GSAP"],
+    videoUrl: "/projvid/deyno.mp4",
+    logoUrl: "/projlogo/deyno.ico",
+  },
+  {
+    id: "kerala-startup-carnival",
+    title: "Kerala Startup Carnival",
+    description:
+      "Startup event website featuring speakers, schedule, experience, and registration.",
+    tags: ["React", "Tailwind CSS", "Framer Motion", "GSAP"],
+    liveUrl: "https://keralastartupcarnival.com/",
+    videoUrl: "/projvid/ksc.mp4",
+    logoUrl: "/projlogo/keralastartup.ico",
   },
   {
     id: "flotilla",
@@ -145,28 +164,9 @@ const projects: ProjectItem[] = [
     description:
       "Premium interior design website focused on projects and visual storytelling.",
     tags: ["React", "Tailwind CSS", "GSAP"],
+    liveUrl: "https://www.alnajwagold.com/",
     videoUrl: "/projvid/alnajwa.mp4",
     logoUrl: "/projlogo/alnlogo.png",
-  },
-  {
-    id: "taj-al-safa",
-    title: "Taj Al Safa",
-    description:
-      "Luxury real-estate website showcasing properties and developments.",
-    tags: ["React", "Tailwind CSS", "Framer Motion"],
-    liveUrl: "https://tajalsafa.com/",
-    videoUrl: "/projvid/tajalsafa.mp4",
-    logoUrl: "/projlogo/tajlogo.png",
-  },
-  {
-    id: "kerala-startup-carnival",
-    title: "Kerala Startup Carnival",
-    description:
-      "Startup event website featuring speakers, schedule, experience, and registration.",
-    tags: ["React", "Tailwind CSS", "Framer Motion", "GSAP"],
-    liveUrl: "https://keralastartupcarnival.com/",
-    videoUrl: "/projvid/ksc.mp4",
-    logoUrl: "/projlogo/keralastartup.ico",
   },
   {
     id: "daily-regrets",
@@ -179,15 +179,71 @@ const projects: ProjectItem[] = [
     logoUrl: "/projlogo/dailyregrets.ico",
   },
   {
-    id: "deyno-technologies",
-    title: "Deyno Technologies",
+    id: "cliper-click",
+    title: "Cliper.click",
     description:
-      "Multi-product SaaS ecosystem showcasing ERP solutions across industries.",
-    tags: ["Next.js", "Tailwind CSS", "Framer Motion", "GSAP"],
-    videoUrl: "/projvid/deyno.mp4",
-    logoUrl: "/projlogo/deyno.ico",
+      "Cross-platform file and clipboard sharing platform for seamless device-to-device transfers.",
+    tags: ["Django", "React", "Tailwind CSS", "PostgreSQL", "Docker"],
+    liveUrl: "https://cliper.click/",
+    imageUrl: "/projvid/cliper.png",
+    logoUrl: "/projlogo/cliper.ico",
+  },
+  {
+    id: "fortura-global-exim",
+    title: "Fortura Global Exim",
+    description:
+      "Premium B2B landing page for a gym equipment importing and distribution company.",
+    tags: ["Astro", "Tailwind CSS", "Framer Motion"],
+    liveUrl: "https://forturaglobalexim.com/",
+    videoUrl: "/projvid/fortura.mp4",
+    logoUrl: "/projlogo/fortura.jpeg",
+  },
+  {
+    id: "taj-al-safa",
+    title: "Taj Al Safa",
+    description:
+      "Luxury real-estate website showcasing properties and developments.",
+    tags: ["React", "Tailwind CSS", "Framer Motion"],
+    liveUrl: "https://tajalsafa.com/",
+    videoUrl: "/projvid/tajalsafa.mp4",
+    logoUrl: "/projlogo/tajlogo.png",
+  },
+  {
+    id: "receiptlog",
+    title: "ReceiptLog",
+    description:
+      "AI-powered personal finance app for receipt scanning, expense tracking, and income management.",
+    tags: ["React Native", "Expo", "TypeScript", "SQLite", "AI"],
+    imageUrl: "/receiptlog-mockup.jpg",
+    logoUrl: "/projlogo/receiptlog.svg",
+  },
+  {
+    id: "tradeease",
+    title: "TradeEase",
+    description:
+      "Modern stock and inventory management platform for tracking products, operations, and business analytics.",
+    tags: ["React", "TypeScript", "Tailwind CSS"],
+    imageUrl: "/tradeease-mockup.jpg",
+    logoUrl: "/projlogo/tradeease.svg",
   },
 ]
+
+const stackIcons: Record<string, string> = {
+  React: "/skills/react.svg",
+  "React Native": "/skills/react.svg",
+  "Next.js": "/skills/nextjs.svg",
+  "Tailwind CSS": "/skills/tailwind-css.svg",
+  TypeScript: "/skills/typescript.svg",
+  "Framer Motion": "/skills/framer.svg",
+  GSAP: "/skills/gsap.svg",
+  Astro: "/skills/astro.svg",
+  Expo: "/skills/expo.svg",
+  SQLite: "/skills/sqlite.svg",
+  AI: "/skills/ai.svg",
+  Django: "/skills/django.svg",
+  PostgreSQL: "/skills/postgresql.svg",
+  Docker: "/skills/docker.svg",
+}
 
 export function Portfolio() {
   return (
@@ -279,16 +335,28 @@ export function Portfolio() {
                       {project.description}
                     </p>
 
-                    {/* Tech Pills */}
+                    {/* Tech Pills with Stack Logos */}
                     <div className="mt-3 flex flex-wrap gap-1.5">
-                      {project.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="inline-flex items-center justify-center rounded-full bg-zinc-900 px-2.5 pt-[5px] pb-[4px] text-[11px] font-mono text-zinc-300 leading-none"
-                        >
-                          {tag}
-                        </span>
-                      ))}
+                      {project.tags.map((tag) => {
+                        const iconUrl = stackIcons[tag]
+                        return (
+                          <span
+                            key={tag}
+                            className="inline-flex items-center gap-1.5 rounded-full bg-zinc-900 border border-zinc-800/80 px-2.5 py-1 text-[11px] font-mono text-zinc-300 leading-none hover:border-zinc-700 transition-colors"
+                          >
+                            {iconUrl && (
+                              <Image
+                                src={iconUrl}
+                                alt={`${tag} icon`}
+                                width={12}
+                                height={12}
+                                className="w-3 h-3 object-contain shrink-0"
+                              />
+                            )}
+                            <span className="translate-y-[0.5px]">{tag}</span>
+                          </span>
+                        )
+                      })}
                     </div>
                   </div>
 

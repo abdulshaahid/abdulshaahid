@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <rect width="100" height="100" rx="22" fill="#0f1715"/>
+  <rect x="1" y="1" width="98" height="98" rx="21" stroke="#1c2e28" stroke-width="2"/>
+  <!-- Receipt outline with jagged bottom & scan sparkle -->
+  <path d="M30 24C30 21.7909 31.7909 20 34 20H66C68.2091 20 70 21.7909 70 24V76L63 71L56 76L50 71L44 76L37 71L30 76V24Z" fill="#162c23" stroke="#22c55e" stroke-width="3" stroke-linejoin="round"/>
+  <line x1="38" y1="32" x2="62" y2="32" stroke="#22c55e" stroke-width="3" stroke-linecap="round"/>
+  <line x1="38" y1="42" x2="54" y2="42" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="38" y1="52" x2="58" y2="52" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- AI Sparkle / Lens marker -->
+  <circle cx="66" cy="58" r="8" fill="#10b981"/>
+  <path d="M66 53V63M61 58H71" stroke="#0f1715" stroke-width="2" stroke-linecap="round"/>
+</svg>
