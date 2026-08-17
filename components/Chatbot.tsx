@@ -140,6 +140,94 @@ function parseInlineMarkdown(text: string): React.ReactNode[] {
   })
 }
 
+// Crisp native vector Gemini logo with subpixel anti-aliasing for Retina/iPhone displays
+function GeminiIcon({ className = "w-6 h-6" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 296 298"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      shapeRendering="geometricPrecision"
+    >
+      <mask
+        id="gemini-svg-mask"
+        width="296"
+        height="298"
+        x="0"
+        y="0"
+        maskUnits="userSpaceOnUse"
+        style={{ maskType: "alpha" }}
+      >
+        <path
+          fill="#3186FF"
+          d="M141.201 4.886c2.282-6.17 11.042-6.071 13.184.148l5.985 17.37a184.004 184.004 0 0 0 111.257 113.049l19.304 6.997c6.143 2.227 6.156 10.91.02 13.155l-19.35 7.082a184.001 184.001 0 0 0-109.495 109.385l-7.573 20.629c-2.241 6.105-10.869 6.121-13.133.025l-7.908-21.296a184 184 0 0 0-109.02-108.658l-19.698-7.239c-6.102-2.243-6.118-10.867-.025-13.132l20.083-7.467A183.998 183.998 0 0 0 133.291 26.28l7.91-21.394Z"
+        />
+      </mask>
+      <g mask="url(#gemini-svg-mask)">
+        <g filter="url(#gemini-f1)">
+          <ellipse cx="163" cy="149" fill="#3689FF" rx="196" ry="159" />
+        </g>
+        <g filter="url(#gemini-f2)">
+          <ellipse cx="33.5" cy="142.5" fill="#F6C013" rx="68.5" ry="72.5" />
+        </g>
+        <g filter="url(#gemini-f3)">
+          <ellipse cx="19.5" cy="148.5" fill="#F6C013" rx="68.5" ry="72.5" />
+        </g>
+        <g filter="url(#gemini-f4)">
+          <path fill="#FA4340" d="M194 10.5C172 82.5 65.5 134.333 22.5 135L144-66l50 76.5Z" />
+        </g>
+        <g filter="url(#gemini-f5)">
+          <path fill="#FA4340" d="M190.5-12.5C168.5 59.5 62 111.333 19 112L140.5-89l50 76.5Z" />
+        </g>
+        <g filter="url(#gemini-f6)">
+          <path fill="#14BB69" d="M194.5 279.5C172.5 207.5 66 155.667 23 155l121.5 201 50-76.5Z" />
+        </g>
+        <g filter="url(#gemini-f7)">
+          <path fill="#14BB69" d="M196.5 320.5C174.5 248.5 68 196.667 25 196l121.5 201 50-76.5Z" />
+        </g>
+      </g>
+      <defs>
+        <filter id="gemini-f1" width="464" height="390" x="-69" y="-46" colorInterpolationFilters="sRGB" filterUnits="userSpaceOnUse">
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
+          <feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
+          <feGaussianBlur result="effect1_foregroundBlur" stdDeviation="18" />
+        </filter>
+        <filter id="gemini-f2" width="265" height="273" x="-99" y="6" colorInterpolationFilters="sRGB" filterUnits="userSpaceOnUse">
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
+          <feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
+          <feGaussianBlur result="effect1_foregroundBlur" stdDeviation="32" />
+        </filter>
+        <filter id="gemini-f3" width="265" height="273" x="-113" y="12" colorInterpolationFilters="sRGB" filterUnits="userSpaceOnUse">
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
+          <feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
+          <feGaussianBlur result="effect1_foregroundBlur" stdDeviation="32" />
+        </filter>
+        <filter id="gemini-f4" width="299.5" height="329" x="-41.5" y="-130" colorInterpolationFilters="sRGB" filterUnits="userSpaceOnUse">
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
+          <feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
+          <feGaussianBlur result="effect1_foregroundBlur" stdDeviation="32" />
+        </filter>
+        <filter id="gemini-f5" width="299.5" height="329" x="-45" y="-153" colorInterpolationFilters="sRGB" filterUnits="userSpaceOnUse">
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
+          <feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
+          <feGaussianBlur result="effect1_foregroundBlur" stdDeviation="32" />
+        </filter>
+        <filter id="gemini-f6" width="299.5" height="329" x="-41" y="91" colorInterpolationFilters="sRGB" filterUnits="userSpaceOnUse">
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
+          <feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
+          <feGaussianBlur result="effect1_foregroundBlur" stdDeviation="32" />
+        </filter>
+        <filter id="gemini-f7" width="299.5" height="329" x="-39" y="132" colorInterpolationFilters="sRGB" filterUnits="userSpaceOnUse">
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
+          <feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
+          <feGaussianBlur result="effect1_foregroundBlur" stdDeviation="32" />
+        </filter>
+      </defs>
+    </svg>
+  )
+}
+
 // Animated soundwave bars with idle breathing and active voice animation
 function WaveformBars({
   active = false,
@@ -807,14 +895,16 @@ export function Chatbot() {
 
               <motion.button
                 id="chatbot-open-btn"
-                initial={{ scale: 0, opacity: 0 }}
+                initial={{ scale: 0.5, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0, opacity: 0 }}
+                exit={{ scale: 0.5, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 420, damping: 26, mass: 0.5 }}
                 whileHover={{ scale: 1.08 }}
-                whileTap={{ scale: 0.94 }}
+                whileTap={{ scale: 0.93 }}
                 onClick={() => setIsOpen(true)}
                 aria-label="Open Gemini Voice Assistant"
                 className="relative flex items-center justify-center cursor-pointer select-none group"
+                style={{ willChange: "transform, opacity", transform: "translateZ(0)" }}
               >
                 {/* Small Soft Gemini Color Aura around the button */}
                 <motion.div
@@ -851,14 +941,7 @@ export function Chatbot() {
                     }}
                     className="w-5.5 h-5.5 sm:w-6 sm:h-6 flex items-center justify-center pointer-events-none"
                   >
-                    <Image
-                      src="/skills/gemini.svg"
-                      alt="Gemini"
-                      width={24}
-                      height={24}
-                      className="w-full h-full object-contain"
-                      priority
-                    />
+                    <GeminiIcon className="w-full h-full object-contain" />
                   </motion.div>
                 </div>
               </motion.button>
@@ -871,16 +954,36 @@ export function Chatbot() {
       <AnimatePresence>
         {isOpen && (
           <div className="fixed inset-0 z-50 pointer-events-none sm:inset-auto sm:right-6 sm:bottom-6 sm:w-[390px]">
+            {/* Mobile Backdrop Overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18, ease: "easeOut" }}
+              onClick={() => setIsOpen(false)}
+              className="fixed inset-0 bg-black/40 backdrop-blur-[2px] sm:hidden pointer-events-auto z-0"
+            />
+
             <motion.div
               id="chatbot-window"
-              initial={{ opacity: 0, y: 15, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 15, scale: 0.98 }}
-              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-              className="fixed inset-0 sm:relative pointer-events-auto w-full h-[100dvh] sm:w-[390px] sm:h-[590px] sm:max-h-[660px] flex flex-col rounded-none sm:rounded-[32px] bg-[#0f0f13] sm:bg-[#0f0f13]/95 backdrop-blur-2xl shadow-none sm:shadow-[0_25px_70px_-15px_rgba(0,0,0,0.85),0_0_50px_-10px_rgba(49,134,255,0.18)] overflow-hidden font-sans text-zinc-100"
+              initial={{ opacity: 0, scale: 0.82, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.82, y: 12 }}
+              transition={{
+                type: "spring",
+                stiffness: 380,
+                damping: 28,
+                mass: 0.6,
+              }}
+              style={{ willChange: "transform, opacity", transform: "translateZ(0)" }}
+              className="fixed inset-0 sm:relative pointer-events-auto w-full h-[100dvh] sm:w-[390px] sm:h-[590px] sm:max-h-[660px] flex flex-col rounded-none sm:rounded-[32px] bg-[#0f0f13] sm:bg-[#0f0f13]/95 backdrop-blur-2xl shadow-none sm:shadow-[0_25px_70px_-15px_rgba(0,0,0,0.85),0_0_50px_-10px_rgba(49,134,255,0.18)] overflow-hidden font-sans text-zinc-100 origin-bottom sm:origin-bottom-right z-10"
             >
               {/* Animated Gemini Ambient Light Aura (Subtle multi-color glow around the borderless frame) */}
-              <div
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.35 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
                 className="absolute -inset-10 rounded-[45px] opacity-35 blur-3xl pointer-events-none animate-pulse"
                 style={{
                   background:
@@ -893,13 +996,7 @@ export function Chatbot() {
                 {/* Left: Subtle branding */}
                 <div className="flex items-center gap-2">
                   <div className="w-6 h-6 rounded-full bg-[#1c1c22] flex items-center justify-center shadow-xs">
-                    <Image
-                      src="/skills/gemini.svg"
-                      alt="Gemini"
-                      width={14}
-                      height={14}
-                      className="w-3.5 h-3.5 object-contain"
-                    />
+                    <GeminiIcon className="w-3.5 h-3.5 object-contain" />
                   </div>
                   <span className="text-xs font-medium text-zinc-300 tracking-wide">
                     Shahid's AI assistant
@@ -917,7 +1014,7 @@ export function Chatbot() {
                   <button
                     onClick={handleResetChat}
                     title="New Conversation"
-                    className="w-7 h-7 rounded-full bg-zinc-800/60 hover:bg-zinc-700/70 text-zinc-400 hover:text-white transition-colors flex items-center justify-center"
+                    className="w-7 h-7 rounded-full bg-zinc-800/60 hover:bg-zinc-700/70 text-zinc-400 hover:text-white transition-colors flex items-center justify-center cursor-pointer"
                     aria-label="New Conversation"
                   >
                     <Plus size={14} />
@@ -927,7 +1024,7 @@ export function Chatbot() {
                   <button
                     onClick={() => setIsOpen(false)}
                     title="Minimize"
-                    className="w-7 h-7 rounded-full bg-zinc-800/60 hover:bg-zinc-700/70 text-zinc-400 hover:text-white transition-colors flex items-center justify-center"
+                    className="w-7 h-7 rounded-full bg-zinc-800/60 hover:bg-zinc-700/70 text-zinc-400 hover:text-white transition-colors flex items-center justify-center cursor-pointer"
                     aria-label="Minimize"
                   >
                     <ChevronDown size={14} />
@@ -937,7 +1034,7 @@ export function Chatbot() {
                   <button
                     onClick={handleCloseAndResetChat}
                     title="Close"
-                    className="w-7 h-7 rounded-full bg-zinc-800/60 hover:bg-red-500/20 text-zinc-400 hover:text-red-400 transition-colors flex items-center justify-center"
+                    className="w-7 h-7 rounded-full bg-zinc-800/60 hover:bg-red-500/20 text-zinc-400 hover:text-red-400 transition-colors flex items-center justify-center cursor-pointer"
                     aria-label="Close and Reset"
                   >
                     <X size={13} />
@@ -952,7 +1049,12 @@ export function Chatbot() {
               >
                 {/* Empty / Welcome State */}
                 {messages.length === 0 && (
-                  <div className="h-full flex flex-col justify-end space-y-4 pb-2">
+                  <motion.div
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}
+                    className="h-full flex flex-col justify-end space-y-4 pb-2"
+                  >
                     <div className="space-y-2">
                       <h4 className="text-base font-medium text-white tracking-tight">
                         Hello! Welcome to Shahid's Portfolio.
@@ -962,24 +1064,43 @@ export function Chatbot() {
                       </p>
                     </div>
 
-                    {/* Minimal Suggestion Chips */}
-                    <div className="flex flex-col gap-1.5 pt-1">
+                    {/* Minimal Suggestion Chips with smooth staggered cascade */}
+                    <motion.div
+                      initial="hidden"
+                      animate="visible"
+                      variants={{
+                        hidden: { opacity: 0 },
+                        visible: {
+                          opacity: 1,
+                          transition: { staggerChildren: 0.04, delayChildren: 0.08 },
+                        },
+                      }}
+                      className="flex flex-col gap-1.5 pt-1"
+                    >
                       {INITIAL_SUGGESTIONS.map((suggestion, i) => (
-                        <button
+                        <motion.button
                           key={i}
+                          variants={{
+                            hidden: { opacity: 0, y: 8 },
+                            visible: {
+                              opacity: 1,
+                              y: 0,
+                              transition: { duration: 0.24, ease: [0.16, 1, 0.3, 1] },
+                            },
+                          }}
                           disabled={isLoading}
                           onClick={() => handleSendMessage(suggestion)}
-                          className="text-left text-xs px-3.5 py-2.5 rounded-xl bg-zinc-900/60 hover:bg-zinc-800/80 text-zinc-300 hover:text-white transition-all flex items-center justify-between group disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none"
+                          className="text-left text-xs px-3.5 py-2.5 rounded-xl bg-zinc-900/60 hover:bg-zinc-800/80 text-zinc-300 hover:text-white transition-all flex items-center justify-between group disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none cursor-pointer"
                         >
                           <span className="truncate">{suggestion}</span>
-                          <Send
+                          <ArrowUp
                             size={12}
-                            className="text-zinc-600 group-hover:text-blue-400 opacity-0 group-hover:opacity-100 transition-all shrink-0 ml-2"
+                            className="text-zinc-600 group-hover:text-blue-400 opacity-0 group-hover:opacity-100 transition-all shrink-0 ml-2 rotate-45"
                           />
-                        </button>
+                        </motion.button>
                       ))}
-                    </div>
-                  </div>
+                    </motion.div>
+                  </motion.div>
                 )}
 
                 {/* Message List */}
@@ -1241,7 +1362,7 @@ export function Chatbot() {
                 {/* Subtle Centered Footer Note */}
                 <div className="text-center mt-2">
                   <span className="text-[10.5px] font-sans text-zinc-500 font-normal tracking-tight">
-                    Powered by Gemini 2.5 Flash
+                    Powered by Google Gemini
                   </span>
                 </div>
               </div>
