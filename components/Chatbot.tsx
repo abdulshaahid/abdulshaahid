@@ -301,7 +301,7 @@ export function Chatbot() {
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [sttSupported, setSttSupported] = useState(true)
   const [micError, setMicError] = useState<string | null>(null)
-  const [keyboardHeight, setKeyboardHeight] = useState(0)
+  const [viewportOffset, setViewportOffset] = useState(0)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -354,44 +354,72 @@ export function Chatbot() {
     }
   }, [isOpen])
 
-  // Track virtual keyboard height on mobile to raise ONLY the input box
-  // Track virtual keyboard height on mobile to raise ONLY the input box
+  // Track visual viewport panning offset across all mobile browsers
   useEffect(() => {
     if (typeof window === "undefined" || !window.visualViewport) return
 
     const handleViewportChange = () => {
       if (!window.visualViewport) return
-      if (window.innerWidth < 640) {
-        const winHeight = window.innerHeight
-        const visualHeight = window.visualViewport.height
-        const diff = Math.max(0, winHeight - visualHeight)
-        
-        // Detect iOS (including iPadOS)
-        const isIOS = 
-          /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-          (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
-          
-        // On iOS, we set keyboardHeight to 0 and rely entirely on Safari's native
-        // visual viewport pan to smoothly show the input above the keyboard.
-        if (isIOS) {
-          setKeyboardHeight(0)
-        } else {
-          setKeyboardHeight(diff > 80 ? diff : 0)
-        }
-      } else {
-        setKeyboardHeight(0)
-      }
+      
+      // When the virtual keyboard opens, modern browsers (iOS Safari, Android Chrome) 
+      // pan the visual viewport up. visualViewport.offsetTop gives us the EXACT number 
+      // of pixels that the layout has been pushed off the top of the visible screen.
+      // We track this offset to add a dynamic spacer at the top of the messages, 
+      // ensuring the earliest messages are never hidden above the physical screen!
+      setViewportOffset(window.visualViewport.offsetTop)
     }
 
     const vv = window.visualViewport
     vv.addEventListener("resize", handleViewportChange)
     vv.addEventListener("scroll", handleViewportChange)
+    
+    handleViewportChange()
 
     return () => {
       vv.removeEventListener("resize", handleViewportChange)
       vv.removeEventListener("scroll", handleViewportChange)
     }
   }, [])
+
+  // iOS Safari layout detachment prevention:
+  // We intercept touchmove events on the scrollable messages container. If the user tries
+  // to overscroll (rubber-band) past the top or bottom, we prevent the default behavior.
+  // This completely stops Safari from chaining the scroll to the visual viewport,
+  // permanently locking the layout without fighting the native keyboard pan!
+  useEffect(() => {
+    const container = document.getElementById("chatbot-messages")
+    if (!container) return
+
+    let touchStartY = 0
+
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartY = e.touches[0].clientY
+    }
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!container) return
+      
+      const touchY = e.touches[0].clientY
+      const isSwipingDown = touchY > touchStartY
+      const isSwipingUp = touchY < touchStartY
+      
+      const isAtTop = container.scrollTop <= 0
+      const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 1
+
+      // If at top and swiping down, or at bottom and swiping up, prevent rubber-banding
+      if ((isAtTop && isSwipingDown) || (isAtBottom && isSwipingUp)) {
+        if (e.cancelable) e.preventDefault()
+      }
+    }
+
+    container.addEventListener("touchstart", handleTouchStart, { passive: false })
+    container.addEventListener("touchmove", handleTouchMove, { passive: false })
+
+    return () => {
+      container.removeEventListener("touchstart", handleTouchStart)
+      container.removeEventListener("touchmove", handleTouchMove)
+    }
+  }, [isOpen])
 
   // Initialize Speech Synthesis and Speech Recognition
   useEffect(() => {
@@ -476,6 +504,22 @@ export function Chatbot() {
   useEffect(() => {
     scrollToBottom()
   }, [messages, isLoading, scrollToBottom])
+
+  // Mathematically perfect scroll anchoring:
+  // When the viewportOffset (top spacer) expands or collapses, it physically pushes the content down or up.
+  // We instantly compensate the scrollTop by the exact same amount of pixels so the messages
+  // stay perfectly glued to the user's screen with zero visual jumping!
+  const prevOffsetRef = useRef(0)
+  useEffect(() => {
+    const container = document.getElementById("chatbot-messages")
+    if (container) {
+      const delta = viewportOffset - prevOffsetRef.current
+      if (delta !== 0) {
+        container.scrollTop += delta
+      }
+    }
+    prevOffsetRef.current = viewportOffset
+  }, [viewportOffset])
 
   // Focus input when opened
   useEffect(() => {
@@ -989,9 +1033,9 @@ export function Chatbot() {
                 damping: 28,
                 mass: 0.6,
               }}
-              style={{ willChange: "transform, opacity", transform: "translateZ(0)" }}
-              className="fixed inset-0 sm:relative pointer-events-auto w-full h-[100dvh] sm:w-[390px] sm:h-[590px] sm:max-h-[660px] flex flex-col rounded-none sm:rounded-[32px] bg-[#0f0f13] sm:bg-[#0f0f13]/95 backdrop-blur-2xl shadow-none sm:shadow-[0_25px_70px_-15px_rgba(0,0,0,0.85),0_0_50px_-10px_rgba(49,134,255,0.18)] overflow-hidden font-sans text-zinc-100 origin-bottom sm:origin-bottom-right z-10 touch-none sm:touch-auto"
-            >
+                style={{ willChange: "transform, opacity", transform: "translateZ(0)" }}
+                className="fixed inset-0 sm:relative pointer-events-auto w-full h-[100dvh] sm:w-[390px] sm:h-[590px] sm:max-h-[660px] flex flex-col rounded-none sm:rounded-[32px] bg-[#0f0f13] sm:bg-[#0f0f13]/95 backdrop-blur-2xl shadow-none sm:shadow-[0_25px_70px_-15px_rgba(0,0,0,0.85),0_0_50px_-10px_rgba(49,134,255,0.18)] overflow-hidden font-sans text-zinc-100 origin-bottom sm:origin-bottom-right z-10 touch-none sm:touch-auto"
+              >
               {/* Animated Gemini Ambient Light Aura (Subtle multi-color glow around the borderless frame) */}
               <motion.div
                 initial={{ opacity: 0 }}
@@ -1059,15 +1103,29 @@ export function Chatbot() {
               {/* Messages Content Stream */}
               <div
                 id="chatbot-messages"
-                className="relative flex-1 flex flex-col overflow-y-auto overscroll-none touch-pan-y chatbot-scrollbar px-4 py-3 sm:px-5 sm:py-3 scroll-smooth z-10"
+                className="relative flex-1 overflow-y-auto overscroll-none touch-pan-y chatbot-scrollbar px-4 py-3 sm:px-5 sm:py-3 z-10"
               >
-                {/* Empty / Welcome State */}
+                {/* Safe inner wrapper: separates scrolling from flexbox bottom-alignment to prevent top-clipping */}
+                <div className="flex flex-col min-h-full">
+                  {/* Spacer pushes short content to the bottom, but collapses when content overflows */}
+                  <div className="flex-1 shrink-0" />
+
+                  {/* Top spacer for keyboard pan: ensures the top-most messages can be scrolled into view when visual viewport is panned */}
+                  {viewportOffset > 0 && (
+                    <div
+                      style={{ height: `${viewportOffset}px` }}
+                      className="shrink-0 w-full pointer-events-none"
+                      aria-hidden="true"
+                    />
+                  )}
+
+                  {/* Empty / Welcome State */}
                 {messages.length === 0 && (
                   <motion.div
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}
-                    className="mt-auto flex flex-col space-y-4 pb-2"
+                    className="flex flex-col space-y-4 pb-2"
                   >
                     <div className="space-y-2">
                       <h4 className="text-base font-medium text-white tracking-tight">
@@ -1119,128 +1177,129 @@ export function Chatbot() {
 
                 {/* Message List */}
                 {messages.length > 0 && (
-                  <div className="w-full space-y-4 mt-auto">
+                  <div className="w-full space-y-4">
                     {messages.map((message) => {
                       const isUser = message.role === "user"
 
                       return (
                         <div
-                      key={message.id}
-                      className={`flex flex-col ${
-                        isUser ? "items-end" : "items-start"
-                      } space-y-1.5`}
-                    >
-                      {/* User message: clean soft pill */}
-                      {isUser ? (
-                        <div className="bg-[#242429] text-zinc-100 rounded-2xl rounded-tr-xs px-4 py-2 text-[13.5px] max-w-[82%] shadow-xs leading-relaxed">
-                          <p className="whitespace-pre-wrap">{message.content}</p>
-                        </div>
-                      ) : (
-                        /* Assistant message: borderless natural text matching screenshot */
-                        <div className="w-full space-y-2 text-zinc-200 text-[14px]">
-                          {message.content ? (
-                            <MarkdownContent content={message.content} />
-                          ) : !message.stopped ? (
-                            <div className="flex items-center gap-1.5 py-1 text-zinc-400">
-                              <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" />
-                              <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce [animation-delay:0.2s]" />
-                              <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce [animation-delay:0.4s]" />
+                          key={message.id}
+                          className={`flex flex-col ${
+                            isUser ? "items-end" : "items-start"
+                          } space-y-1.5`}
+                        >
+                          {/* User message: clean soft pill */}
+                          {isUser ? (
+                            <div className="bg-[#242429] text-zinc-100 rounded-2xl rounded-tr-xs px-4 py-2 text-[13.5px] max-w-[82%] shadow-xs leading-relaxed">
+                              <p className="whitespace-pre-wrap">{message.content}</p>
                             </div>
-                          ) : null}
+                          ) : (
+                            /* Assistant message: borderless natural text matching screenshot */
+                            <div className="w-full space-y-2 text-zinc-200 text-[14px]">
+                              {message.content ? (
+                                <MarkdownContent content={message.content} />
+                              ) : !message.stopped ? (
+                                <div className="flex items-center gap-1.5 py-1 text-zinc-400">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" />
+                                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce [animation-delay:0.2s]" />
+                                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce [animation-delay:0.4s]" />
+                                </div>
+                              ) : null}
 
-                          {/* "You stopped this response" Indicator matching screenshot */}
-                          {message.stopped && (
-                            <div className="w-full flex items-center gap-3 my-2.5 text-xs text-zinc-500 select-none">
-                              <div className="flex-1 h-[1px] bg-zinc-800" />
-                              <span className="text-[12px] font-normal text-zinc-400 whitespace-nowrap">
-                                You stopped this response
-                              </span>
-                              <div className="flex-1 h-[1px] bg-zinc-800" />
-                            </div>
-                          )}
+                              {/* "You stopped this response" Indicator matching screenshot */}
+                              {message.stopped && (
+                                <div className="w-full flex items-center gap-3 my-2.5 text-xs text-zinc-500 select-none">
+                                  <div className="flex-1 h-[1px] bg-zinc-800" />
+                                  <span className="text-[12px] font-normal text-zinc-400 whitespace-nowrap">
+                                    You stopped this response
+                                  </span>
+                                  <div className="flex-1 h-[1px] bg-zinc-800" />
+                                </div>
+                              )}
 
-                          {/* Action Feedback Bar (Regenerate, ThumbsUp, ThumbsDown, Copy, Speaker) */}
-                          {(message.content || message.stopped) && (
-                            <div className="flex items-center gap-3 pt-0.5 text-zinc-400">
-                              {/* Regenerate / Retry button */}
-                              <button
-                                onClick={() => handleRegenerate(message.id)}
-                                disabled={isLoading}
-                                title="Regenerate response"
-                                className="text-zinc-500 hover:text-zinc-200 transition-colors disabled:opacity-40 cursor-pointer"
-                              >
-                                <RotateCcw size={13.5} />
-                              </button>
-
-                              {message.content && (
-                                <>
-                                  {/* Thumbs Up */}
+                              {/* Action Feedback Bar (Regenerate, ThumbsUp, ThumbsDown, Copy, Speaker) */}
+                              {(message.content || message.stopped) && (
+                                <div className="flex items-center gap-3 pt-0.5 text-zinc-400">
+                                  {/* Regenerate / Retry button */}
                                   <button
-                                    onClick={() => handleFeedback(message.id, true)}
-                                    title="Helpful"
-                                    className={`transition-colors hover:text-zinc-200 ${
-                                      message.liked === true
-                                        ? "text-blue-400"
-                                        : "text-zinc-500"
-                                    }`}
+                                    onClick={() => handleRegenerate(message.id)}
+                                    disabled={isLoading}
+                                    title="Regenerate response"
+                                    className="text-zinc-500 hover:text-zinc-200 transition-colors disabled:opacity-40 cursor-pointer"
                                   >
-                                    <ThumbsUp size={14} className={message.liked === true ? "fill-current" : ""} />
+                                    <RotateCcw size={13.5} />
                                   </button>
 
-                                  {/* Thumbs Down */}
-                                  <button
-                                    onClick={() => handleFeedback(message.id, false)}
-                                    title="Not helpful"
-                                    className={`transition-colors hover:text-zinc-200 ${
-                                      message.liked === false
-                                        ? "text-red-400"
-                                        : "text-zinc-500"
-                                    }`}
-                                  >
-                                    <ThumbsDown size={14} className={message.liked === false ? "fill-current" : ""} />
-                                  </button>
+                                  {message.content && (
+                                    <>
+                                      {/* Thumbs Up */}
+                                      <button
+                                        onClick={() => handleFeedback(message.id, true)}
+                                        title="Helpful"
+                                        className={`transition-colors hover:text-zinc-200 ${
+                                          message.liked === true
+                                            ? "text-blue-400"
+                                            : "text-zinc-500"
+                                        }`}
+                                      >
+                                        <ThumbsUp size={14} className={message.liked === true ? "fill-current" : ""} />
+                                      </button>
 
-                                  {/* Copy Message */}
-                                  <button
-                                    onClick={() =>
-                                      handleCopyMessage(message.id, message.content)
-                                    }
-                                    title="Copy response"
-                                    className="text-zinc-500 hover:text-zinc-200 transition-colors"
-                                  >
-                                    {copiedId === message.id ? (
-                                      <Check size={14} className="text-emerald-400" />
-                                    ) : (
-                                      <Copy size={14} />
-                                    )}
-                                  </button>
+                                      {/* Thumbs Down */}
+                                      <button
+                                        onClick={() => handleFeedback(message.id, false)}
+                                        title="Not helpful"
+                                        className={`transition-colors hover:text-zinc-200 ${
+                                          message.liked === false
+                                            ? "text-red-400"
+                                            : "text-zinc-500"
+                                        }`}
+                                      >
+                                        <ThumbsDown size={14} className={message.liked === false ? "fill-current" : ""} />
+                                      </button>
 
-                                  {/* Speak text */}
-                                  <button
-                                    onClick={() => speakText(message.content)}
-                                    title="Listen aloud"
-                                    className="text-zinc-500 hover:text-blue-400 transition-colors"
-                                  >
-                                    <Volume2 size={14} />
-                                  </button>
-                                </>
+                                      {/* Copy Message */}
+                                      <button
+                                        onClick={() =>
+                                          handleCopyMessage(message.id, message.content)
+                                        }
+                                        title="Copy response"
+                                        className="text-zinc-500 hover:text-zinc-200 transition-colors"
+                                      >
+                                        {copiedId === message.id ? (
+                                          <Check size={14} className="text-emerald-400" />
+                                        ) : (
+                                          <Copy size={14} />
+                                        )}
+                                      </button>
+
+                                      {/* Speak text */}
+                                      <button
+                                        onClick={() => speakText(message.content)}
+                                        title="Listen aloud"
+                                        className="text-zinc-500 hover:text-blue-400 transition-colors"
+                                      >
+                                        <Volume2 size={14} />
+                                      </button>
+                                    </>
+                                  )}
+                                </div>
                               )}
                             </div>
                           )}
                         </div>
-                      )}
-                    </div>
-                  )
-                })}
+                      )
+                    })}
 
-                <div ref={messagesEndRef} />
+                    <div ref={messagesEndRef} />
+                  </div>
+                )}
+                </div>
               </div>
-            )}
-          </div>
 
               <div
                 style={{
-                  paddingBottom: keyboardHeight > 0 ? `${keyboardHeight}px` : "max(env(safe-area-inset-bottom), 0.85rem)",
+                  paddingBottom: "max(env(safe-area-inset-bottom), 0.85rem)",
                 }}
                 className="relative px-4 pt-1 sm:px-5 sm:pb-3 select-none z-10"
               >
