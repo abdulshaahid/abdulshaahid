@@ -144,91 +144,17 @@ function parseInlineMarkdown(text: string): React.ReactNode[] {
   })
 }
 
-// Crisp native vector Gemini logo with subpixel anti-aliasing for Retina/iPhone displays
+// Official Google Gemini vector icon - renders flawlessly on iPhone/Safari and all platforms
 function GeminiIcon({ className = "w-6 h-6" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 296 298"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
+    <Image
+      src="/skills/gemini.svg"
+      alt="Google Gemini"
+      width={24}
+      height={24}
       className={className}
-      shapeRendering="geometricPrecision"
-    >
-      <mask
-        id="gemini-svg-mask"
-        width="296"
-        height="298"
-        x="0"
-        y="0"
-        maskUnits="userSpaceOnUse"
-        style={{ maskType: "alpha" }}
-      >
-        <path
-          fill="#3186FF"
-          d="M141.201 4.886c2.282-6.17 11.042-6.071 13.184.148l5.985 17.37a184.004 184.004 0 0 0 111.257 113.049l19.304 6.997c6.143 2.227 6.156 10.91.02 13.155l-19.35 7.082a184.001 184.001 0 0 0-109.495 109.385l-7.573 20.629c-2.241 6.105-10.869 6.121-13.133.025l-7.908-21.296a184 184 0 0 0-109.02-108.658l-19.698-7.239c-6.102-2.243-6.118-10.867-.025-13.132l20.083-7.467A183.998 183.998 0 0 0 133.291 26.28l7.91-21.394Z"
-        />
-      </mask>
-      <g mask="url(#gemini-svg-mask)">
-        <g filter="url(#gemini-f1)">
-          <ellipse cx="163" cy="149" fill="#3689FF" rx="196" ry="159" />
-        </g>
-        <g filter="url(#gemini-f2)">
-          <ellipse cx="33.5" cy="142.5" fill="#F6C013" rx="68.5" ry="72.5" />
-        </g>
-        <g filter="url(#gemini-f3)">
-          <ellipse cx="19.5" cy="148.5" fill="#F6C013" rx="68.5" ry="72.5" />
-        </g>
-        <g filter="url(#gemini-f4)">
-          <path fill="#FA4340" d="M194 10.5C172 82.5 65.5 134.333 22.5 135L144-66l50 76.5Z" />
-        </g>
-        <g filter="url(#gemini-f5)">
-          <path fill="#FA4340" d="M190.5-12.5C168.5 59.5 62 111.333 19 112L140.5-89l50 76.5Z" />
-        </g>
-        <g filter="url(#gemini-f6)">
-          <path fill="#14BB69" d="M194.5 279.5C172.5 207.5 66 155.667 23 155l121.5 201 50-76.5Z" />
-        </g>
-        <g filter="url(#gemini-f7)">
-          <path fill="#14BB69" d="M196.5 320.5C174.5 248.5 68 196.667 25 196l121.5 201 50-76.5Z" />
-        </g>
-      </g>
-      <defs>
-        <filter id="gemini-f1" width="464" height="390" x="-69" y="-46" colorInterpolationFilters="sRGB" filterUnits="userSpaceOnUse">
-          <feFlood floodOpacity="0" result="BackgroundImageFix" />
-          <feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
-          <feGaussianBlur result="effect1_foregroundBlur" stdDeviation="18" />
-        </filter>
-        <filter id="gemini-f2" width="265" height="273" x="-99" y="6" colorInterpolationFilters="sRGB" filterUnits="userSpaceOnUse">
-          <feFlood floodOpacity="0" result="BackgroundImageFix" />
-          <feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
-          <feGaussianBlur result="effect1_foregroundBlur" stdDeviation="32" />
-        </filter>
-        <filter id="gemini-f3" width="265" height="273" x="-113" y="12" colorInterpolationFilters="sRGB" filterUnits="userSpaceOnUse">
-          <feFlood floodOpacity="0" result="BackgroundImageFix" />
-          <feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
-          <feGaussianBlur result="effect1_foregroundBlur" stdDeviation="32" />
-        </filter>
-        <filter id="gemini-f4" width="299.5" height="329" x="-41.5" y="-130" colorInterpolationFilters="sRGB" filterUnits="userSpaceOnUse">
-          <feFlood floodOpacity="0" result="BackgroundImageFix" />
-          <feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
-          <feGaussianBlur result="effect1_foregroundBlur" stdDeviation="32" />
-        </filter>
-        <filter id="gemini-f5" width="299.5" height="329" x="-45" y="-153" colorInterpolationFilters="sRGB" filterUnits="userSpaceOnUse">
-          <feFlood floodOpacity="0" result="BackgroundImageFix" />
-          <feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
-          <feGaussianBlur result="effect1_foregroundBlur" stdDeviation="32" />
-        </filter>
-        <filter id="gemini-f6" width="299.5" height="329" x="-41" y="91" colorInterpolationFilters="sRGB" filterUnits="userSpaceOnUse">
-          <feFlood floodOpacity="0" result="BackgroundImageFix" />
-          <feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
-          <feGaussianBlur result="effect1_foregroundBlur" stdDeviation="32" />
-        </filter>
-        <filter id="gemini-f7" width="299.5" height="329" x="-39" y="132" colorInterpolationFilters="sRGB" filterUnits="userSpaceOnUse">
-          <feFlood floodOpacity="0" result="BackgroundImageFix" />
-          <feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
-          <feGaussianBlur result="effect1_foregroundBlur" stdDeviation="32" />
-        </filter>
-      </defs>
-    </svg>
+      priority
+    />
   )
 }
 
@@ -303,11 +229,13 @@ export function Chatbot() {
   const [isMuted, setIsMuted] = useState(false)
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [speakingMessageId, setSpeakingMessageId] = useState<string | null>(null)
   const [sttSupported, setSttSupported] = useState(true)
   const [micError, setMicError] = useState<string | null>(null)
   const [viewportOffset, setViewportOffset] = useState(0)
 
   const isAtBottomRef = useRef(true)
+  const isVoiceInputRef = useRef(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
@@ -475,6 +403,7 @@ export function Chatbot() {
             }
             if (currentTranscript) {
               setInput(currentTranscript)
+              isVoiceInputRef.current = true
             }
           }
 
@@ -568,12 +497,18 @@ export function Chatbot() {
 
   // Text to Speech playback function
   const speakText = useCallback(
-    (rawText: string) => {
+    (rawText: string, messageId?: string) => {
       if (
         isMuted ||
         typeof window === "undefined" ||
         !("speechSynthesis" in window)
       ) {
+        return
+      }
+
+      // If currently speaking this exact message, clicking speaker stops it
+      if (window.speechSynthesis.speaking && messageId && speakingMessageId === messageId) {
+        stopSpeaking()
         return
       }
 
@@ -603,25 +538,36 @@ export function Chatbot() {
           utterance.voice = preferredVoice
         }
 
-        utterance.onstart = () => setIsSpeaking(true)
-        utterance.onend = () => setIsSpeaking(false)
-        utterance.onerror = () => setIsSpeaking(false)
+        utterance.onstart = () => {
+          setIsSpeaking(true)
+          if (messageId) setSpeakingMessageId(messageId)
+        }
+        utterance.onend = () => {
+          setIsSpeaking(false)
+          setSpeakingMessageId(null)
+        }
+        utterance.onerror = () => {
+          setIsSpeaking(false)
+          setSpeakingMessageId(null)
+        }
 
         window.speechSynthesis.speak(utterance)
       } catch (err) {
         console.warn("TTS Error:", err)
         setIsSpeaking(false)
+        setSpeakingMessageId(null)
       }
     },
-    [isMuted]
+    [isMuted, speakingMessageId]
   )
 
-  const stopSpeaking = () => {
+  const stopSpeaking = useCallback(() => {
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel()
       setIsSpeaking(false)
+      setSpeakingMessageId(null)
     }
-  }
+  }, [])
 
   // Toggle Microphone (STT)
   const toggleSpeechRecognition = async () => {
@@ -640,6 +586,7 @@ export function Chatbot() {
     } else {
       stopSpeaking()
       setMicError(null)
+      isVoiceInputRef.current = true
       try {
         // Check/warm microphone permission if getUserMedia is supported
         if (typeof navigator !== "undefined" && navigator.mediaDevices?.getUserMedia) {
@@ -684,6 +631,7 @@ export function Chatbot() {
       abortControllerRef.current.abort()
     }
     stopSpeaking()
+    isVoiceInputRef.current = false
     setMessages([])
     setIsLoading(false)
   }
@@ -723,7 +671,7 @@ export function Chatbot() {
         }
       }
       if (prevUserPrompt) {
-        handleSendMessage(prevUserPrompt, assistantId)
+        handleSendMessage(prevUserPrompt, assistantId, false)
       }
     }
   }
@@ -731,10 +679,14 @@ export function Chatbot() {
   // Send message and stream response (or retry in-place if retryAssistantId is provided)
   const handleSendMessage = async (
     textToSend?: string,
-    retryAssistantId?: string
+    retryAssistantId?: string,
+    isVoice?: boolean
   ) => {
     const messageContent = (textToSend || input).trim()
     if (!messageContent || isLoading) return
+
+    const shouldSpeak = isVoice !== undefined ? isVoice : isVoiceInputRef.current
+    isVoiceInputRef.current = false
 
     stopSpeaking()
     if (isListening && recognitionRef.current) {
@@ -892,8 +844,8 @@ export function Chatbot() {
           }
         }
 
-        if (accumulatedText && !isMuted && !abortController.signal.aborted) {
-          speakText(accumulatedText)
+        if (accumulatedText && shouldSpeak && !isMuted && !abortController.signal.aborted) {
+          speakText(accumulatedText, assistantId)
         }
       } finally {
         readerRef.current = null
@@ -983,10 +935,10 @@ export function Chatbot() {
 
               <motion.button
                 id="chatbot-open-btn"
-                initial={{ scale: 0.5, opacity: 0 }}
+                initial={{ scale: 0.7, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.5, opacity: 0 }}
-                transition={{ type: "spring", stiffness: 420, damping: 26, mass: 0.5 }}
+                exit={{ scale: 0.7, opacity: 0 }}
+                transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
                 whileHover={{ scale: 1.08 }}
                 whileTap={{ scale: 0.93 }}
                 onClick={() => setIsOpen(true)}
@@ -1054,18 +1006,16 @@ export function Chatbot() {
 
             <motion.div
               id="chatbot-window"
-              initial={{ opacity: 0, scale: 0.82, y: 16 }}
+              initial={{ opacity: 0, scale: 0.94, y: 12 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.82, y: 12 }}
+              exit={{ opacity: 0, scale: 0.94, y: 10 }}
               transition={{
-                type: "spring",
-                stiffness: 380,
-                damping: 28,
-                mass: 0.6,
+                duration: 0.2,
+                ease: [0.16, 1, 0.3, 1],
               }}
-                style={{ willChange: "transform, opacity", transform: "translateZ(0)" }}
-                className="fixed inset-0 sm:relative pointer-events-auto w-full h-[100dvh] sm:w-[390px] sm:h-[590px] sm:max-h-[660px] flex flex-col rounded-none sm:rounded-[32px] bg-[#0f0f13] sm:bg-[#0f0f13]/95 backdrop-blur-2xl shadow-none sm:shadow-[0_25px_70px_-15px_rgba(0,0,0,0.85),0_0_50px_-10px_rgba(49,134,255,0.18)] overflow-hidden font-sans text-zinc-100 origin-bottom sm:origin-bottom-right z-10 touch-none sm:touch-auto"
-              >
+              style={{ willChange: "transform, opacity", transform: "translateZ(0)" }}
+              className="fixed inset-0 sm:relative pointer-events-auto w-full h-[100dvh] sm:w-[390px] sm:h-[590px] sm:max-h-[660px] flex flex-col rounded-none sm:rounded-[32px] bg-[#0f0f13] sm:bg-[#0f0f13]/95 backdrop-blur-2xl shadow-none sm:shadow-[0_25px_70px_-15px_rgba(0,0,0,0.85),0_0_50px_-10px_rgba(49,134,255,0.18)] overflow-hidden font-sans text-zinc-100 origin-bottom sm:origin-bottom-right z-10 touch-none sm:touch-auto"
+            >
               {/* Animated Gemini Ambient Light Aura (Subtle multi-color glow around the borderless frame) */}
               <motion.div
                 initial={{ opacity: 0 }}
@@ -1192,7 +1142,7 @@ export function Chatbot() {
                             },
                           }}
                           disabled={isLoading}
-                          onClick={() => handleSendMessage(suggestion)}
+                          onClick={() => handleSendMessage(suggestion, undefined, false)}
                           className="text-left text-xs px-3.5 py-2.5 rounded-xl bg-zinc-900/60 hover:bg-zinc-800/80 text-zinc-300 hover:text-white transition-all flex items-center justify-between group disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none cursor-pointer"
                         >
                           <span className="truncate">{suggestion}</span>
@@ -1306,9 +1256,13 @@ export function Chatbot() {
 
                                       {/* Speak text */}
                                       <button
-                                        onClick={() => speakText(message.content)}
-                                        title="Listen aloud"
-                                        className="text-zinc-500 hover:text-blue-400 transition-colors"
+                                        onClick={() => speakText(message.content, message.id)}
+                                        title={speakingMessageId === message.id ? "Stop listening" : "Listen aloud"}
+                                        className={`transition-colors cursor-pointer ${
+                                          speakingMessageId === message.id
+                                            ? "text-blue-400"
+                                            : "text-zinc-500 hover:text-blue-400"
+                                        }`}
                                       >
                                         <Volume2 size={14} />
                                       </button>
@@ -1392,7 +1346,10 @@ export function Chatbot() {
                     id="chatbot-input"
                     type="text"
                     value={input}
-                    onChange={(e) => setInput(e.target.value)}
+                    onChange={(e) => {
+                      setInput(e.target.value)
+                      isVoiceInputRef.current = false
+                    }}
                     onClick={(e) => {
                       // Safari edge case fix: If the keyboard was manually closed but the input 
                       // remains technically focused, tapping it again won't pan the screen up.
@@ -1488,8 +1445,7 @@ export function Chatbot() {
                 {/* Subtle Centered Footer Note */}
                 <div className="text-center mt-2">
                   <span className="text-[10.5px] font-sans text-zinc-500 font-normal tracking-tight">
-                    Powered by Google Gemini
-                  </span>
+Crafted by Shahid ✧ Gemini                  </span>
                 </div>
               </div>
             </motion.div>
