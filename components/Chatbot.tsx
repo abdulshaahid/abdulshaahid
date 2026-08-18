@@ -364,16 +364,15 @@ export function Chatbot() {
       if (window.innerWidth < 640) {
         const winHeight = window.innerHeight
         const visualHeight = window.visualViewport.height
-        
         const diff = Math.max(0, winHeight - visualHeight)
         
         // Detect iOS (including iPadOS)
         const isIOS = 
           /iPad|iPhone|iPod/.test(navigator.userAgent) || 
           (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
-
-        // On iOS, let Safari natively pan the visual viewport.
-        // We will prevent the user from swiping it back down using CSS touch-action.
+          
+        // On iOS, we set keyboardHeight to 0 and rely entirely on Safari's native
+        // visual viewport pan to smoothly show the input above the keyboard.
         if (isIOS) {
           setKeyboardHeight(0)
         } else {
@@ -1060,7 +1059,7 @@ export function Chatbot() {
               {/* Messages Content Stream */}
               <div
                 id="chatbot-messages"
-                className="relative flex-1 overflow-y-auto overscroll-contain touch-pan-y chatbot-scrollbar px-4 py-3 sm:px-5 sm:py-3 space-y-4 scroll-smooth z-10"
+                className="relative flex-1 flex flex-col overflow-y-auto overscroll-none touch-pan-y chatbot-scrollbar px-4 py-3 sm:px-5 sm:py-3 scroll-smooth z-10"
               >
                 {/* Empty / Welcome State */}
                 {messages.length === 0 && (
@@ -1068,7 +1067,7 @@ export function Chatbot() {
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}
-                    className="h-full flex flex-col justify-end space-y-4 pb-2"
+                    className="mt-auto flex flex-col space-y-4 pb-2"
                   >
                     <div className="space-y-2">
                       <h4 className="text-base font-medium text-white tracking-tight">
@@ -1119,11 +1118,13 @@ export function Chatbot() {
                 )}
 
                 {/* Message List */}
-                {messages.map((message) => {
-                  const isUser = message.role === "user"
+                {messages.length > 0 && (
+                  <div className="w-full space-y-4 mt-auto">
+                    {messages.map((message) => {
+                      const isUser = message.role === "user"
 
-                  return (
-                    <div
+                      return (
+                        <div
                       key={message.id}
                       className={`flex flex-col ${
                         isUser ? "items-end" : "items-start"
@@ -1234,13 +1235,12 @@ export function Chatbot() {
 
                 <div ref={messagesEndRef} />
               </div>
+            )}
+          </div>
 
               <div
                 style={{
-                  paddingBottom:
-                    keyboardHeight > 0
-                      ? `${keyboardHeight + 6}px`
-                      : "max(env(safe-area-inset-bottom), 0.85rem)",
+                  paddingBottom: keyboardHeight > 0 ? `${keyboardHeight}px` : "max(env(safe-area-inset-bottom), 0.85rem)",
                 }}
                 className="relative px-4 pt-1 sm:px-5 sm:pb-3 select-none z-10"
               >
