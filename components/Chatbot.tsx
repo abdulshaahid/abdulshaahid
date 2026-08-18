@@ -1,8 +1,12 @@
 "use client"
 
-import React, { useState, useEffect, useRef, useCallback } from "react"
+import React, { useState, useEffect, useLayoutEffect, useRef, useCallback } from "react"
 import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
+
+const useIsomorphicLayoutEffect =
+  typeof window !== "undefined" ? useLayoutEffect : useEffect
+
 import {
   X,
   Send,
@@ -303,6 +307,7 @@ export function Chatbot() {
   const [micError, setMicError] = useState<string | null>(null)
   const [viewportOffset, setViewportOffset] = useState(0)
 
+  const isAtBottomRef = useRef(true)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
@@ -325,12 +330,22 @@ export function Chatbot() {
   const scrollToBottom = useCallback((smooth = true) => {
     const container = document.getElementById('chatbot-messages')
     if (container) {
+      isAtBottomRef.current = true
       if (smooth) {
         container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' })
       } else {
         container.scrollTop = container.scrollHeight
       }
     }
+  }, [])
+
+  // Track manual scrolling to know if the user is viewing recent messages or reading history
+  const handleScroll = useCallback(() => {
+    const container = document.getElementById('chatbot-messages')
+    if (!container) return
+    const atBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight <= 45
+    isAtBottomRef.current = atBottom
   }, [])
 
   // Lock background scroll on mobile and desktop when chat is open
@@ -366,7 +381,17 @@ export function Chatbot() {
       // of pixels that the layout has been pushed off the top of the visible screen.
       // We track this offset to add a dynamic spacer at the top of the messages, 
       // ensuring the earliest messages are never hidden above the physical screen!
-      setViewportOffset(window.visualViewport.offsetTop)
+      const offset = window.visualViewport.offsetTop
+      setViewportOffset(offset)
+
+      // When the visual viewport resizes or pans during keyboard appearance/dismissal,
+      // keep the messages pinned to the bottom if the user is at the bottom.
+      if (isAtBottomRef.current) {
+        const container = document.getElementById("chatbot-messages")
+        if (container) {
+          container.scrollTop = container.scrollHeight - container.clientHeight
+        }
+      }
     }
 
     const vv = window.visualViewport
@@ -507,15 +532,19 @@ export function Chatbot() {
 
   // Mathematically perfect scroll anchoring:
   // When the viewportOffset (top spacer) expands or collapses, it physically pushes the content down or up.
-  // We instantly compensate the scrollTop by the exact same amount of pixels so the messages
-  // stay perfectly glued to the user's screen with zero visual jumping!
+  // If the user was at the bottom, we ensure they stay anchored to the bottom.
+  // If the user had manually scrolled up to read earlier history, we compensate by delta so their visual position doesn't jump.
   const prevOffsetRef = useRef(0)
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const container = document.getElementById("chatbot-messages")
     if (container) {
-      const delta = viewportOffset - prevOffsetRef.current
-      if (delta !== 0) {
-        container.scrollTop += delta
+      if (isAtBottomRef.current) {
+        container.scrollTop = container.scrollHeight - container.clientHeight
+      } else {
+        const delta = viewportOffset - prevOffsetRef.current
+        if (delta !== 0) {
+          container.scrollTop += delta
+        }
       }
     }
     prevOffsetRef.current = viewportOffset
@@ -524,6 +553,7 @@ export function Chatbot() {
   // Focus input when opened
   useEffect(() => {
     if (isOpen) {
+      isAtBottomRef.current = true
       setTimeout(() => {
         inputRef.current?.focus()
         scrollToBottom(false)
@@ -1103,6 +1133,7 @@ export function Chatbot() {
               {/* Messages Content Stream */}
               <div
                 id="chatbot-messages"
+                onScroll={handleScroll}
                 className="relative flex-1 overflow-y-auto overscroll-none touch-pan-y chatbot-scrollbar px-4 py-3 sm:px-5 sm:py-3 z-10"
               >
                 {/* Safe inner wrapper: separates scrolling from flexbox bottom-alignment to prevent top-clipping */}
@@ -1377,7 +1408,16 @@ export function Chatbot() {
                       }
                     }}
                     onFocus={() => {
+                      isAtBottomRef.current = true
                       setTimeout(() => scrollToBottom(true), 200)
+                    }}
+                    onBlur={() => {
+                      if (isAtBottomRef.current) {
+                        const container = document.getElementById("chatbot-messages")
+                        if (container) {
+                          container.scrollTop = container.scrollHeight - container.clientHeight
+                        }
+                      }
                     }}
                     onKeyDown={handleKeyDown}
                     placeholder={
