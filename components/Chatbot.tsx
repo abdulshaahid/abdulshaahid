@@ -319,13 +319,17 @@ export function Chatbot() {
     }, 4500)
   }, [])
 
-  // Auto-scroll on messages change
+  // Auto-scroll on messages change — uses scrollTop instead of scrollIntoView
+  // because scrollIntoView can scroll the visual viewport on mobile, causing
+  // the chat to visually jump when the keyboard opens
   const scrollToBottom = useCallback((smooth = true) => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({
-        behavior: smooth ? "smooth" : "auto",
-        block: "end",
-      })
+    const container = document.getElementById('chatbot-messages')
+    if (container) {
+      if (smooth) {
+        container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' })
+      } else {
+        container.scrollTop = container.scrollHeight
+      }
     }
   }, [])
 
@@ -351,6 +355,7 @@ export function Chatbot() {
   }, [isOpen])
 
   // Track virtual keyboard height on mobile to raise ONLY the input box
+  // Track virtual keyboard height on mobile to raise ONLY the input box
   useEffect(() => {
     if (typeof window === "undefined" || !window.visualViewport) return
 
@@ -359,10 +364,20 @@ export function Chatbot() {
       if (window.innerWidth < 640) {
         const winHeight = window.innerHeight
         const visualHeight = window.visualViewport.height
+        
         const diff = Math.max(0, winHeight - visualHeight)
-        setKeyboardHeight(diff > 80 ? diff : 0)
-        if (diff > 80) {
-          setTimeout(() => scrollToBottom(true), 150)
+        
+        // Detect iOS (including iPadOS)
+        const isIOS = 
+          /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+          (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+
+        // On iOS, let Safari natively pan the visual viewport.
+        // We will prevent the user from swiping it back down using CSS touch-action.
+        if (isIOS) {
+          setKeyboardHeight(0)
+        } else {
+          setKeyboardHeight(diff > 80 ? diff : 0)
         }
       } else {
         setKeyboardHeight(0)
@@ -377,7 +392,7 @@ export function Chatbot() {
       vv.removeEventListener("resize", handleViewportChange)
       vv.removeEventListener("scroll", handleViewportChange)
     }
-  }, [scrollToBottom])
+  }, [])
 
   // Initialize Speech Synthesis and Speech Recognition
   useEffect(() => {
@@ -976,7 +991,7 @@ export function Chatbot() {
                 mass: 0.6,
               }}
               style={{ willChange: "transform, opacity", transform: "translateZ(0)" }}
-              className="fixed inset-0 sm:relative pointer-events-auto w-full h-[100dvh] sm:w-[390px] sm:h-[590px] sm:max-h-[660px] flex flex-col rounded-none sm:rounded-[32px] bg-[#0f0f13] sm:bg-[#0f0f13]/95 backdrop-blur-2xl shadow-none sm:shadow-[0_25px_70px_-15px_rgba(0,0,0,0.85),0_0_50px_-10px_rgba(49,134,255,0.18)] overflow-hidden font-sans text-zinc-100 origin-bottom sm:origin-bottom-right z-10"
+              className="fixed inset-0 sm:relative pointer-events-auto w-full h-[100dvh] sm:w-[390px] sm:h-[590px] sm:max-h-[660px] flex flex-col rounded-none sm:rounded-[32px] bg-[#0f0f13] sm:bg-[#0f0f13]/95 backdrop-blur-2xl shadow-none sm:shadow-[0_25px_70px_-15px_rgba(0,0,0,0.85),0_0_50px_-10px_rgba(49,134,255,0.18)] overflow-hidden font-sans text-zinc-100 origin-bottom sm:origin-bottom-right z-10 touch-none sm:touch-auto"
             >
               {/* Animated Gemini Ambient Light Aura (Subtle multi-color glow around the borderless frame) */}
               <motion.div
@@ -1045,7 +1060,7 @@ export function Chatbot() {
               {/* Messages Content Stream */}
               <div
                 id="chatbot-messages"
-                className="relative flex-1 overflow-y-auto overscroll-contain chatbot-scrollbar px-4 py-3 sm:px-5 sm:py-3 space-y-4 scroll-smooth z-10"
+                className="relative flex-1 overflow-y-auto overscroll-contain touch-pan-y chatbot-scrollbar px-4 py-3 sm:px-5 sm:py-3 space-y-4 scroll-smooth z-10"
               >
                 {/* Empty / Welcome State */}
                 {messages.length === 0 && (
@@ -1220,14 +1235,12 @@ export function Chatbot() {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Bottom Input Area matching screenshot layout */}
               <div
                 style={{
                   paddingBottom:
                     keyboardHeight > 0
                       ? `${keyboardHeight + 6}px`
                       : "max(env(safe-area-inset-bottom), 0.85rem)",
-                  transition: "padding-bottom 0.15s ease-out",
                 }}
                 className="relative px-4 pt-1 sm:px-5 sm:pb-3 select-none z-10"
               >
@@ -1290,6 +1303,20 @@ export function Chatbot() {
                     type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
+                    onClick={(e) => {
+                      // Safari edge case fix: If the keyboard was manually closed but the input 
+                      // remains technically focused, tapping it again won't pan the screen up.
+                      // We detect if it's tapped while already focused AND the keyboard is closed 
+                      // (visualViewport is full height). If so, we force a quick blur/focus cycle 
+                      // so Safari natively pans it.
+                      if (window.innerWidth < 640 && document.activeElement === inputRef.current) {
+                        const vv = window.visualViewport
+                        if (vv && Math.abs(window.innerHeight - vv.height) < 80) {
+                          inputRef.current?.blur()
+                          setTimeout(() => inputRef.current?.focus(), 10)
+                        }
+                      }
+                    }}
                     onFocus={() => {
                       setTimeout(() => scrollToBottom(true), 200)
                     }}
