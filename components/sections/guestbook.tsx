@@ -1,6 +1,10 @@
+"use client"
+
 import React from "react"
+import { motion } from "framer-motion"
 import { ArrowUpRight } from "lucide-react"
 import { GreenHighlight } from "@/components/ui/geometric"
+import { VIEWPORT_CONFIG, SMOOTH_EASE } from "@/lib/motion"
 
 interface Testimonial {
   company: string
@@ -141,14 +145,26 @@ export function Guestbook() {
       {/* Central Content Container */}
       <div className="w-[calc(100%-3rem)] sm:w-[calc(100%-4.5rem)] md:w-[calc(100%-5rem)] lg:max-w-[1220px] xl:max-w-[1300px] mx-auto border-l border-r border-zinc-800/90 relative bg-[#09090b] overflow-hidden">
         {/* Intro Header */}
-        <div className="px-6 sm:px-10 lg:px-12 py-8 sm:py-10 border-b border-zinc-800/90">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={VIEWPORT_CONFIG}
+          transition={{ duration: 0.5, ease: SMOOTH_EASE }}
+          className="px-6 sm:px-10 lg:px-12 py-8 sm:py-10 border-b border-zinc-800/90"
+        >
           <p className="font-bricolage text-base sm:text-xl lg:text-2xl text-zinc-100 leading-snug max-w-2xl text-pretty font-medium">
-            Words from friends and <GreenHighlight>collaborators</GreenHighlight> who know me best.
+            Words from friends and <GreenHighlight delay={0.15}>collaborators</GreenHighlight> who know me best.
           </p>
-        </div>
+        </motion.div>
 
         {/* Horizontal Rolling Testimonial Marquees */}
-        <div className="py-3.5 sm:py-4 space-y-2 sm:space-y-2.5 relative overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_24px,black_calc(100%-24px),transparent)] sm:[mask-image:linear-gradient(to_right,transparent,black_48px,black_calc(100%-48px),transparent)]">
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={VIEWPORT_CONFIG}
+          transition={{ duration: 0.52, ease: SMOOTH_EASE, delay: 0.08 }}
+          className="py-3.5 sm:py-4 space-y-2 sm:space-y-2.5 relative overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_24px,black_calc(100%-24px),transparent)] sm:[mask-image:linear-gradient(to_right,transparent,black_48px,black_calc(100%-48px),transparent)]"
+        >
           {/* Row 1 - Rolling Left */}
           <div
             className="flex items-center gap-2 sm:gap-2.5 animate-skills-left hover:[animation-play-state:paused]"
@@ -168,13 +184,11 @@ export function Guestbook() {
               <TestimonialCard key={`row2-${idx}-${item.company}`} item={item} />
             ))}
           </div>
-        </div>
-
-        {/* Button */}
-      
+        </motion.div>
       </div>
     </section>
   )
 }
+
 
 

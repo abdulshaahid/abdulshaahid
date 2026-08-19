@@ -1,8 +1,10 @@
 "use client"
 
 import React, { useState } from "react"
+import { motion } from "framer-motion"
 import { ChevronDown, ArrowUpRight } from "lucide-react"
 import { GreenHighlight } from "@/components/ui/geometric"
+import { VIEWPORT_CONFIG, SMOOTH_EASE } from "@/lib/motion"
 
 interface FAQItem {
   id: string
@@ -68,25 +70,39 @@ export function FAQ() {
       {/* Central Content Container */}
       <div className="w-[calc(100%-3rem)] sm:w-[calc(100%-4.5rem)] md:w-[calc(100%-5rem)] lg:max-w-[1220px] xl:max-w-[1300px] mx-auto border-l border-r border-zinc-800/90 relative bg-[#09090b]">
         {/* Section Header */}
-        <div className="px-6 sm:px-10 lg:px-12 py-8 sm:py-10 border-b border-dashed border-zinc-800/90 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={VIEWPORT_CONFIG}
+          transition={{ duration: 0.5, ease: SMOOTH_EASE }}
+          className="px-6 sm:px-10 lg:px-12 py-8 sm:py-10 border-b border-dashed border-zinc-800/90 flex flex-col sm:flex-row sm:items-end justify-between gap-4"
+        >
           <div>
             <p className="font-bricolage text-base sm:text-xl lg:text-2xl text-zinc-100 leading-snug max-w-2xl text-pretty font-medium">
               Got questions? Here is everything about{" "}
-              <GreenHighlight>how I work and build</GreenHighlight>.
+              <GreenHighlight delay={0.15}>how I work and build</GreenHighlight>.
             </p>
           </div>
           <span className="text-xs font-mono text-zinc-500 shrink-0">
             FAQ // WORKFLOW & PROCESS
           </span>
-        </div>
+        </motion.div>
 
         {/* FAQ Accordion List */}
         <div className="divide-y divide-dashed divide-zinc-800/90">
           {faqs.map((faq, index) => {
             const isOpen = openIndex === index
             return (
-              <div
+              <motion.div
                 key={faq.id}
+                initial={{ opacity: 0, y: 14 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={VIEWPORT_CONFIG}
+                transition={{
+                  duration: 0.45,
+                  ease: SMOOTH_EASE,
+                  delay: 0.04 + index * 0.05,
+                }}
                 className="group transition-colors hover:bg-white/[0.015]"
               >
                 <button
@@ -131,13 +147,19 @@ export function FAQ() {
                     </p>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             )
           })}
         </div>
 
         {/* Bottom CTA Bar */}
-        <div className="p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-zinc-800/90 text-xs font-mono text-zinc-400">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={VIEWPORT_CONFIG}
+          transition={{ duration: 0.45, ease: SMOOTH_EASE, delay: 0.1 }}
+          className="p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-zinc-800/90 text-xs font-mono text-zinc-400"
+        >
           <span>Have a question not answered here?</span>
           <a
             href="#contact"
@@ -146,8 +168,9 @@ export function FAQ() {
             <span className="leading-none translate-y-[0.75px]">Ask me directly</span>
             <ArrowUpRight size={13} className="shrink-0 text-zinc-400 group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
           </a>
-        </div>
+        </motion.div>
       </div>
     </section>
   )
 }
+

@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useRef, useEffect } from "react"
+import { motion } from "framer-motion"
 import {
   Mail,
   Phone,
@@ -14,6 +15,7 @@ import {
   ChevronDown,
 } from "lucide-react"
 import { GreenHighlight } from "@/components/ui/geometric"
+import { VIEWPORT_CONFIG, SMOOTH_EASE } from "@/lib/motion"
 
 function WhatsAppIcon({ className = "w-4 h-4" }: { className?: string }) {
   return (
@@ -74,17 +76,36 @@ export function Contact() {
         {/* Intro Header */}
         <div className="p-8 sm:p-12 lg:p-16">
           <div className="max-w-2xl">
-            <h2 className="font-bricolage text-xl sm:text-2xl lg:text-3xl font-bold text-white tracking-tight">
-              Got something <GreenHighlight>worth building?</GreenHighlight>
-            </h2>
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={VIEWPORT_CONFIG}
+              transition={{ duration: 0.5, ease: SMOOTH_EASE }}
+            >
+              <h2 className="font-bricolage text-xl sm:text-2xl lg:text-3xl font-bold text-white tracking-tight">
+                Got something <GreenHighlight delay={0.15}>worth building?</GreenHighlight>
+              </h2>
+            </motion.div>
 
-            <p className="mt-4 text-[13.5px] sm:text-[14.5px] text-zinc-400 font-light leading-relaxed">
+            <motion.p
+              initial={{ opacity: 0, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={VIEWPORT_CONFIG}
+              transition={{ duration: 0.48, ease: SMOOTH_EASE, delay: 0.06 }}
+              className="mt-4 text-[13.5px] sm:text-[14.5px] text-zinc-400 font-light leading-relaxed"
+            >
               Open to new opportunities, freelance projects, and creative collaborations.
               Have an ambitious idea or need frontend engineering? Let's talk.
-            </p>
+            </motion.p>
 
             {/* Action Buttons Row */}
-            <div className="mt-8 flex flex-wrap items-center gap-2.5 sm:gap-3">
+            <motion.div
+              initial={{ opacity: 0, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={VIEWPORT_CONFIG}
+              transition={{ duration: 0.5, ease: SMOOTH_EASE, delay: 0.12 }}
+              className="mt-8 flex flex-wrap items-center gap-2.5 sm:gap-3"
+            >
               {/* Say Hello with attached Copy Email */}
               <div className="inline-flex items-center rounded-full bg-zinc-200 text-black hover:bg-white transition-all shadow-sm group h-9">
                 <a
@@ -246,7 +267,7 @@ export function Contact() {
                 <Instagram size={14} className="shrink-0" />
                 <span className="leading-none translate-y-[0.75px]">Instagram</span>
               </a>
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>

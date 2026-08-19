@@ -1,7 +1,11 @@
+"use client"
+
 import React from "react"
 import Image from "next/image"
+import { motion } from "framer-motion"
 import { CrosshairMarker, GreenHighlight } from "@/components/ui/geometric"
-import { Code2, Lightbulb, GraduationCap, BookOpen, ChevronsUpDown, Globe } from "lucide-react"
+import { Lightbulb, BookOpen, ChevronsUpDown, Globe } from "lucide-react"
+import { VIEWPORT_CONFIG, SMOOTH_EASE } from "@/lib/motion"
 
 const principles = [
   {
@@ -37,44 +41,70 @@ export function About() {
 
         {/* Intro Statement */}
         <div className="px-6 sm:px-10 lg:px-12 py-10 sm:py-14">
-          <h2 className="font-bricolage text-base sm:text-xl lg:text-2xl font-normal text-zinc-100 leading-snug max-w-3xl text-pretty">
-            I build with{" "}
-            <GreenHighlight>
-              clarity, structure, and a bias toward automation
-            </GreenHighlight>{" "}
-            — because software should feel simple, even when the logic behind it isn't.
-          </h2>
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={VIEWPORT_CONFIG}
+            transition={{ duration: 0.5, ease: SMOOTH_EASE }}
+          >
+            <h2 className="font-bricolage text-base sm:text-xl lg:text-2xl font-normal text-zinc-100 leading-snug max-w-3xl text-pretty">
+              I build with{" "}
+              <GreenHighlight delay={0.15}>
+                clarity, structure, and a bias toward automation
+              </GreenHighlight>{" "}
+              — because software should feel simple, even when the logic behind it isn't.
+            </h2>
+          </motion.div>
 
-          {/* 4 Philosophy Blocks (2x2 Grid) with Bricolage Grotesque */}
+          {/* 4 Philosophy Blocks (2x2 Grid) with subtle stagger */}
           <div className="mt-10 sm:mt-12 grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10 lg:gap-12">
-            {principles.map((item) => (
-              <div key={item.title} className="space-y-2.5">
+            {principles.map((item, idx) => (
+              <motion.div
+                key={item.title}
+                initial={{ opacity: 0, y: 14 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={VIEWPORT_CONFIG}
+                transition={{ duration: 0.45, ease: SMOOTH_EASE, delay: 0.06 + idx * 0.05 }}
+                className="space-y-2.5"
+              >
                 <h3 className="font-bricolage text-base sm:text-lg lg:text-xl font-bold text-white tracking-tight">
                   {item.title}
                 </h3>
                 <p className="text-[13.5px] sm:text-[14.5px] text-zinc-400 font-light leading-relaxed">
                   {item.description}
                 </p>
-              </div>
+              </motion.div>
             ))}
           </div>
 
-          {/* Experience & Education Section (Screenshot Design) */}
+          {/* Experience & Education Section */}
           <div className="mt-14 pt-10 border-t border-zinc-800/90 space-y-12">
             {/* Section Header */}
-            <div className="flex items-center justify-between">
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={VIEWPORT_CONFIG}
+              transition={{ duration: 0.45, ease: SMOOTH_EASE }}
+              className="flex items-center justify-between"
+            >
               <div className="flex items-center gap-2">
                 <h3 className="font-bricolage text-sm sm:text-base font-bold uppercase tracking-wider text-zinc-100">
                   Experience & Education
                 </h3>
               </div>
               <span className="text-xs font-mono text-zinc-500">TIMELINE // CAREER</span>
-            </div>
+            </motion.div>
 
             {/* Timeline Cards Container */}
             <div className="space-y-12">
               {/* 1. Experience: Trawayl */}
-              <div className="space-y-4">
+              <motion.div
+                initial={{ opacity: 0, y: 14 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={VIEWPORT_CONFIG}
+                transition={{ duration: 0.48, ease: SMOOTH_EASE, delay: 0.04 }}
+                className="space-y-4"
+              >
                 {/* Company Header */}
                 <div className="flex items-start gap-3.5">
                   <div className="w-6 h-6 flex items-center justify-center shrink-0 mt-0.5">
@@ -96,7 +126,7 @@ export function About() {
                   </div>
                 </div>
 
-                {/* Nested Roles with Tree Connector (Aligned directly under main) */}
+                {/* Nested Roles with Tree Connector */}
                 <div className="relative pt-1">
                   <div className="space-y-7">
                     {/* Role 1: Design Engineer & Frontend Lead */}
@@ -187,7 +217,6 @@ export function About() {
                             "UX Architecture",
                             "Business Ownership",
                             "Frontend Architecture",
-                            
                           ].map((skill) => (
                             <span
                               key={skill}
@@ -201,10 +230,16 @@ export function About() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
 
               {/* 2. Experience: Freelance */}
-              <div className="space-y-4 pt-2">
+              <motion.div
+                initial={{ opacity: 0, y: 14 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={VIEWPORT_CONFIG}
+                transition={{ duration: 0.48, ease: SMOOTH_EASE, delay: 0.08 }}
+                className="space-y-4 pt-2"
+              >
                 {/* Company / Client Header */}
                 <div className="flex items-start gap-3.5">
                   <div className="w-6 h-6 flex items-center justify-center shrink-0 mt-0.5">
@@ -279,10 +314,16 @@ export function About() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
 
               {/* 3. Experience: Luminar Technolab */}
-              <div className="space-y-4 pt-2">
+              <motion.div
+                initial={{ opacity: 0, y: 14 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={VIEWPORT_CONFIG}
+                transition={{ duration: 0.48, ease: SMOOTH_EASE, delay: 0.12 }}
+                className="space-y-4 pt-2"
+              >
                 {/* Company Header */}
                 <div className="flex items-start gap-3.5">
                   <div className="w-6 h-6 flex items-center justify-center shrink-0 mt-0.5">
@@ -364,10 +405,16 @@ export function About() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
 
-              {/* 3. Education: MEA Engineering College */}
-              <div className="space-y-4 pt-2">
+              {/* 4. Education: MEA Engineering College */}
+              <motion.div
+                initial={{ opacity: 0, y: 14 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={VIEWPORT_CONFIG}
+                transition={{ duration: 0.48, ease: SMOOTH_EASE, delay: 0.16 }}
+                className="space-y-4 pt-2"
+              >
                 {/* Institution Header */}
                 <div className="flex items-start gap-3.5">
                   <div className="w-6 h-6 flex items-center justify-center shrink-0 mt-0.5">
@@ -389,7 +436,7 @@ export function About() {
                   </div>
                 </div>
 
-                {/* Nested Degree with Curved Tree Node (Aligned directly under main) */}
+                {/* Nested Degree with Curved Tree Node */}
                 <div className="relative pt-1">
                   <div className="relative flex items-start gap-3.5 group">
                     {/* Fluid curved track line bending 90 degrees horizontally into the last row of tags */}
@@ -432,7 +479,7 @@ export function About() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             </div>
           </div>
         </div>
@@ -440,3 +487,4 @@ export function About() {
     </section>
   )
 }
+

@@ -1,5 +1,9 @@
+"use client"
+
 import React from "react"
+import { motion } from "framer-motion"
 import { Github, Linkedin, Instagram, Mail, Phone, ArrowUp } from "lucide-react"
+import { VIEWPORT_CONFIG, SMOOTH_EASE } from "@/lib/motion"
 
 export function Footer() {
   return (
@@ -8,7 +12,13 @@ export function Footer() {
         <div className="p-8 sm:p-12 lg:p-14 space-y-12">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12">
             {/* Left Column: Brand, Bio & Status */}
-            <div className="md:col-span-7 space-y-4">
+            <motion.div
+              initial={{ opacity: 0, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={VIEWPORT_CONFIG}
+              transition={{ duration: 0.5, ease: SMOOTH_EASE }}
+              className="md:col-span-7 space-y-4"
+            >
               <div className="flex items-center gap-2">
                 <span className="font-bricolage text-base sm:text-lg font-bold text-white tracking-tight">
                   Mohamed Abdul Shahid
@@ -68,10 +78,16 @@ export function Footer() {
                   <Phone size={14} />
                 </a>
               </div>
-            </div>
+            </motion.div>
 
             {/* Right Column: Navigation */}
-            <div className="md:col-span-5 grid grid-cols-2 gap-6">
+            <motion.div
+              initial={{ opacity: 0, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={VIEWPORT_CONFIG}
+              transition={{ duration: 0.5, ease: SMOOTH_EASE, delay: 0.08 }}
+              className="md:col-span-5 grid grid-cols-2 gap-6"
+            >
               <div>
                 <h4 className="font-bricolage text-xs font-bold uppercase tracking-wider text-zinc-300 mb-3">
                   Navigation
@@ -84,7 +100,7 @@ export function Footer() {
                   </li>
                   <li>
                     <a href="#about" className="text-zinc-400 hover:text-white transition-colors">
-                      01 // Philosophy
+                      01 // About
                     </a>
                   </li>
                   <li>
@@ -160,18 +176,23 @@ export function Footer() {
                   </a>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
 
           {/* Bottom Bar: Copyright & Specs */}
-          <div className="mt-12 pt-6 border-t border-zinc-800/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono text-zinc-400">
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={VIEWPORT_CONFIG}
+            transition={{ duration: 0.45, ease: SMOOTH_EASE, delay: 0.14 }}
+            className="mt-12 pt-6 border-t border-zinc-800/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono text-zinc-400"
+          >
             <p>© {new Date().getFullYear()} Mohamed Abdul Shahid. All rights reserved.</p>
-            <div className="flex items-center gap-3">
-              <span>Next.js + Tailwind CSS</span>
-            </div>
-          </div>
+           
+          </motion.div>
         </div>
       </div>
     </footer>
   )
 }
+

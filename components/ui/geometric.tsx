@@ -1,5 +1,9 @@
-import React from "react"
+"use client"
+
+import React, { useRef } from "react"
+import { motion, useInView } from "framer-motion"
 import { cn } from "@/lib/utils"
+import { VIEWPORT_CONFIG } from "@/lib/motion"
 
 /**
  * Mathematically centered SVG crosshair marker.
@@ -37,7 +41,11 @@ export function CrosshairMarker({ className }: { className?: string }) {
  */
 export function SlopeDivider({ className }: { className?: string }) {
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      viewport={VIEWPORT_CONFIG}
+      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
         "relative w-full h-5 sm:h-6 bg-diagonal-hatch border-y border-zinc-800/90 overflow-visible",
         className
@@ -54,27 +62,44 @@ export function SlopeDivider({ className }: { className?: string }) {
         {/* Bottom-Right Corner */}
         <CrosshairMarker className="top-full left-full" />
       </div>
-    </div>
+    </motion.div>
   )
 }
 
 /**
- * Signature bright green marker highlight with multi-line box-decoration-break clone support.
- * Wraps seamlessly across lines with independent background pills and thin text.
+ * Signature bright green marker highlight with multi-line box-decoration-break clone support
+ * and smooth viewport-triggered left-to-right sweep animation.
  */
 export function GreenHighlight({
   children,
   className,
+  delay = 0.2,
 }: {
   children: React.ReactNode
   className?: string
+  delay?: number
 }) {
+  const ref = useRef<HTMLSpanElement>(null)
+  const isInView = useInView(ref, { once: true, margin: "-40px" })
+
   return (
     <span
+      ref={ref}
       className={cn(
-        "inline bg-[#1fd38a] text-black font-normal px-1.5 py-0.5 rounded-[4px] [box-decoration-break:clone] [-webkit-box-decoration-break:clone] leading-relaxed mx-0.5",
+        "inline text-black font-normal px-2 py-0.5 rounded-[7px] [box-decoration-break:clone] [-webkit-box-decoration-break:clone] leading-relaxed mx-0.5",
         className
       )}
+      style={{
+        backgroundImage: "linear-gradient(to right, #1fd38a, #1fd38a)",
+        backgroundRepeat: "no-repeat",
+        backgroundPosition: "left center",
+        backgroundSize: isInView ? "100% 100%" : "0% 100%",
+        transitionProperty: "background-size",
+        transitionDuration: "600ms",
+        transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
+        transitionDelay: `${delay}s`,
+        willChange: "background-size",
+      }}
     >
       {children}
     </span>
@@ -99,3 +124,4 @@ export function GreenBadge({
     </span>
   )
 }
+

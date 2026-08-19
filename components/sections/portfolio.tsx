@@ -2,8 +2,10 @@
 
 import React, { useRef, useEffect, useState } from "react"
 import Image from "next/image"
+import { motion } from "framer-motion"
 import { Github, ExternalLink } from "lucide-react"
 import { CrosshairMarker, GreenHighlight } from "@/components/ui/geometric"
+import { VIEWPORT_CONFIG, SMOOTH_EASE } from "@/lib/motion"
 
 interface ProjectItem {
   id: string
@@ -272,14 +274,20 @@ export function Portfolio() {
       {/* Central Content Container */}
       <div className="w-[calc(100%-3rem)] sm:w-[calc(100%-4.5rem)] md:w-[calc(100%-5rem)] lg:max-w-[1220px] xl:max-w-[1300px] mx-auto border-l border-r border-zinc-800/90 relative bg-[#09090b]">
         {/* Section Header Banner */}
-        <div className="px-6 sm:px-10 lg:px-12 py-8 sm:py-10 border-b border-dashed border-zinc-800/90">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={VIEWPORT_CONFIG}
+          transition={{ duration: 0.5, ease: SMOOTH_EASE }}
+          className="px-6 sm:px-10 lg:px-12 py-8 sm:py-10 border-b border-dashed border-zinc-800/90"
+        >
           <p className="font-bricolage text-base sm:text-xl lg:text-2xl text-zinc-100 leading-snug max-w-2xl text-pretty font-medium">
             Think of{" "}
-            <GreenHighlight>
+            <GreenHighlight delay={0.15}>
               side-projects and client work as my personal lab
             </GreenHighlight>
           </p>
-        </div>
+        </motion.div>
 
         {/* Grid: 1 Column on Mobile, iPad, and iPad Pro (< xl), 2 Columns on Desktop (xl+) */}
         <div className="grid grid-cols-1 xl:grid-cols-2 relative">
@@ -287,8 +295,16 @@ export function Portfolio() {
             const isLeftCol = index % 2 === 0
 
             return (
-              <article
+              <motion.article
                 key={project.id}
+                initial={{ opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={VIEWPORT_CONFIG}
+                transition={{
+                  duration: 0.5,
+                  ease: SMOOTH_EASE,
+                  delay: (index % 2) * 0.08,
+                }}
                 className={`relative flex flex-col sm:flex-row items-start sm:items-center gap-5 p-6 sm:p-7 md:p-8 hover:bg-white/[0.015] transition-colors duration-150 border-b border-dashed border-zinc-800/90 group ${
                   isLeftCol ? "xl:border-r border-dashed border-zinc-800/90" : ""
                 }`}
@@ -298,7 +314,13 @@ export function Portfolio() {
                 <CrosshairMarker className="top-0 left-full" />
 
                 {/* Left Side: 16:9 Video / Image Preview */}
-                <div className="relative aspect-video w-full sm:w-[220px] md:w-[250px] lg:w-[280px] xl:w-[240px] shrink-0 overflow-hidden rounded-xl bg-zinc-950 shadow-lg shadow-black/60 group-hover:shadow-xl group-hover:shadow-black/80 transition-shadow">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.98 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={VIEWPORT_CONFIG}
+                  transition={{ duration: 0.52, ease: SMOOTH_EASE }}
+                  className="relative aspect-video w-full sm:w-[220px] md:w-[250px] lg:w-[280px] xl:w-[240px] shrink-0 overflow-hidden rounded-xl bg-zinc-950 shadow-lg shadow-black/60 group-hover:shadow-xl group-hover:shadow-black/80 transition-shadow"
+                >
                   {project.videoUrl ? (
                     <ProjectVideo src={project.videoUrl} />
                   ) : project.imageUrl ? (
@@ -316,7 +338,7 @@ export function Portfolio() {
                       Preview Coming Soon
                     </div>
                   )}
-                </div>
+                </motion.div>
 
                 {/* Right Side: Project Details & Action Buttons */}
                 <div className="flex-1 flex flex-col justify-between self-stretch min-w-0">
@@ -409,7 +431,7 @@ export function Portfolio() {
                     )}
                   </div>
                 </div>
-              </article>
+              </motion.article>
             )
           })}
 

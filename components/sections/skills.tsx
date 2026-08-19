@@ -1,6 +1,10 @@
+"use client"
+
 import React from "react"
 import Image from "next/image"
+import { motion } from "framer-motion"
 import { GreenHighlight } from "@/components/ui/geometric"
+import { VIEWPORT_CONFIG, SMOOTH_EASE } from "@/lib/motion"
 
 interface SkillItem {
   name: string
@@ -103,16 +107,22 @@ export function Skills() {
       {/* Central Content Container */}
       <div className="w-[calc(100%-3rem)] sm:w-[calc(100%-4.5rem)] md:w-[calc(100%-5rem)] lg:max-w-[1220px] xl:max-w-[1300px] mx-auto border-l border-r border-zinc-800/90 relative bg-[#09090b]">
         {/* Intro Header Banner */}
-        <div className="px-6 sm:px-10 lg:px-12 py-8 sm:py-10 border-b border-dashed border-zinc-800/90">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={VIEWPORT_CONFIG}
+          transition={{ duration: 0.5, ease: SMOOTH_EASE }}
+          className="px-6 sm:px-10 lg:px-12 py-8 sm:py-10 border-b border-dashed border-zinc-800/90"
+        >
           <p className="font-bricolage text-base sm:text-xl lg:text-2xl text-zinc-100 leading-snug max-w-2xl text-pretty font-medium">
             Technologies powering{" "}
-            <GreenHighlight>
+            <GreenHighlight delay={0.15}>
               modern web applications & digital experiences
             </GreenHighlight>
           </p>
-        </div>
+        </motion.div>
 
-        {/* Horizontal Categorized Rows */}
+        {/* Horizontal Categorized Rows with subtle stagger */}
         <div className="divide-y divide-zinc-800/80">
           {skillsData.map((category, categoryIndex) => {
             const mid = Math.ceil(category.skills.length / 2)
@@ -120,8 +130,16 @@ export function Skills() {
             const row2Skills = category.skills.slice(mid)
 
             return (
-              <div
+              <motion.div
                 key={category.num}
+                initial={{ opacity: 0, y: 14 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={VIEWPORT_CONFIG}
+                transition={{
+                  duration: 0.48,
+                  ease: SMOOTH_EASE,
+                  delay: 0.05 + categoryIndex * 0.06,
+                }}
                 className="flex flex-col sm:flex-row items-start sm:items-center hover:bg-white/[0.015] transition-colors group/row overflow-hidden"
               >
                 {/* Left Column: Number + Category Title with dashed vertical divider */}
@@ -193,17 +211,24 @@ export function Skills() {
                     )}
                   </div>
                 </div>
-              </div>
+              </motion.div>
             )
           })}
         </div>
 
-        {/* Bottom Specs  Bar */}
-        <div className="px-6 sm:px-10 lg:px-12 py-4 border-t border-dashed border-zinc-800/90 flex items-center justify-between flex-wrap gap-2 text-xs font-mono text-zinc-400">
+        {/* Bottom Specs Bar */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={VIEWPORT_CONFIG}
+          transition={{ duration: 0.45, ease: SMOOTH_EASE, delay: 0.1 }}
+          className="px-6 sm:px-10 lg:px-12 py-4 border-t border-dashed border-zinc-800/90 flex items-center justify-between flex-wrap gap-2 text-xs font-mono text-zinc-400"
+        >
           <span>* Scalable modular architecture & ultra-smooth interaction standards</span>
           <span className="text-zinc-500">ECOSYSTEM // 2025</span>
-        </div>
+        </motion.div>
       </div>
     </section>
   )
 }
+
