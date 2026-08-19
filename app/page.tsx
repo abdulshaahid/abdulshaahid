@@ -3,19 +3,22 @@
 import type React from "react"
 import { useState, useCallback } from "react"
 
+import dynamic from "next/dynamic"
+
 import { SplashScreen } from "@/components/ui/splash-screen"
 import { Navbar } from "@/components/sections/navbar"
 import { Hero } from "@/components/sections/hero"
-import { Portfolio } from "@/components/sections/portfolio"
-import { GithubActivity } from "@/components/sections/github-activity"
 import { About } from "@/components/sections/about"
-import { Skills } from "@/components/sections/skills"
-import { Writing } from "@/components/sections/writing"
-import { Guestbook } from "@/components/sections/guestbook"
-import { Contact } from "@/components/sections/contact"
-import { Footer } from "@/components/sections/footer"
+import { Portfolio } from "@/components/sections/portfolio"
 import { SlopeDivider } from "@/components/ui/geometric"
 import { WavePattern } from "@/components/ui/wave-pattern"
+import { Footer } from "@/components/sections/footer"
+
+const GithubActivity = dynamic(() => import("@/components/sections/github-activity").then((m) => m.GithubActivity))
+const Skills = dynamic(() => import("@/components/sections/skills").then((m) => m.Skills))
+const Writing = dynamic(() => import("@/components/sections/writing").then((m) => m.Writing))
+const Guestbook = dynamic(() => import("@/components/sections/guestbook").then((m) => m.Guestbook))
+const Contact = dynamic(() => import("@/components/sections/contact").then((m) => m.Contact))
 
 // ===== Mouse Following Ambient Glow =====
 const MouseBackground = ({ children }: { children: React.ReactNode }) => {

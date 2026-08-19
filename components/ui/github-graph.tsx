@@ -197,20 +197,13 @@ export function GithubGraph() {
           <div className="grid grid-flow-col grid-rows-7 gap-[3px] sm:gap-[3.5px] pt-1">
             {weeks.map((week, wIdx) =>
               week.map((day, dIdx) => (
-                <motion.div
+                <div
                   key={`${wIdx}-${dIdx}`}
-                  initial={{ opacity: 0, scale: 0.4 }}
-                  animate={
-                    isInView
-                      ? { opacity: 1, scale: 1 }
-                      : { opacity: 0, scale: 0.4 }
-                  }
-                  transition={{
-                    duration: 0.35,
-                    delay: wIdx * 0.012 + dIdx * 0.008,
-                    ease: "easeOut",
+                  style={{
+                    transitionDelay: isInView
+                      ? `${(wIdx * 0.012 + dIdx * 0.008).toFixed(3)}s`
+                      : "0s",
                   }}
-                  whileHover={{ scale: 1.18, zIndex: 10 }}
                   onMouseEnter={(e) => {
                     const rect = e.currentTarget.getBoundingClientRect()
                     setHoveredDay(day)
@@ -220,9 +213,9 @@ export function GithubGraph() {
                     })
                   }}
                   onMouseLeave={() => setHoveredDay(null)}
-                  className={`w-[10.5px] h-[10.5px] sm:w-[12px] sm:h-[12px] rounded-[2px] cursor-pointer transition-transform duration-100 ${
+                  className={`w-[10.5px] h-[10.5px] sm:w-[12px] sm:h-[12px] rounded-[2px] cursor-pointer transition-all duration-300 ease-out hover:scale-125 hover:z-10 ${
                     COLOR_LEVELS[day.level]
-                  }`}
+                  } ${isInView ? "opacity-100 scale-100" : "opacity-0 scale-50"}`}
                 />
               ))
             )}

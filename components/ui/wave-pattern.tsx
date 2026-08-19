@@ -116,8 +116,15 @@ const WavePattern: React.FC<WavePatternProps> = ({
 
     let phase = 0;
     const xStep = 10; // Optimized step size for ultra-smooth 60-120fps on all devices
+    let lastWaveFrame = 0;
 
-    const animate = () => {
+    const animate = (timestamp: number = 0) => {
+      if (timestamp - lastWaveFrame < 32 && lastWaveFrame !== 0) {
+        animationFrameId.current = requestAnimationFrame(animate);
+        return;
+      }
+      lastWaveFrame = timestamp;
+
       const width = cssWidth || canvas.clientWidth || window.innerWidth;
       const height = cssHeight || canvas.clientHeight || window.innerHeight;
 
@@ -138,52 +145,82 @@ const WavePattern: React.FC<WavePatternProps> = ({
       const maxDistance = isMobile ? 140 : 200;
       const maxDistanceSq = maxDistance * maxDistance;
 
-      for (let row = -1; row < rows; row++) {
-        const baseY = row * currentSpacing;
+      if (!fadeEdges) {
+        ctx.strokeStyle = `rgba(${strokeColor}, ${opacity})`;
+        ctx.beginPath();
 
-        let lineAlpha = opacity;
-        if (fadeEdges) {
+        for (let row = -1; row < rows; row++) {
+          const baseY = row * currentSpacing;
+          let firstPoint = true;
+
+          for (let x = -20; x <= width + 20; x += xStep) {
+            let y = baseY + Math.sin((x / waveLength) * (Math.PI * 2) + phase + row * 0.15) * currentAmplitude;
+
+            if (interactive && mouseX > -500) {
+              const dx = x - mouseX;
+              const dy = y - mouseY;
+              const distSq = dx * dx + dy * dy;
+
+              if (distSq < maxDistanceSq) {
+                const dist = Math.sqrt(distSq);
+                const force = Math.cos((dist / maxDistance) * (Math.PI / 2));
+                const pushY = (dy / (dist || 1)) * force * 24;
+                y += pushY;
+              }
+            }
+
+            if (firstPoint) {
+              ctx.moveTo(x, y);
+              firstPoint = false;
+            } else {
+              ctx.lineTo(x, y);
+            }
+          }
+        }
+
+        ctx.stroke();
+      } else {
+        for (let row = -1; row < rows; row++) {
+          const baseY = row * currentSpacing;
+          let lineAlpha = opacity;
           const verticalProgress = baseY / height;
           if (verticalProgress < 0.15) {
             lineAlpha *= verticalProgress / 0.15;
           } else if (verticalProgress > 0.85) {
             lineAlpha *= (1 - verticalProgress) / 0.15;
           }
-        }
 
-        ctx.strokeStyle = `rgba(${strokeColor}, ${lineAlpha.toFixed(3)})`;
-        ctx.beginPath();
+          ctx.strokeStyle = `rgba(${strokeColor}, ${lineAlpha.toFixed(3)})`;
+          ctx.beginPath();
 
-        let firstPoint = true;
+          let firstPoint = true;
 
-        for (let x = -20; x <= width + 20; x += xStep) {
-          // Banknote sine wave calculation
-          let y = baseY + Math.sin((x / waveLength) * (Math.PI * 2) + phase + row * 0.15) * currentAmplitude;
+          for (let x = -20; x <= width + 20; x += xStep) {
+            let y = baseY + Math.sin((x / waveLength) * (Math.PI * 2) + phase + row * 0.15) * currentAmplitude;
 
-          // Interactive mouse wave distortion
-          if (interactive && mouseX > -500) {
-            const dx = x - mouseX;
-            const dy = y - mouseY;
-            const distSq = dx * dx + dy * dy;
+            if (interactive && mouseX > -500) {
+              const dx = x - mouseX;
+              const dy = y - mouseY;
+              const distSq = dx * dx + dy * dy;
 
-            if (distSq < maxDistanceSq) {
-              const dist = Math.sqrt(distSq);
-              const force = Math.cos((dist / maxDistance) * (Math.PI / 2));
-              // Push waves away smoothly around cursor
-              const pushY = (dy / (dist || 1)) * force * 24;
-              y += pushY;
+              if (distSq < maxDistanceSq) {
+                const dist = Math.sqrt(distSq);
+                const force = Math.cos((dist / maxDistance) * (Math.PI / 2));
+                const pushY = (dy / (dist || 1)) * force * 24;
+                y += pushY;
+              }
+            }
+
+            if (firstPoint) {
+              ctx.moveTo(x, y);
+              firstPoint = false;
+            } else {
+              ctx.lineTo(x, y);
             }
           }
 
-          if (firstPoint) {
-            ctx.moveTo(x, y);
-            firstPoint = false;
-          } else {
-            ctx.lineTo(x, y);
-          }
+          ctx.stroke();
         }
-
-        ctx.stroke();
       }
 
       animationFrameId.current = requestAnimationFrame(animate);
@@ -191,7 +228,22 @@ const WavePattern: React.FC<WavePatternProps> = ({
 
     animate();
 
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        if (animationFrameId.current) {
+          cancelAnimationFrame(animationFrameId.current);
+          animationFrameId.current = undefined;
+        }
+      } else {
+        if (!animationFrameId.current) {
+          animate();
+        }
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
     return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("resize", throttledResize);
       if (resizeObserver) {
         resizeObserver.disconnect();

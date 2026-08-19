@@ -250,9 +250,13 @@ export function Grainient({
     let isPageVisible = !document.hidden;
     const t0 = performance.now();
 
+    let lastRenderTime = 0;
     const loop = (t: number) => {
-      (program.uniforms.iTime as { value: number }).value = (t - t0) * 0.001;
-      renderer.render({ scene: mesh });
+      if (t - lastRenderTime >= 32) {
+        lastRenderTime = t;
+        (program.uniforms.iTime as { value: number }).value = (t - t0) * 0.001;
+        renderer.render({ scene: mesh });
+      }
       raf = requestAnimationFrame(loop);
     };
 

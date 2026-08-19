@@ -8,7 +8,7 @@ const SMOOTH_EASE = [0.16, 1, 0.3, 1] as const;
 // Hard safety net: if something stalls (slow network, a hung "load" event),
 // never let the splash block the app past this.
 const MAX_WAIT_MS = 4000;
-const EXIT_DELAY_MS = 280;
+const EXIT_DELAY_MS = 120;
 
 interface SplashScreenProps {
   onComplete: () => void;
@@ -51,7 +51,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
   const tick = useCallback(() => {
     const current = displayedProgress.current;
     const target = targetProgress.current;
-    const next = reducedMotion.current ? target : current + (target - current) * 0.18;
+    const next = reducedMotion.current ? target : current + (target - current) * 0.22;
     displayedProgress.current = Math.abs(target - next) < 0.001 ? target : next;
 
     if (barRef.current) {
@@ -92,36 +92,13 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
     }
 
     async function loadAllAssets() {
-      const safety = setTimeout(finishSplash, MAX_WAIT_MS);
+      const safety = setTimeout(finishSplash, 600);
 
       try {
-        const fontsReady =
-          typeof document !== "undefined" && document.fonts
-            ? document.fonts.ready
-            : Promise.resolve();
-
-        const windowLoaded = new Promise<void>((resolve) => {
-          if (document.readyState === "complete") {
-            resolve();
-          } else {
-            window.addEventListener("load", () => resolve(), { once: true });
-          }
-        });
-
-        const shapeSrcs = [1, 2, 3, 4, 5].map((n) => `/shapes/Shape%20${n}.svg`);
-
-        // Everything fires in parallel instead of a sequential waterfall —
-        // total wait becomes the SLOWEST asset, not the sum of all of them.
-        // Each task nudges the shared progress target as it resolves; the
-        // rAF loop above smooths the visible bar between those nudges.
-        await Promise.all([
-          fontsReady.then(() => bumpProgress(0.3)),
-          preloadImage("/head.webp").then(() => bumpProgress(0.55)),
-          preloadImage("/me.webp").then(() => bumpProgress(0.8)),
-          Promise.all(shapeSrcs.map(preloadImage)).then(() => bumpProgress(0.92)),
-          windowLoaded.then(() => bumpProgress(0.95)),
-        ]);
-
+        if (typeof document !== "undefined" && document.fonts) {
+          await document.fonts.ready;
+        }
+        bumpProgress(1);
         clearTimeout(safety);
         finishSplash();
       } catch {
@@ -146,8 +123,8 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
           initial={{ opacity: 1 }}
           exit={{
             opacity: 0,
-            scale: 1.02,
-            transition: { duration: 0.55, ease: SMOOTH_EASE },
+            scale: 1.01,
+            transition: { duration: 0.35, ease: SMOOTH_EASE },
           }}
           style={{ willChange: "opacity, transform" }}
           className="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-black select-none pointer-events-auto"
@@ -155,13 +132,15 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
           {/* Main Visual: Center Head Cutout (Present Immediately from Frame 0) */}
           <div className="relative flex items-center justify-center">
             <div className="relative flex items-center justify-center shrink-0">
-              <div className="relative w-28 h-32 sm:w-32 sm:h-36 md:w-36 md:h-40 drop-shadow-2xl">
-                <Image
+              <div className="relative w-28 h-32 sm:w-32 sm:h-36 md:w-36 md:h-40 drop-shadow-2xl flex items-center justify-center">
+                <img
                   src="/head.webp"
                   alt="Mohamed Abdul Shahid"
-                  fill
-                  priority
-                  className="object-contain"
+                  fetchPriority="high"
+                  decoding="sync"
+                  width="144"
+                  height="160"
+                  className="w-full h-full object-contain pointer-events-none"
                 />
               </div>
             </div>

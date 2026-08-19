@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useRef, useEffect } from "react"
+import React, { useRef, useEffect, useState } from "react"
 import Image from "next/image"
 import { Github, ExternalLink } from "lucide-react"
 import { CrosshairMarker, GreenHighlight } from "@/components/ui/geometric"
@@ -18,13 +18,40 @@ interface ProjectItem {
 }
 
 function ProjectVideo({ src }: { src: string }) {
+  const containerRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
+  const [shouldLoad, setShouldLoad] = useState(false)
 
+  // 1. Viewport pre-loader: start loading when approaching within 600px
   useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+
+    if (!("IntersectionObserver" in window)) {
+      setShouldLoad(true)
+      return
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setShouldLoad(true)
+          observer.disconnect()
+        }
+      },
+      { rootMargin: "600px 0px" }
+    )
+
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  // 2. Playback controller: play when visible, pause when offscreen
+  useEffect(() => {
+    if (!shouldLoad) return
     const video = videoRef.current
     if (!video) return
 
-    // Ensure muted DOM property is explicitly true for reliable autoplay policies
     video.muted = true
     video.defaultMuted = true
 
@@ -32,24 +59,16 @@ function ProjectVideo({ src }: { src: string }) {
       if (video.paused) {
         const promise = video.play()
         if (promise !== undefined) {
-          promise.catch(() => {
-            // Autoplay catch handler to prevent unhandled rejection
-          })
+          promise.catch(() => {})
         }
       }
     }
 
-    // Initial attempt to play
     playVideo()
 
-    // Resume when screen is turned back on or tab visibility changes
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        playVideo()
-      }
+      if (document.visibilityState === "visible") playVideo()
     }
-
-    // Resume on window focus and pageshow (device wake / unlock events)
     const handleFocus = () => playVideo()
     const handlePageShow = () => playVideo()
 
@@ -57,7 +76,6 @@ function ProjectVideo({ src }: { src: string }) {
     window.addEventListener("focus", handleFocus)
     window.addEventListener("pageshow", handlePageShow)
 
-    // IntersectionObserver to play when in viewport and pause when scrolled away
     let observer: IntersectionObserver | null = null
     if ("IntersectionObserver" in window) {
       observer = new IntersectionObserver(
@@ -79,14 +97,11 @@ function ProjectVideo({ src }: { src: string }) {
       document.removeEventListener("visibilitychange", handleVisibilityChange)
       window.removeEventListener("focus", handleFocus)
       window.removeEventListener("pageshow", handlePageShow)
-      if (observer) {
-        observer.disconnect()
-      }
+      if (observer) observer.disconnect()
     }
-  }, [src])
+  }, [shouldLoad, src])
 
   const handleEnded = () => {
-    // Fail-safe loop restart in case browser halts at end of stream on sleep
     if (videoRef.current) {
       videoRef.current.currentTime = 0
       videoRef.current.play().catch(() => {})
@@ -94,17 +109,23 @@ function ProjectVideo({ src }: { src: string }) {
   }
 
   return (
-    <video
-      ref={videoRef}
-      src={src}
-      autoPlay
-      loop
-      muted
-      playsInline
-      preload="auto"
-      onEnded={handleEnded}
-      className="w-full h-full object-cover scale-[1.05] pointer-events-none"
-    />
+    <div ref={containerRef} className="w-full h-full relative">
+      {shouldLoad ? (
+        <video
+          ref={videoRef}
+          src={src}
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="metadata"
+          onEnded={handleEnded}
+          className="w-full h-full object-cover scale-[1.05] pointer-events-none"
+        />
+      ) : (
+        <div className="w-full h-full bg-zinc-950" />
+      )}
+    </div>
   )
 }
 
@@ -286,6 +307,7 @@ export function Portfolio() {
                         src={project.imageUrl}
                         alt={project.title}
                         fill
+                        sizes="(max-width: 640px) 100vw, 280px"
                         className="object-cover object-center"
                       />
                     </div>
@@ -348,6 +370,8 @@ export function Portfolio() {
                               <img
                                 src={iconUrl}
                                 alt=""
+                                loading="lazy"
+                                decoding="async"
                                 className="w-3 h-3 object-contain shrink-0"
                               />
                             )}
