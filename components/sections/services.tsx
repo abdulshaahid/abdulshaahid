@@ -1,2 +1,2 @@
-export { Writing as Services } from "./writing"
-export { Writing } from "./writing"
+export { FAQ as Services, FAQ } from "./faq"
+

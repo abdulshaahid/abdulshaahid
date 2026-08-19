@@ -25,16 +25,16 @@ export function GithubActivity() {
             regularly on GitHub.
           </p>
 
-          <div className="mt-4">
+          <div className="mt-4 flex justify-center">
             <a
               href="https://github.com/abdulshaahid"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-mono font-medium text-black bg-zinc-200 hover:bg-white transition-all shadow-sm group"
+              className="inline-flex items-center gap-2 px-4 h-9 rounded-full text-xs font-mono font-medium text-black bg-zinc-200 hover:bg-white transition-all shadow-sm group"
             >
-              <Github size={13} className="text-black" />
-              <span>Explore on GitHub</span>
-              <ArrowUpRight size={12} className="text-black group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              <Github size={13} className="text-black shrink-0" />
+              <span className="leading-none translate-y-[0.75px]">Explore on GitHub</span>
+              <ArrowUpRight size={12} className="text-black group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
             </a>
           </div>
         </div>

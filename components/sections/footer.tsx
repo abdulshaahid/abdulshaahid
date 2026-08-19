@@ -1,5 +1,5 @@
 import React from "react"
-import { Github, Linkedin, Instagram, Mail, ArrowUp } from "lucide-react"
+import { Github, Linkedin, Instagram, Mail, Phone, ArrowUp } from "lucide-react"
 
 export function Footer() {
   return (
@@ -10,7 +10,6 @@ export function Footer() {
             {/* Left Column: Brand, Bio & Status */}
             <div className="md:col-span-7 space-y-4">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#1fd38a] animate-pulse" />
                 <span className="font-bricolage text-base sm:text-lg font-bold text-white tracking-tight">
                   Mohamed Abdul Shahid
                 </span>
@@ -22,7 +21,7 @@ export function Footer() {
 
               {/* Status indicator */}
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900  text-[11px] font-mono text-zinc-300">
-                <span>Available for <span className="text-[#1fd38a]">full-time & freelance</span> projects</span>
+                <span>Available for <span className="text-[#1fd38a]">projects</span> </span>
               </div>
 
               {/* Social Icons */}
@@ -60,6 +59,13 @@ export function Footer() {
                   className="w-8 h-8 rounded-lg bg-zinc-900  flex items-center justify-center text-zinc-400 hover:text-white hover:border-zinc-700 transition-colors"
                 >
                   <Mail size={14} />
+                </a>
+                <a
+                  href="tel:+916282669441"
+                  aria-label="Phone"
+                  className="w-8 h-8 rounded-lg bg-zinc-900  flex items-center justify-center text-zinc-400 hover:text-[#1fd38a] hover:border-zinc-700 transition-colors"
+                >
+                  <Phone size={14} />
                 </a>
               </div>
             </div>
@@ -162,8 +168,6 @@ export function Footer() {
             <p>© {new Date().getFullYear()} Mohamed Abdul Shahid. All rights reserved.</p>
             <div className="flex items-center gap-3">
               <span>Next.js + Tailwind CSS</span>
-              <span className="text-zinc-700">•</span>
-              <span className="text-emerald-400">Ultra-Smooth UI</span>
             </div>
           </div>
         </div>

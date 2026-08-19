@@ -150,7 +150,7 @@ export function About() {
                           ].map((tech) => (
                             <span
                               key={tech}
-                              className="inline-flex items-center justify-center rounded-full bg-[#16161a] hover:bg-zinc-800/90 border border-zinc-800 hover:border-zinc-700 px-2.5 pt-[3.5px] pb-[2.5px] text-[11px] sm:text-xs font-mono text-zinc-400 hover:text-zinc-200 transition-all cursor-default leading-none"
+                              className="inline-flex items-center justify-center rounded-full bg-[#161616] hover:bg-zinc-800/90 border border-white/[0.06] hover:border-white/15 px-2.5 pt-[4.5px] pb-[3.5px] text-[11px] sm:text-xs font-mono text-zinc-400 hover:text-zinc-200 transition-all cursor-default leading-none"
                             >
                               {tech}
                             </span>
@@ -191,7 +191,7 @@ export function About() {
                           ].map((skill) => (
                             <span
                               key={skill}
-                              className="inline-flex items-center justify-center rounded-full bg-[#16161a] hover:bg-zinc-800/90 border border-zinc-800 hover:border-zinc-700 px-2.5 pt-[3.5px] pb-[2.5px] text-[11px] sm:text-xs font-mono text-zinc-400 hover:text-zinc-200 transition-all cursor-default leading-none"
+                              className="inline-flex items-center justify-center rounded-full bg-[#161616] hover:bg-zinc-800/90 border border-white/[0.06] hover:border-white/15 px-2.5 pt-[4.5px] pb-[3.5px] text-[11px] sm:text-xs font-mono text-zinc-400 hover:text-zinc-200 transition-all cursor-default leading-none"
                             >
                               {skill}
                             </span>
@@ -270,7 +270,7 @@ export function About() {
                         ].map((skill) => (
                           <span
                             key={skill}
-                            className="inline-flex items-center justify-center rounded-full bg-[#16161a] hover:bg-zinc-800/90 border border-zinc-800 hover:border-zinc-700 px-2.5 pt-[3.5px] pb-[2.5px] text-[11px] sm:text-xs font-mono text-zinc-400 hover:text-zinc-200 transition-all cursor-default leading-none"
+                            className="inline-flex items-center justify-center rounded-full bg-[#161616] hover:bg-zinc-800/90 border border-white/[0.06] hover:border-white/15 px-2.5 pt-[4.5px] pb-[3.5px] text-[11px] sm:text-xs font-mono text-zinc-400 hover:text-zinc-200 transition-all cursor-default leading-none"
                           >
                             <span className="leading-none">{skill}</span>
                           </span>
@@ -355,7 +355,7 @@ export function About() {
                         ].map((skill) => (
                           <span
                             key={skill}
-                            className="inline-flex items-center justify-center rounded-full bg-[#16161a] hover:bg-zinc-800/90 border border-zinc-800 hover:border-zinc-700 px-2.5 pt-[3.5px] pb-[2.5px] text-[11px] sm:text-xs font-mono text-zinc-400 hover:text-zinc-200 transition-all cursor-default leading-none"
+                            className="inline-flex items-center justify-center rounded-full bg-[#161616] hover:bg-zinc-800/90 border border-white/[0.06] hover:border-white/15 px-2.5 pt-[4.5px] pb-[3.5px] text-[11px] sm:text-xs font-mono text-zinc-400 hover:text-zinc-200 transition-all cursor-default leading-none"
                           >
                             <span className="leading-none">{skill}</span>
                           </span>
@@ -423,7 +423,7 @@ export function About() {
                         ].map((course) => (
                           <span
                             key={course}
-                            className="inline-flex items-center justify-center rounded-full bg-[#16161a] hover:bg-zinc-800/90 border border-zinc-800 hover:border-zinc-700 px-2.5 pt-[3.5px] pb-[2.5px] text-[11px] sm:text-xs font-mono text-zinc-400 hover:text-zinc-200 transition-all cursor-default leading-none"
+                            className="inline-flex items-center justify-center rounded-full bg-[#161616] hover:bg-zinc-800/90 border border-white/[0.06] hover:border-white/15 px-2.5 pt-[4.5px] pb-[3.5px] text-[11px] sm:text-xs font-mono text-zinc-400 hover:text-zinc-200 transition-all cursor-default leading-none"
                           >
                             {course}
                           </span>

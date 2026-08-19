@@ -141,10 +141,10 @@ export function FAQ() {
           <span>Have a question not answered here?</span>
           <a
             href="#contact"
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-mono font-medium text-zinc-200 hover:text-white bg-zinc-900 hover:bg-zinc-800 rounded-full transition-all border border-zinc-800 hover:border-zinc-700"
+            className="inline-flex items-center gap-1.5 px-4 h-9 rounded-full text-xs font-mono font-medium text-zinc-200 hover:text-white bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 transition-all group"
           >
-            <span>Ask me directly</span>
-            <ArrowUpRight size={13} />
+            <span className="leading-none translate-y-[0.75px]">Ask me directly</span>
+            <ArrowUpRight size={13} className="shrink-0 text-zinc-400 group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
           </a>
         </div>
       </div>
