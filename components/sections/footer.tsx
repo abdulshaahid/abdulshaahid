@@ -92,8 +92,8 @@ export function Footer() {
                     </a>
                   </li>
                   <li>
-                    <a href="#services" className="text-zinc-400 hover:text-white transition-colors">
-                      04 // Writing
+                    <a href="#faq" className="text-zinc-400 hover:text-white transition-colors">
+                      04 // FAQ
                     </a>
                   </li>
                   <li>
@@ -163,7 +163,7 @@ export function Footer() {
             <div className="flex items-center gap-3">
               <span>Next.js + Tailwind CSS</span>
               <span className="text-zinc-700">•</span>
-              <span className="text-emerald-400">60 FPS Native</span>
+              <span className="text-emerald-400">Ultra-Smooth UI</span>
             </div>
           </div>
         </div>

@@ -141,7 +141,7 @@ export function About() {
                             "React",
                             "TypeScript",
                             "Tailwind CSS",
-                            "Figma",
+                            "Interface Design",
                             "UI/UX Design",
                             "UX Writing",
                             "Design System",

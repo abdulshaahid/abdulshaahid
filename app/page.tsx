@@ -5,8 +5,8 @@ import { About } from "@/components/sections/about"
 import { Portfolio } from "@/components/sections/portfolio"
 import { GithubActivity } from "@/components/sections/github-activity"
 import { Skills } from "@/components/sections/skills"
-import { Writing } from "@/components/sections/writing"
 import { Guestbook } from "@/components/sections/guestbook"
+import { FAQ } from "@/components/sections/faq"
 import { Contact } from "@/components/sections/contact"
 import { Footer } from "@/components/sections/footer"
 import { SlopeDivider } from "@/components/ui/geometric"
@@ -50,14 +50,14 @@ export default function Page() {
           {/* Full-width Slope Divider */}
           <SlopeDivider />
 
-          {/* 4. Writing / Blog Section (Server Component) */}
-          <Writing />
+          {/* 4. Guestbook / Testimonials Section */}
+          <Guestbook />
 
           {/* Full-width Slope Divider */}
           <SlopeDivider />
 
-          {/* 5. Guestbook / Social Proof Section (Server Component) */}
-          <Guestbook />
+          {/* 5. FAQ Section (Interactive Accordion) */}
+          <FAQ />
 
           {/* Full-width Slope Divider */}
           <SlopeDivider />

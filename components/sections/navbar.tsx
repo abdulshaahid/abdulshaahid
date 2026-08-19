@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useState, useEffect } from "react"
-import { Home, Info, Wrench, Briefcase, Images, Mail } from "lucide-react"
+import { Home, Info, Wrench, CircleHelp, Images, Mail } from "lucide-react"
 import { ExpandableTabs } from "@/components/ui/expandable-tabs"
 import { useMediaQuery } from "usehooks-ts"
 
@@ -11,7 +11,7 @@ const items = [
   { id: "about", label: "About" },
   { id: "portfolio", label: "Portfolio" },
   { id: "skills", label: "Skills" },
-  { id: "services", label: "Services" },
+  { id: "faq", label: "FAQ" },
   { id: "contact", label: "Contact" },
 ]
 
@@ -29,7 +29,7 @@ export function Navbar() {
     { title: "About", icon: Info },
     { title: "Portfolio", icon: Images },
     { title: "Skills", icon: Wrench },
-    { title: "Services", icon: Briefcase },
+    { title: "FAQ", icon: CircleHelp },
     { title: "Contact", icon: Mail },
   ]
 
@@ -38,7 +38,7 @@ export function Navbar() {
     { title: "About", icon: Info },
     { title: "Portfolio", icon: Images },
     { title: "Skills", icon: Wrench },
-    { title: "Services", icon: Briefcase },
+    { title: "FAQ", icon: CircleHelp },
     { title: "Contact", icon: Mail },
   ]
 

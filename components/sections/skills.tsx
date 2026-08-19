@@ -200,7 +200,7 @@ export function Skills() {
 
         {/* Bottom Specs  Bar */}
         <div className="px-6 sm:px-10 lg:px-12 py-4 border-t border-dashed border-zinc-800/90 flex items-center justify-between flex-wrap gap-2 text-xs font-mono text-zinc-400">
-          <span>* Scalable modular architecture & 60fps interaction standards</span>
+          <span>* Scalable modular architecture & ultra-smooth interaction standards</span>
           <span className="text-zinc-500">ECOSYSTEM // 2025</span>
         </div>
       </div>
