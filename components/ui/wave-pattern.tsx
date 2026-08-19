@@ -34,30 +34,20 @@ const WavePattern: React.FC<WavePatternProps> = ({
   const isTouchDevice = useRef(false);
 
   const handlePointerMove = useCallback((e: PointerEvent) => {
-    try {
-      const canvas = canvasRef.current;
-      if (!canvas || !canvas.isConnected) return;
-      const rect = canvas.getBoundingClientRect();
-      mousePos.current = {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
-      };
-    } catch (_) {}
+    mousePos.current = {
+      x: e.clientX,
+      y: e.clientY,
+    };
   }, []);
 
   const handleTouchMove = useCallback((e: TouchEvent) => {
-    try {
-      const canvas = canvasRef.current;
-      if (!canvas || !canvas.isConnected) return;
-      const touch = e.touches[0];
-      if (touch) {
-        const rect = canvas.getBoundingClientRect();
-        mousePos.current = {
-          x: touch.clientX - rect.left,
-          y: touch.clientY - rect.top,
-        };
-      }
-    } catch (_) {}
+    const touch = e.touches[0];
+    if (touch) {
+      mousePos.current = {
+        x: touch.clientX,
+        y: touch.clientY,
+      };
+    }
   }, []);
 
   const handlePointerLeave = useCallback(() => {
@@ -133,8 +123,8 @@ const WavePattern: React.FC<WavePatternProps> = ({
       phase += speed;
 
       const isMobile = width < 640;
-      const currentSpacing = isMobile ? rowSpacing * 0.6 : rowSpacing;
-      const currentAmplitude = isMobile ? waveAmplitude * 0.55 : waveAmplitude;
+      const currentSpacing = rowSpacing;
+      const currentAmplitude = isMobile ? waveAmplitude * 0.75 : waveAmplitude;
 
       const rows = Math.ceil(height / currentSpacing) + 2;
 
@@ -226,6 +216,31 @@ const WavePattern: React.FC<WavePatternProps> = ({
       animationFrameId.current = requestAnimationFrame(animate);
     };
 
+    // Draw initial static frame instantly
+    const drawInitialFrame = () => {
+      const width = cssWidth || canvas.clientWidth || window.innerWidth;
+      const height = cssHeight || canvas.clientHeight || window.innerHeight;
+      ctx.clearRect(0, 0, width, height);
+      const rows = Math.ceil(height / rowSpacing) + 2;
+      ctx.lineWidth = lineWidth;
+      ctx.strokeStyle = `rgba(${strokeColor}, ${opacity})`;
+      ctx.beginPath();
+      for (let row = -1; row < rows; row++) {
+        const baseY = row * rowSpacing;
+        let firstPoint = true;
+        for (let x = -20; x <= width + 20; x += xStep) {
+          const y = baseY + Math.sin((x / waveLength) * (Math.PI * 2) + row * 0.15) * waveAmplitude;
+          if (firstPoint) {
+            ctx.moveTo(x, y);
+            firstPoint = false;
+          } else {
+            ctx.lineTo(x, y);
+          }
+        }
+      }
+      ctx.stroke();
+    };
+
     animate();
 
     const handleVisibilityChange = () => {
@@ -236,13 +251,16 @@ const WavePattern: React.FC<WavePatternProps> = ({
         }
       } else {
         if (!animationFrameId.current) {
-          animate();
+          animationFrameId.current = requestAnimationFrame(animate);
         }
       }
     };
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
+      if (animationFrameId.current) {
+        cancelAnimationFrame(animationFrameId.current);
+      }
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("resize", throttledResize);
       if (resizeObserver) {

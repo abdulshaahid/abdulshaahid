@@ -1,5 +1,3 @@
-"use client"
-
 import React from "react"
 import { ArrowUpRight } from "lucide-react"
 import { GreenHighlight } from "@/components/ui/geometric"
@@ -45,8 +43,7 @@ export function Writing() {
           {articles.map((article) => (
             <a
               key={article.id}
-              href="#"
-              onClick={(e) => e.preventDefault()}
+              href="#writing"
               className="group relative flex flex-col sm:flex-row sm:items-center justify-between px-6 sm:px-10 lg:px-12 py-5 sm:py-6 hover:bg-white/[0.015] transition-colors duration-150"
             >
               <div className="flex-1 pr-4">

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState, useId } from "react";
+import { useEffect, useState, useId, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMediaQuery } from "usehooks-ts";
 import Grainient from "@/components/ui/grainient";
@@ -49,21 +49,15 @@ const GPU_LAYER = {
 function AnimatedShapeIcon({ className }: { className?: string }) {
   const [shapeIndex, setShapeIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
-  const [isSpinning, setIsSpinning] = useState(false);
   const rawId = useId();
   const gradientId = `shape-grad-${rawId.replace(/[^a-zA-Z0-9_-]/g, "")}`;
 
-  // Start periodic morphing and rotation after initial entrance completes
+  // Start periodic morphing and rotation
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsSpinning(true);
-      const interval = setInterval(() => {
-        setShapeIndex((prev) => (prev + 1) % CURATED_SHAPE_PATHS.length);
-      }, 1200);
-      return () => clearInterval(interval);
-    }, 1000);
-
-    return () => clearTimeout(timer);
+    const interval = setInterval(() => {
+      setShapeIndex((prev) => (prev + 1) % CURATED_SHAPE_PATHS.length);
+    }, 1400);
+    return () => clearInterval(interval);
   }, []);
 
   const pathD = CURATED_SHAPE_PATHS[shapeIndex];
@@ -76,16 +70,15 @@ function AnimatedShapeIcon({ className }: { className?: string }) {
       onClick={() => setShapeIndex((prev) => (prev + 1) % CURATED_SHAPE_PATHS.length)}
       title="Click to cycle shape"
     >
-      {/* Continuously Rotating Vector Gyroscope */}
-      <motion.div
-        animate={isSpinning ? { rotate: 360 } : { rotate: 0 }}
-        transition={{
-          duration: isHovered ? 6 : 12,
-          ease: "linear",
-          repeat: Infinity,
-        }}
+      {/* Continuously Rotating Vector Gyroscope via GPU-composited CSS animation */}
+      <div
         className="w-full h-full relative flex items-center justify-center"
-        style={GPU_LAYER}
+        style={{
+          ...GPU_LAYER,
+          animation: isHovered
+            ? "spin 6s linear infinite"
+            : "spin 12s linear infinite",
+        }}
       >
         <AnimatePresence mode="wait">
           <motion.div
@@ -125,13 +118,13 @@ function AnimatedShapeIcon({ className }: { className?: string }) {
             </svg>
           </motion.div>
         </AnimatePresence>
-      </motion.div>
+      </div>
     </div>
   );
 }
 
 export function Hero({ isReady = true }: { isReady?: boolean }) {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const ambientGlowRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
   const isMobile = useMediaQuery("(max-width: 767px)");
 
@@ -140,36 +133,25 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
   }, []);
 
   useEffect(() => {
-    // Passive mouse move listener with RAF throttling for 0 overhead
-    let rafId: number | null = null;
     const handleMouseMove = (e: MouseEvent) => {
-      if (rafId) return;
-      rafId = requestAnimationFrame(() => {
+      if (ambientGlowRef.current) {
         const { innerWidth, innerHeight } = window;
-        setMousePosition({
-          x: (e.clientX - innerWidth / 2) / (innerWidth / 2),
-          y: (e.clientY - innerHeight / 2) / (innerHeight / 2),
-        });
-        rafId = null;
-      });
+        const x = (e.clientX - innerWidth / 2) / (innerWidth / 2);
+        const y = (e.clientY - innerHeight / 2) / (innerHeight / 2);
+        ambientGlowRef.current.style.transform = `translate3d(${x * 12}px, ${y * 8}px, 0)`;
+      }
     };
 
     window.addEventListener("mousemove", handleMouseMove, { passive: true });
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
-      if (rafId) cancelAnimationFrame(rafId);
     };
   }, []);
 
   const activeMobile = mounted && isMobile;
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
-      className="w-full px-2 sm:px-3 md:px-4 pt-2 sm:pt-3 md:pt-4"
-    >
+    <div className="w-full px-2 sm:px-3 md:px-4 pt-2 sm:pt-3 md:pt-4">
       <section
         id="home"
         aria-label="Hero"
@@ -207,9 +189,10 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
         <div className="absolute inset-0 pointer-events-none overflow-hidden -z-5 flex justify-center items-center">
           {/* Central Ambient Glow Bowl */}
           <div
+            ref={ambientGlowRef}
             className="w-[160vw] sm:w-[120vw] max-w-[1400px] h-[700px] sm:h-[900px] rounded-full bg-[radial-gradient(ellipse_at_center,_rgba(55,229,165,0.14)_0%,_rgba(55,229,165,0.04)_45%,_transparent_72%)] transition-transform duration-500 ease-out"
             style={{
-              transform: `translate3d(${mousePosition.x * 12}px, ${mousePosition.y * 8}px, 0)`,
+              transform: "translate3d(0, 0, 0)",
               willChange: "transform",
             }}
           />
@@ -229,96 +212,72 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
             {/* Desktop Script Title (PC / Laptops in Landscape >= lg) */}
             <h1 className="hidden lg:landscape:flex font-script italic text-[7.5rem] md:text-[7rem] lg:text-[9rem] xl:text-[10.5rem] text-zinc-100/90 leading-none font-thin tracking-wide drop-shadow-sm items-center justify-center gap-24 lg:gap-32 mx-auto">
               <span className="inline-flex overflow-hidden pb-4 -mb-4 pt-1">
-                <motion.span
-                  initial={{ y: "115%", opacity: 0 }}
-                  animate={isReady ? { y: "0%", opacity: 1 } : { y: "115%", opacity: 0 }}
-                  transition={{
-                    y: { duration: 0.9, ease: SMOOTH_EASE, delay: 0.04 },
-                    opacity: { duration: 0.6, ease: "easeOut", delay: 0.04 },
-                  }}
+                <span
                   style={GPU_LAYER}
-                  className="text-[#27bf88] inline-block"
+                  className={`text-[#27bf88] inline-block transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                    isReady ? "translate-y-0 opacity-100" : "translate-y-[115%] opacity-0"
+                  }`}
                 >
                   Hey,
-                </motion.span>
+                </span>
               </span>
               <span className="inline-flex overflow-hidden pb-4 -mb-4 pt-1">
-                <motion.span
-                  initial={{ y: "115%", opacity: 0 }}
-                  animate={isReady ? { y: "0%", opacity: 1 } : { y: "115%", opacity: 0 }}
-                  transition={{
-                    y: { duration: 0.9, ease: SMOOTH_EASE, delay: 0.1 },
-                    opacity: { duration: 0.6, ease: "easeOut", delay: 0.1 },
-                  }}
+                <span
                   style={GPU_LAYER}
-                  className="inline-block"
+                  className={`inline-block transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] delay-75 ${
+                    isReady ? "translate-y-0 opacity-100" : "translate-y-[115%] opacity-0"
+                  }`}
                 >
                   there
-                </motion.span>
+                </span>
               </span>
             </h1>
 
             {/* iPad / Tablet Script Title (iPad Mini, iPad Air, iPad Pro) */}
             <h1 className="hidden md:flex lg:landscape:hidden font-script italic text-7xl md:text-8xl lg:text-9xl text-zinc-100/90 leading-none font-thin tracking-wide drop-shadow-sm items-center justify-center gap-12 mx-auto translate-y-6 md:translate-y-8 lg:portrait:translate-y-10">
               <span className="inline-flex overflow-hidden pb-2 -mb-2">
-                <motion.span
-                  initial={{ y: "115%", opacity: 0 }}
-                  animate={isReady ? { y: "0%", opacity: 1 } : { y: "115%", opacity: 0 }}
-                  transition={{
-                    y: { duration: 0.85, ease: SMOOTH_EASE, delay: 0.04 },
-                    opacity: { duration: 0.6, ease: "easeOut", delay: 0.04 },
-                  }}
+                <span
                   style={GPU_LAYER}
-                  className="text-[#27bf88] inline-block"
+                  className={`text-[#27bf88] inline-block transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                    isReady ? "translate-y-0 opacity-100" : "translate-y-[115%] opacity-0"
+                  }`}
                 >
                   Hey,
-                </motion.span>
+                </span>
               </span>
               <span className="inline-flex overflow-hidden pb-2 -mb-2">
-                <motion.span
-                  initial={{ y: "115%", opacity: 0 }}
-                  animate={isReady ? { y: "0%", opacity: 1 } : { y: "115%", opacity: 0 }}
-                  transition={{
-                    y: { duration: 0.85, ease: SMOOTH_EASE, delay: 0.1 },
-                    opacity: { duration: 0.6, ease: "easeOut", delay: 0.1 },
-                  }}
+                <span
                   style={GPU_LAYER}
-                  className="inline-block"
+                  className={`inline-block transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] delay-75 ${
+                    isReady ? "translate-y-0 opacity-100" : "translate-y-[115%] opacity-0"
+                  }`}
                 >
                   there
-                </motion.span>
+                </span>
               </span>
             </h1>
 
             {/* Mobile Script Title (< md - Phones) */}
             <h1 className="block md:hidden font-script italic text-7xl sm:text-8xl text-zinc-100/90 leading-none font-thin tracking-wide drop-shadow-sm text-center">
               <span className="inline-flex overflow-hidden pb-2 -mb-2">
-                <motion.span
-                  initial={{ y: "115%", opacity: 0 }}
-                  animate={isReady ? { y: "0%", opacity: 1 } : { y: "115%", opacity: 0 }}
-                  transition={{
-                    y: { duration: 0.85, ease: SMOOTH_EASE, delay: 0.04 },
-                    opacity: { duration: 0.6, ease: "easeOut", delay: 0.04 },
-                  }}
+                <span
                   style={GPU_LAYER}
-                  className="text-[#27bf88] inline-block"
+                  className={`text-[#27bf88] inline-block transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                    isReady ? "translate-y-0 opacity-100" : "translate-y-[115%] opacity-0"
+                  }`}
                 >
                   Hey,
-                </motion.span>
+                </span>
               </span>{" "}
               <span className="inline-flex overflow-hidden pb-2 -mb-2">
-                <motion.span
-                  initial={{ y: "115%", opacity: 0 }}
-                  animate={isReady ? { y: "0%", opacity: 1 } : { y: "115%", opacity: 0 }}
-                  transition={{
-                    y: { duration: 0.85, ease: SMOOTH_EASE, delay: 0.1 },
-                    opacity: { duration: 0.6, ease: "easeOut", delay: 0.1 },
-                  }}
+                <span
                   style={GPU_LAYER}
-                  className="inline-block"
+                  className={`inline-block transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] delay-75 ${
+                    isReady ? "translate-y-0 opacity-100" : "translate-y-[115%] opacity-0"
+                  }`}
                 >
                   there
-                </motion.span>
+                </span>
               </span>
             </h1>
           </div>
@@ -332,46 +291,34 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
             <div className="col-span-3 flex flex-col justify-center items-start z-20 space-y-8 pb-12 lg:pb-16 -translate-y-4 lg:-translate-y-8">
               <div className="text-left select-none">
                 <div className="overflow-hidden pb-1">
-                  <motion.span
-                    initial={{ y: "120%", opacity: 0 }}
-                    animate={isReady ? { y: "0%", opacity: 1 } : { y: "120%", opacity: 0 }}
-                    transition={{
-                      y: { duration: 0.9, ease: SMOOTH_EASE, delay: 0.12 },
-                      opacity: { duration: 0.6, ease: "easeOut", delay: 0.12 },
-                    }}
+                  <span
                     style={GPU_LAYER}
-                    className="block text-xl lg:text-2xl xl:text-3xl font-jakarta font-light tracking-[0.25em] bg-gradient-to-b from-zinc-100 via-zinc-300 to-zinc-500 bg-clip-text text-transparent leading-none uppercase"
+                    className={`block text-xl lg:text-2xl xl:text-3xl font-jakarta font-light tracking-[0.25em] bg-gradient-to-b from-zinc-100 via-zinc-300 to-zinc-500 bg-clip-text text-transparent leading-none uppercase transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] delay-100 ${
+                      isReady ? "translate-y-0 opacity-100" : "translate-y-[120%] opacity-0"
+                    }`}
                   >
                     I'm
-                  </motion.span>
+                  </span>
                 </div>
                 <div className="overflow-hidden pb-2 -mb-2">
-                  <motion.span
-                    initial={{ y: "120%", opacity: 0 }}
-                    animate={isReady ? { y: "0%", opacity: 1 } : { y: "120%", opacity: 0 }}
-                    transition={{
-                      y: { duration: 0.95, ease: SMOOTH_EASE, delay: 0.18 },
-                      opacity: { duration: 0.6, ease: "easeOut", delay: 0.18 },
-                    }}
+                  <span
                     style={GPU_LAYER}
-                    className="block text-7xl lg:text-[5.5rem] xl:text-[7.5rem] font-jakarta font-medium tracking-tight bg-gradient-to-b from-zinc-100 via-zinc-300 to-zinc-500 bg-clip-text text-transparent leading-[1.1] uppercase"
+                    className={`block text-7xl lg:text-[5.5rem] xl:text-[7.5rem] font-jakarta font-medium tracking-tight bg-gradient-to-b from-zinc-100 via-zinc-300 to-zinc-500 bg-clip-text text-transparent leading-[1.1] uppercase transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] delay-150 ${
+                      isReady ? "translate-y-0 opacity-100" : "translate-y-[120%] opacity-0"
+                    }`}
                   >
                     Shahid
-                  </motion.span>
+                  </span>
                 </div>
               </div>
             </div>
 
             {/* Center Column: Cutout Portrait Photo */}
-            <motion.div
-              initial={{ y: 140, opacity: 0 }}
-              animate={isReady ? { y: 0, opacity: 1 } : { y: 140, opacity: 0 }}
-              transition={{
-                y: { duration: 1.1, ease: SMOOTH_EASE, delay: 0.04 },
-                opacity: { duration: 0.35, ease: "easeOut", delay: 0.04 },
-              }}
+            <div
               style={GPU_LAYER}
-              className="col-span-6 flex justify-center items-end relative z-10"
+              className={`col-span-6 flex justify-center items-end relative z-10 transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                isReady ? "translate-y-0 opacity-100" : "translate-y-[140px] opacity-0"
+              }`}
             >
               <div className="relative w-full max-w-[480px] lg:max-w-[580px] xl:max-w-[660px] flex justify-center items-end group">
                 <ParticleImage
@@ -380,58 +327,49 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
                   className="w-full h-auto max-h-[76vh] lg:max-h-[84vh]"
                 />
               </div>
-            </motion.div>
+            </div>
 
             {/* Right Column: Bio Paragraph + Animated Shape + Frontend Developer */}
             <div className="col-span-3 flex flex-col justify-center items-end z-20 space-y-8 pb-12 lg:pb-16 -translate-y-4 lg:-translate-y-8">
-              <motion.p
-                initial={{ opacity: 0, y: 18 }}
-                animate={isReady ? { opacity: 1, y: 0 } : { opacity: 0, y: 18 }}
-                transition={{ duration: 0.85, ease: SMOOTH_EASE, delay: 0.18 }}
+              <p
                 style={GPU_LAYER}
-                className="text-xs sm:text-sm md:text-base text-zinc-400 font-normal leading-relaxed max-w-[220px] lg:max-w-[260px] text-right"
+                className={`text-xs sm:text-sm md:text-base text-zinc-400 font-normal leading-relaxed max-w-[220px] lg:max-w-[260px] text-right transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] delay-150 ${
+                  isReady ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
+                }`}
               >
                 Specialized in Web Design, UX / UI, Webflow, and Front End Development.
-              </motion.p>
+              </p>
 
               <div className="flex items-center justify-end gap-3 lg:gap-4 select-none">
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.7, y: 12 }}
-                  animate={isReady ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.7, y: 12 }}
-                  transition={{ duration: 0.8, ease: SMOOTH_EASE, delay: 0.22 }}
+                <div
                   style={GPU_LAYER}
+                  className={`transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] delay-200 ${
+                    isReady ? "scale-100 translate-y-0 opacity-100" : "scale-75 translate-y-3 opacity-0"
+                  }`}
                 >
                   <AnimatedShapeIcon className="w-12 h-12 lg:w-16 lg:h-16 xl:w-20 xl:h-20 shrink-0" />
-                </motion.div>
+                </div>
 
                 <div className="w-[185px] sm:w-[245px] lg:w-[290px] xl:w-[365px] flex flex-col justify-center gap-0.5">
                   <div className="overflow-hidden py-0.5">
-                    <motion.div
-                      initial={{ y: "115%", opacity: 0 }}
-                      animate={isReady ? { y: "0%", opacity: 1 } : { y: "115%", opacity: 0 }}
-                      transition={{
-                        y: { duration: 0.9, ease: SMOOTH_EASE, delay: 0.2 },
-                        opacity: { duration: 0.6, ease: "easeOut", delay: 0.2 },
-                      }}
+                    <div
                       style={GPU_LAYER}
-                      className="flex justify-between w-full text-2xl sm:text-3xl lg:text-[2.5rem] xl:text-[3.2rem] font-jakarta font-medium bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none"
+                      className={`flex justify-between w-full text-2xl sm:text-3xl lg:text-[2.5rem] xl:text-[3.2rem] font-jakarta font-medium bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] delay-150 ${
+                        isReady ? "translate-y-0 opacity-100" : "translate-y-[115%] opacity-0"
+                      }`}
                     >
                       <span>F</span><span>R</span><span>O</span><span>N</span><span>T</span><span>E</span><span>N</span><span>D</span>
-                    </motion.div>
+                    </div>
                   </div>
                   <div className="overflow-hidden py-0.5">
-                    <motion.div
-                      initial={{ y: "115%", opacity: 0 }}
-                      animate={isReady ? { y: "0%", opacity: 0.5 } : { y: "115%", opacity: 0 }}
-                      transition={{
-                        y: { duration: 0.9, ease: SMOOTH_EASE, delay: 0.24 },
-                        opacity: { duration: 0.6, ease: "easeOut", delay: 0.24 },
-                      }}
+                    <div
                       style={GPU_LAYER}
-                      className="flex justify-between w-full text-2xl sm:text-3xl lg:text-[2.5rem] xl:text-[3.2rem] font-jakarta font-thin bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none"
+                      className={`flex justify-between w-full text-2xl sm:text-3xl lg:text-[2.5rem] xl:text-[3.2rem] font-jakarta font-thin bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] delay-200 ${
+                        isReady ? "translate-y-0 opacity-50" : "translate-y-[115%] opacity-0"
+                      }`}
                     >
                       <span>D</span><span>E</span><span>V</span><span>E</span><span>L</span><span>O</span><span>P</span><span>E</span><span>R</span>
-                    </motion.div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -443,220 +381,178 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
           <div className="hidden md:flex lg:landscape:hidden flex-col items-center w-full my-auto z-20 pt-0 pb-6 -mt-6">
             
             {/* Center Portrait Image */}
-            <motion.div
-              initial={{ y: 100, opacity: 0 }}
-              animate={isReady ? { y: 0, opacity: 1 } : { y: 100, opacity: 0 }}
-              transition={{
-                y: { duration: 1.0, ease: SMOOTH_EASE, delay: 0.04 },
-                opacity: { duration: 0.35, ease: "easeOut", delay: 0.04 },
-              }}
+            <div
               style={GPU_LAYER}
-              className="relative w-full max-w-[420px] md:max-w-[460px] flex justify-center items-end py-0 z-10 -mb-2"
+              className={`relative w-full max-w-[420px] md:max-w-[460px] flex justify-center items-end py-0 z-10 -mb-2 transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                isReady ? "translate-y-0 opacity-100" : "translate-y-[100px] opacity-0"
+              }`}
             >
               <ParticleImage
                 src="/me.webp"
                 alt="Mohamed Abdul Shahid"
                 className="w-full h-auto max-h-[46vh] md:max-h-[50vh]"
               />
-            </motion.div>
+            </div>
 
             {/* iPad Headlines Stack */}
             <div className="w-full flex flex-col items-center justify-center space-y-4 md:space-y-5 z-20 -mt-20 md:-mt-24 relative pointer-events-none">
               <div className="text-center select-none flex flex-col items-center">
                 <div className="overflow-hidden pb-1">
-                  <motion.span
-                    initial={{ y: "120%", opacity: 0 }}
-                    animate={isReady ? { y: "0%", opacity: 1 } : { y: "120%", opacity: 0 }}
-                    transition={{
-                      y: { duration: 0.85, ease: SMOOTH_EASE, delay: 0.12 },
-                      opacity: { duration: 0.6, ease: "easeOut", delay: 0.12 },
-                    }}
+                  <span
                     style={GPU_LAYER}
-                    className="block text-xl md:text-2xl font-jakarta font-light tracking-[0.25em] bg-gradient-to-b from-zinc-100 via-zinc-300 to-zinc-500 bg-clip-text text-transparent leading-none uppercase drop-shadow-md"
+                    className={`block text-xl md:text-2xl font-jakarta font-light tracking-[0.25em] bg-gradient-to-b from-zinc-100 via-zinc-300 to-zinc-500 bg-clip-text text-transparent leading-none uppercase drop-shadow-md transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] delay-100 ${
+                      isReady ? "translate-y-0 opacity-100" : "translate-y-[120%] opacity-0"
+                    }`}
                   >
                     I'm
-                  </motion.span>
+                  </span>
                 </div>
                 <div className="overflow-hidden pb-1">
-                  <motion.span
-                    initial={{ y: "120%", opacity: 0 }}
-                    animate={isReady ? { y: "0%", opacity: 1 } : { y: "120%", opacity: 0 }}
-                    transition={{
-                      y: { duration: 0.9, ease: SMOOTH_EASE, delay: 0.18 },
-                      opacity: { duration: 0.6, ease: "easeOut", delay: 0.18 },
-                    }}
+                  <span
                     style={GPU_LAYER}
-                    className="block text-7xl md:text-8xl font-jakarta font-medium tracking-tight bg-gradient-to-b from-zinc-100 via-zinc-300 to-zinc-500 bg-clip-text text-transparent leading-[1.1] uppercase drop-shadow-md"
+                    className={`block text-7xl md:text-8xl font-jakarta font-medium tracking-tight bg-gradient-to-b from-zinc-100 via-zinc-300 to-zinc-500 bg-clip-text text-transparent leading-[1.1] uppercase drop-shadow-md transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] delay-150 ${
+                      isReady ? "translate-y-0 opacity-100" : "translate-y-[120%] opacity-0"
+                    }`}
                   >
                     Shahid
-                  </motion.span>
+                  </span>
                 </div>
               </div>
 
               <div className="flex items-center justify-center gap-3 select-none">
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.7, y: 12 }}
-                  animate={isReady ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.7, y: 12 }}
-                  transition={{ duration: 0.75, ease: SMOOTH_EASE, delay: 0.22 }}
+                <div
                   style={GPU_LAYER}
+                  className={`transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] delay-200 ${
+                    isReady ? "scale-100 translate-y-0 opacity-100" : "scale-75 translate-y-3 opacity-0"
+                  }`}
                 >
                   <AnimatedShapeIcon className="w-12 h-12 md:w-14 md:h-14 shrink-0" />
-                </motion.div>
+                </div>
                 <div className="w-[230px] md:w-[270px] flex flex-col justify-center gap-0.5">
                   <div className="overflow-hidden py-0.5">
-                    <motion.div
-                      initial={{ y: "115%", opacity: 0 }}
-                      animate={isReady ? { y: "0%", opacity: 1 } : { y: "115%", opacity: 0 }}
-                      transition={{
-                        y: { duration: 0.85, ease: SMOOTH_EASE, delay: 0.2 },
-                        opacity: { duration: 0.6, ease: "easeOut", delay: 0.2 },
-                      }}
+                    <div
                       style={GPU_LAYER}
-                      className="flex justify-between w-full text-2xl md:text-3xl font-jakarta font-medium bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none drop-shadow-md"
+                      className={`flex justify-between w-full text-2xl md:text-3xl font-jakarta font-medium bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none drop-shadow-md transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] delay-150 ${
+                        isReady ? "translate-y-0 opacity-100" : "translate-y-[115%] opacity-0"
+                      }`}
                     >
                       <span>F</span><span>R</span><span>O</span><span>N</span><span>T</span><span>E</span><span>N</span><span>D</span>
-                    </motion.div>
+                    </div>
                   </div>
                   <div className="overflow-hidden py-0.5">
-                    <motion.div
-                      initial={{ y: "115%", opacity: 0 }}
-                      animate={isReady ? { y: "0%", opacity: 0.35 } : { y: "115%", opacity: 0 }}
-                      transition={{
-                        y: { duration: 0.85, ease: SMOOTH_EASE, delay: 0.24 },
-                        opacity: { duration: 0.6, ease: "easeOut", delay: 0.24 },
-                      }}
+                    <div
                       style={GPU_LAYER}
-                      className="flex justify-between w-full text-2xl md:text-3xl font-jakarta font-thin bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none drop-shadow-md"
+                      className={`flex justify-between w-full text-2xl md:text-3xl font-jakarta font-thin bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none drop-shadow-md transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] delay-200 ${
+                        isReady ? "translate-y-0 opacity-35" : "translate-y-[115%] opacity-0"
+                      }`}
                     >
                       <span>D</span><span>E</span><span>V</span><span>E</span><span>L</span><span>O</span><span>P</span><span>E</span><span>R</span>
-                    </motion.div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* iPad Bio Text Paragraph */}
-            <motion.p
-              initial={{ opacity: 0, y: 16 }}
-              animate={isReady ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
-              transition={{ duration: 0.8, ease: SMOOTH_EASE, delay: 0.28 }}
+            <p
               style={GPU_LAYER}
-              className="text-sm md:text-base text-zinc-400 font-normal text-center max-w-[360px] md:max-w-[420px] px-4 mt-6 relative z-20"
+              className={`text-sm md:text-base text-zinc-400 font-normal text-center max-w-[360px] md:max-w-[420px] px-4 mt-6 relative z-20 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] delay-200 ${
+                isReady ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
+              }`}
             >
               Specialized in Web Design, UX / UI, Webflow, and Front End Development.
-            </motion.p>
+            </p>
           </div>
 
           {/* MOBILE LAYOUT (< md - Phones) */}
           <div className="flex md:hidden flex-col items-center w-full my-auto z-20 pt-0 pb-8 -mt-6 sm:-mt-8">
             
             {/* Center Portrait Image */}
-            <motion.div
-              initial={{ y: 100, opacity: 0 }}
-              animate={isReady ? { y: 0, opacity: 1 } : { y: 100, opacity: 0 }}
-              transition={{
-                y: { duration: 1.0, ease: SMOOTH_EASE, delay: 0.04 },
-                opacity: { duration: 0.35, ease: "easeOut", delay: 0.04 },
-              }}
+            <div
               style={GPU_LAYER}
-              className="relative w-full max-w-[370px] sm:max-w-[450px] flex justify-center items-end py-0 z-10 -mb-2 -translate-y-1 sm:-translate-y-1"
+              className={`relative w-full max-w-[370px] sm:max-w-[450px] flex justify-center items-end py-0 z-10 -mb-2 -translate-y-1 sm:-translate-y-1 transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                isReady ? "translate-y-0 opacity-100" : "translate-y-[100px] opacity-0"
+              }`}
             >
               <ParticleImage
                 src="/me.webp"
                 alt="Mohamed Abdul Shahid"
                 className="w-full h-auto max-h-[52vh] sm:max-h-[62vh]"
               />
-            </motion.div>
+            </div>
 
             {/* Mobile Headlines Stack */}
             <div className="w-full flex flex-col items-center justify-center space-y-4 z-20 -mt-20 sm:-mt-28 relative pointer-events-none">
               <div className="text-center select-none flex flex-col items-center">
                 <div className="overflow-hidden pb-1">
-                  <motion.span
-                    initial={{ y: "120%", opacity: 0 }}
-                    animate={isReady ? { y: "0%", opacity: 1 } : { y: "120%", opacity: 0 }}
-                    transition={{
-                      y: { duration: 0.85, ease: SMOOTH_EASE, delay: 0.12 },
-                      opacity: { duration: 0.6, ease: "easeOut", delay: 0.12 },
-                    }}
+                  <span
                     style={GPU_LAYER}
-                    className="block text-xl sm:text-2xl font-jakarta font-light tracking-[0.25em] bg-gradient-to-b from-zinc-100 via-zinc-300 to-zinc-500 bg-clip-text text-transparent leading-none uppercase drop-shadow-md"
+                    className={`block text-xl sm:text-2xl font-jakarta font-light tracking-[0.25em] bg-gradient-to-b from-zinc-100 via-zinc-300 to-zinc-500 bg-clip-text text-transparent leading-none uppercase drop-shadow-md transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] delay-100 ${
+                      isReady ? "translate-y-0 opacity-100" : "translate-y-[120%] opacity-0"
+                    }`}
                   >
                     I'm
-                  </motion.span>
+                  </span>
                 </div>
                 <div className="overflow-hidden pb-1">
-                  <motion.span
-                    initial={{ y: "120%", opacity: 0 }}
-                    animate={isReady ? { y: "0%", opacity: 1 } : { y: "120%", opacity: 0 }}
-                    transition={{
-                      y: { duration: 0.9, ease: SMOOTH_EASE, delay: 0.18 },
-                      opacity: { duration: 0.6, ease: "easeOut", delay: 0.18 },
-                    }}
+                  <span
                     style={GPU_LAYER}
-                    className="block text-7xl sm:text-7xl font-jakarta font-medium tracking-tight bg-gradient-to-b from-zinc-100 via-zinc-300 to-zinc-500 bg-clip-text text-transparent leading-[1.1] uppercase drop-shadow-md"
+                    className={`block text-7xl sm:text-7xl font-jakarta font-medium tracking-tight bg-gradient-to-b from-zinc-100 via-zinc-300 to-zinc-500 bg-clip-text text-transparent leading-[1.1] uppercase drop-shadow-md transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] delay-150 ${
+                      isReady ? "translate-y-0 opacity-100" : "translate-y-[120%] opacity-0"
+                    }`}
                   >
                     Shahid
-                  </motion.span>
+                  </span>
                 </div>
               </div>
 
               <div className="flex items-center justify-center gap-2.5 sm:gap-3 select-none">
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.7, y: 12 }}
-                  animate={isReady ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.7, y: 12 }}
-                  transition={{ duration: 0.75, ease: SMOOTH_EASE, delay: 0.22 }}
+                <div
                   style={GPU_LAYER}
+                  className={`transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] delay-200 ${
+                    isReady ? "scale-100 translate-y-0 opacity-100" : "scale-75 translate-y-3 opacity-0"
+                  }`}
                 >
                   <AnimatedShapeIcon className="w-10 h-10 sm:w-14 sm:h-14 shrink-0" />
-                </motion.div>
+                </div>
                 <div className="w-[195px] sm:w-[250px] flex flex-col justify-center gap-0.5">
                   <div className="overflow-hidden py-0.5">
-                    <motion.div
-                      initial={{ y: "115%", opacity: 0 }}
-                      animate={isReady ? { y: "0%", opacity: 1 } : { y: "115%", opacity: 0 }}
-                      transition={{
-                        y: { duration: 0.85, ease: SMOOTH_EASE, delay: 0.2 },
-                        opacity: { duration: 0.6, ease: "easeOut", delay: 0.2 },
-                      }}
+                    <div
                       style={GPU_LAYER}
-                      className="flex justify-between w-full text-2xl sm:text-3xl font-jakarta font-medium bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none drop-shadow-md"
+                      className={`flex justify-between w-full text-2xl sm:text-3xl font-jakarta font-medium bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none drop-shadow-md transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] delay-150 ${
+                        isReady ? "translate-y-0 opacity-100" : "translate-y-[115%] opacity-0"
+                      }`}
                     >
                       <span>F</span><span>R</span><span>O</span><span>N</span><span>T</span><span>E</span><span>N</span><span>D</span>
-                    </motion.div>
+                    </div>
                   </div>
                   <div className="overflow-hidden py-0.5">
-                    <motion.div
-                      initial={{ y: "115%", opacity: 0 }}
-                      animate={isReady ? { y: "0%", opacity: 0.35 } : { y: "115%", opacity: 0 }}
-                      transition={{
-                        y: { duration: 0.85, ease: SMOOTH_EASE, delay: 0.24 },
-                        opacity: { duration: 0.6, ease: "easeOut", delay: 0.24 },
-                      }}
+                    <div
                       style={GPU_LAYER}
-                      className="flex justify-between w-full text-2xl sm:text-3xl font-jakarta font-thin bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none drop-shadow-md"
+                      className={`flex justify-between w-full text-2xl sm:text-3xl font-jakarta font-thin bg-gradient-to-r from-[#37e5a5] to-[#27bf88] bg-clip-text text-transparent uppercase leading-none drop-shadow-md transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] delay-200 ${
+                        isReady ? "translate-y-0 opacity-35" : "translate-y-[115%] opacity-0"
+                      }`}
                     >
                       <span>D</span><span>E</span><span>V</span><span>E</span><span>L</span><span>O</span><span>P</span><span>E</span><span>R</span>
-                    </motion.div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Bio Text Paragraph */}
-            <motion.p
-              initial={{ opacity: 0, y: 16 }}
-              animate={isReady ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
-              transition={{ duration: 0.8, ease: SMOOTH_EASE, delay: 0.28 }}
+            <p
               style={GPU_LAYER}
-              className="text-sm text-zinc-400 font-normal text-center max-w-[300px] px-4 mt-6 sm:mt-8 relative z-20"
+              className={`text-sm text-zinc-400 font-normal text-center max-w-[300px] px-4 mt-6 sm:mt-8 relative z-20 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] delay-200 ${
+                isReady ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
+              }`}
             >
               Specialized in Web Design, UX / UI, Webflow, and Front End Development.
-            </motion.p>
+            </p>
           </div>
 
         </div>
       </section>
-    </motion.div>
+    </div>
   );
 }

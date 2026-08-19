@@ -1,5 +1,3 @@
-"use client"
-
 import React from "react"
 import Image from "next/image"
 import { GreenHighlight } from "@/components/ui/geometric"
@@ -82,13 +80,14 @@ function SkillBadge({ skill }: { skill: SkillItem }) {
   return (
     <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#131316] hover:bg-[#18181d] border border-zinc-800/90 hover:border-zinc-700 transition-all duration-150 cursor-default shrink-0 group select-none">
       <div className="w-4 h-4 relative shrink-0 flex items-center justify-center">
-        <Image
+        <img
           src={skill.iconUrl}
           alt={skill.name}
           width={16}
           height={16}
+          loading="lazy"
+          decoding="async"
           className="w-full h-full object-contain"
-          style={{ width: "auto", height: "auto" }}
         />
       </div>
       <span className="text-xs sm:text-[13px] font-mono font-medium text-zinc-300 group-hover:text-white transition-colors whitespace-nowrap">
@@ -147,7 +146,7 @@ export function Skills() {
                       animationDuration: `${55 + categoryIndex * 4}s`,
                     }}
                   >
-                    {[...Array(4)].flatMap((_, setIndex) =>
+                    {[...Array(2)].flatMap((_, setIndex) =>
                       category.skills.map((skill, skillIndex) => (
                         <SkillBadge
                           key={`desk-${category.num}-${setIndex}-${skill.name}-${skillIndex}`}
@@ -167,7 +166,7 @@ export function Skills() {
                       animationDuration: `${42 + categoryIndex * 3}s`,
                     }}
                   >
-                    {[...Array(5)].flatMap((_, setIndex) =>
+                    {[...Array(2)].flatMap((_, setIndex) =>
                       row1Skills.map((skill, skillIndex) => (
                         <SkillBadge
                           key={`mob1-${category.num}-${setIndex}-${skill.name}-${skillIndex}`}
@@ -184,7 +183,7 @@ export function Skills() {
                       animationDuration: `${46 + categoryIndex * 3}s`,
                     }}
                   >
-                    {[...Array(5)].flatMap((_, setIndex) =>
+                    {[...Array(2)].flatMap((_, setIndex) =>
                       row2Skills.map((skill, skillIndex) => (
                         <SkillBadge
                           key={`mob2-${category.num}-${setIndex}-${skill.name}-${skillIndex}`}

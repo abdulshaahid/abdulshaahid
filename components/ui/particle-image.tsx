@@ -282,8 +282,7 @@ export function ParticleImage({
     sampleCtx.drawImage(img, 0, 0, renderWidth, renderHeight)
     const imgData = sampleCtx.getImageData(0, 0, renderWidth, renderHeight)
     const data = imgData.data
-
-    const gridStep = isMobile ? 2.0 : 2.0
+    const gridStep = 2.0
     const pSize = Math.max(gridStep * 1.35, 2.4)
 
     const cols = Math.ceil(renderWidth / gridStep)
@@ -439,15 +438,22 @@ export function ParticleImage({
     [startAnimation]
   )
 
-  // Coordinate normalizer
+  const cachedRectRef = useRef<{ left: number; top: number; time: number }>({ left: 0, top: 0, time: 0 })
+
+  // Coordinate normalizer with cached bounding rect (avoids forced reflows on mousemove)
   const handleInteractionAt = useCallback(
     (clientX: number, clientY: number) => {
       const canvas = canvasRef.current
       if (!canvas) return
 
-      const rect = canvas.getBoundingClientRect()
-      const x = clientX - rect.left
-      const y = clientY - rect.top
+      const now = performance.now()
+      if (now - cachedRectRef.current.time > 500) {
+        const rect = canvas.getBoundingClientRect()
+        cachedRectRef.current = { left: rect.left, top: rect.top, time: now }
+      }
+
+      const x = clientX - cachedRectRef.current.left
+      const y = clientY - cachedRectRef.current.top
 
       const mouse = stateRef.current.mouse
       let vx = 0

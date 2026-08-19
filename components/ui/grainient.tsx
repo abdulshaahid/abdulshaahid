@@ -232,6 +232,10 @@ export function Grainient({
       const w = Math.max(1, Math.ceil(rect.width));
       const h = Math.max(1, Math.ceil(rect.height));
       renderer.setSize(w, h);
+      gl.canvas.style.width = "100%";
+      gl.canvas.style.height = "100%";
+      gl.canvas.style.position = "absolute";
+      gl.canvas.style.inset = "0";
       const res = (program.uniforms.iResolution as { value: Float32Array }).value;
       res[0] = gl.drawingBufferWidth;
       res[1] = gl.drawingBufferHeight;

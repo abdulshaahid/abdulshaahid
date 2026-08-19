@@ -1,13 +1,7 @@
-"use client"
-
 import React from "react"
 import { Github, Linkedin, Instagram, Mail, ArrowUp } from "lucide-react"
 
 export function Footer() {
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" })
-  }
-
   return (
     <footer className="relative w-full border-t border-zinc-800/80 bg-[#070709]">
       <div className="w-[calc(100%-3rem)] sm:w-[calc(100%-4.5rem)] md:w-[calc(100%-5rem)] lg:max-w-[1220px] xl:max-w-[1300px] mx-auto border-l border-r border-zinc-800/80 relative bg-[#070709]">
@@ -151,13 +145,13 @@ export function Footer() {
                 </ul>
 
                 <div className="mt-6">
-                  <button
-                    onClick={scrollToTop}
+                  <a
+                    href="#top"
                     className="inline-flex items-center gap-1.5 text-xs font-mono text-zinc-400 hover:text-zinc-200 transition-colors"
                   >
                     <ArrowUp size={13} />
                     <span>Back to top</span>
-                  </button>
+                  </a>
                 </div>
               </div>
             </div>

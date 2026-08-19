@@ -946,43 +946,29 @@ export function Chatbot() {
                 className="relative flex items-center justify-center cursor-pointer select-none group"
                 style={{ willChange: "transform, opacity", transform: "translateZ(0)" }}
               >
-                {/* Small Soft Gemini Color Aura around the button */}
-                <motion.div
-                  animate={{
-                    scale: [1, 1.15, 1, 1],
-                    opacity: [0.7, 1, 0.7, 0.7],
-                  }}
-                  transition={{
-                    duration: 3.8,
-                    times: [0, 0.25, 0.45, 1],
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  }}
-                  className="absolute -inset-1 rounded-full blur-[6px] group-hover:blur-[8px] transition-all duration-300 pointer-events-none"
+                {/* Small Soft Gemini Color Aura around the button (GPU Composited) */}
+                <div
+                  className="absolute -inset-1 rounded-full blur-[6px] group-hover:blur-[8px] transition-[filter] duration-300 pointer-events-none"
                   style={{
                     background:
                       "conic-gradient(from 180deg at 50% 50%, #3186FF 0deg, #14BB69 90deg, #F6C013 180deg, #FA4340 270deg, #3186FF 360deg)",
+                    animation: "chatbotAura 3.8s ease-in-out infinite",
+                    willChange: "transform, opacity",
                   }}
                 />
 
                 {/* Core #151515 round button without border */}
                 <div className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#151515] flex items-center justify-center shadow-lg overflow-hidden">
-                  {/* Periodic Spin + Enlarge + Pause Animation */}
-                  <motion.div
-                    animate={{
-                      rotate: [0, 180, 360, 360],
-                      scale: [1, 1.25, 1, 1],
-                    }}
-                    transition={{
-                      duration: 3.8,
-                      times: [0, 0.22, 0.42, 1],
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    }}
+                  {/* Periodic Spin + Enlarge + Pause Animation (GPU Composited) */}
+                  <div
                     className="w-5.5 h-5.5 sm:w-6 sm:h-6 flex items-center justify-center pointer-events-none"
+                    style={{
+                      animation: "chatbotSpin 3.8s ease-in-out infinite",
+                      willChange: "transform",
+                    }}
                   >
                     <GeminiIcon className="w-full h-full object-contain" />
-                  </motion.div>
+                  </div>
                 </div>
               </motion.button>
             </div>

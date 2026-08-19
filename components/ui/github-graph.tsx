@@ -135,6 +135,9 @@ const COLOR_LEVELS = [
   "bg-[#39d353]", // Level 4
 ]
 
+// Precompute static deterministic contribution data at module load time
+const STATIC_CONTRIBUTION_DATA = generateContributionData()
+
 export function GithubGraph() {
   const containerRef = useRef<HTMLDivElement>(null)
   const isInView = useInView(containerRef, { once: true, margin: "-60px" })
@@ -142,7 +145,7 @@ export function GithubGraph() {
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 })
   const [displayCount, setDisplayCount] = useState(0)
 
-  const { weeks, totalContributions } = useMemo(() => generateContributionData(), [])
+  const { weeks, totalContributions } = STATIC_CONTRIBUTION_DATA
 
   // Smooth number counter animation
   useEffect(() => {
@@ -156,7 +159,6 @@ export function GithubGraph() {
     const animateNumber = (currentTime: number) => {
       const elapsed = currentTime - startTime
       const progress = Math.min(elapsed / duration, 1)
-      // Ease out cubic
       const easeProgress = 1 - Math.pow(1 - progress, 3)
       const currentVal = Math.floor(easeProgress * end)
       setDisplayCount(currentVal)
@@ -171,6 +173,27 @@ export function GithubGraph() {
     const raf = requestAnimationFrame(animateNumber)
     return () => cancelAnimationFrame(raf)
   }, [isInView, totalContributions])
+
+  // Container-level event delegation for hover tooltips
+  const handleGridPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement
+    if (target && target.dataset && target.dataset.date) {
+      const rect = target.getBoundingClientRect()
+      setHoveredDay({
+        date: target.dataset.date,
+        count: Number(target.dataset.count || 0),
+        level: Number(target.dataset.level || 0),
+      })
+      setTooltipPos({
+        x: rect.left + rect.width / 2,
+        y: rect.top - 8,
+      })
+    }
+  }
+
+  const handleGridPointerLeave = () => {
+    setHoveredDay(null)
+  }
 
   return (
     <div ref={containerRef} className="w-full bg-transparent select-none font-sans overflow-hidden">
@@ -193,26 +216,25 @@ export function GithubGraph() {
             ))}
           </div>
 
-          {/* 7 x 52 Staggered Cascade Animated Grid */}
-          <div className="grid grid-flow-col grid-rows-7 gap-[3px] sm:gap-[3.5px] pt-1">
+          {/* 7 x 52 Staggered Cascade Animated Grid with CSS Containment & Delegated Events */}
+          <div
+            className="grid grid-flow-col grid-rows-7 gap-[3px] sm:gap-[3.5px] pt-1"
+            style={{ contain: "paint layout" }}
+            onPointerMove={handleGridPointerMove}
+            onPointerLeave={handleGridPointerLeave}
+          >
             {weeks.map((week, wIdx) =>
               week.map((day, dIdx) => (
                 <div
                   key={`${wIdx}-${dIdx}`}
+                  data-date={day.date}
+                  data-count={day.count}
+                  data-level={day.level}
                   style={{
                     transitionDelay: isInView
                       ? `${(wIdx * 0.012 + dIdx * 0.008).toFixed(3)}s`
                       : "0s",
                   }}
-                  onMouseEnter={(e) => {
-                    const rect = e.currentTarget.getBoundingClientRect()
-                    setHoveredDay(day)
-                    setTooltipPos({
-                      x: rect.left + rect.width / 2,
-                      y: rect.top - 8,
-                    })
-                  }}
-                  onMouseLeave={() => setHoveredDay(null)}
                   className={`w-[10.5px] h-[10.5px] sm:w-[12px] sm:h-[12px] rounded-[2px] cursor-pointer transition-all duration-300 ease-out hover:scale-125 hover:z-10 ${
                     COLOR_LEVELS[day.level]
                   } ${isInView ? "opacity-100 scale-100" : "opacity-0 scale-50"}`}
