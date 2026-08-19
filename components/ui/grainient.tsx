@@ -183,7 +183,7 @@ export function Grainient({
       alpha: true,
       antialias: false,
       powerPreference: "high-performance",
-      dpr: Math.min(window.devicePixelRatio || 1, 1.25),
+      dpr: 1.0,
     });
 
     const gl = renderer.gl;

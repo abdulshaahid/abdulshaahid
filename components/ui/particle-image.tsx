@@ -20,6 +20,31 @@ interface Particle {
   size: number
 }
 
+const globalImgCache = new Map<string, HTMLImageElement>()
+const globalImgPromises = new Map<string, Promise<HTMLImageElement>>()
+
+function getGlobalImage(src: string): Promise<HTMLImageElement> {
+  const cached = globalImgCache.get(src)
+  if (cached && cached.complete) {
+    return Promise.resolve(cached)
+  }
+  const pending = globalImgPromises.get(src)
+  if (pending) return pending
+
+  const p = new Promise<HTMLImageElement>((resolve, reject) => {
+    const img = new window.Image()
+    img.crossOrigin = "anonymous"
+    img.src = src
+    img.onload = () => {
+      globalImgCache.set(src, img)
+      resolve(img)
+    }
+    img.onerror = reject
+  })
+  globalImgPromises.set(src, p)
+  return p
+}
+
 export function ParticleImage({
   src,
   alt = "Portrait",
@@ -359,19 +384,12 @@ export function ParticleImage({
 
   // Initialize and sample the image
   const initCanvas = useCallback(() => {
-    if (imgCacheRef.current && imgCacheRef.current.complete) {
-      buildFromImage(imgCacheRef.current)
-      return
-    }
-
-    const img = new window.Image()
-    img.crossOrigin = "anonymous"
-    img.src = src
-
-    img.onload = () => {
-      imgCacheRef.current = img
-      buildFromImage(img)
-    }
+    getGlobalImage(src)
+      .then((img) => {
+        imgCacheRef.current = img
+        buildFromImage(img)
+      })
+      .catch(() => {})
   }, [src, buildFromImage])
 
   useEffect(() => {
@@ -609,6 +627,10 @@ export function ParticleImage({
         <img
           src={src}
           alt={alt}
+          width={976}
+          height={1099}
+          loading="eager"
+          decoding="async"
           className="w-full h-full object-contain pointer-events-none"
           style={{
             maskImage: "linear-gradient(to bottom, black 68%, transparent 100%)",
