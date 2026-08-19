@@ -28,6 +28,7 @@ const instrumentSerif = Instrument_Serif({
 })
 
 export const viewport: Viewport = {
+  themeColor: "#09090b",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -37,8 +38,18 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: "Mohamed Abdul Shahid — Portfolio",
-  description: "React Frontend Developer & UI/UX Designer",
-  generator: "v0.app",
+  description: "Frontend Developer & UI/UX Designer crafting purposeful digital experiences and scalable web systems.",
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon-96x96.png", sizes: "96x96", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
+  manifest: "/site.webmanifest",
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
