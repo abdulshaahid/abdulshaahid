@@ -187,7 +187,7 @@ export function About() {
                             "UX Architecture",
                             "Business Ownership",
                             "Frontend Architecture",
-                            "Webflow",
+                            
                           ].map((skill) => (
                             <span
                               key={skill}
