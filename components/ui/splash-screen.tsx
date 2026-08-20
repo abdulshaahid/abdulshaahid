@@ -1,32 +1,17 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import { getGlobalImage } from "@/components/ui/particle-image";
 
 const SMOOTH_EASE = [0.16, 1, 0.3, 1] as const;
-// Hard safety net: if something stalls (slow network, a hung "load" event),
+// Hard safety net: if something stalls (e.g. extreme slow network / offline),
 // never let the splash block the app past this.
-const MAX_WAIT_MS = 4000;
-const EXIT_DELAY_MS = 120;
+const MAX_WAIT_MS = 6000;
+const EXIT_DELAY_MS = 140;
 
 interface SplashScreenProps {
   onComplete: () => void;
-}
-
-// Preloads and decodes an image off the paint path. Always resolves —
-// a failed/missing asset should never be able to hang the splash.
-function preloadImage(src: string): Promise<void> {
-  return new Promise((resolve) => {
-    const img = new window.Image();
-    img.src = src;
-    if (img.decode) {
-      img.decode().then(() => resolve()).catch(() => resolve());
-    } else {
-      img.onload = () => resolve();
-      img.onerror = () => resolve();
-    }
-  });
 }
 
 export function SplashScreen({ onComplete }: SplashScreenProps) {
@@ -37,8 +22,8 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
   // never triggers a re-render of this component — only the final
   // isVisible flip does.
   const barRef = useRef<HTMLDivElement>(null);
-  const targetProgress = useRef(0.1);
-  const displayedProgress = useRef(0.1);
+  const targetProgress = useRef(0.15);
+  const displayedProgress = useRef(0.15);
   const rafId = useRef<number | null>(null);
   const reducedMotion = useRef(false);
   const onCompleteRef = useRef(onComplete);
@@ -51,14 +36,14 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
   const tick = useCallback(() => {
     const current = displayedProgress.current;
     const target = targetProgress.current;
-    const next = reducedMotion.current ? target : current + (target - current) * 0.22;
+    const next = reducedMotion.current ? target : current + (target - current) * 0.18;
     displayedProgress.current = Math.abs(target - next) < 0.001 ? target : next;
 
     if (barRef.current) {
       barRef.current.style.transform = `scaleX(${displayedProgress.current})`;
     }
 
-    rafId.current = displayedProgress.current < 1 ? requestAnimationFrame(tick) : null;
+    rafId.current = displayedProgress.current < 0.999 ? requestAnimationFrame(tick) : null;
   }, []);
 
   const bumpProgress = useCallback(
@@ -92,15 +77,50 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
     }
 
     async function loadAllAssets() {
-      const safety = setTimeout(finishSplash, 600);
+      const safety = setTimeout(finishSplash, MAX_WAIT_MS);
 
       try {
-        if (typeof document !== "undefined" && document.fonts) {
-          await document.fonts.ready;
+        bumpProgress(0.2);
+
+        // Preload /head.webp (splash screen visual)
+        const headPromise = getGlobalImage("/head.webp")
+          .then(() => {
+            if (isMounted) bumpProgress(0.45);
+          })
+          .catch(() => {});
+
+        // Preload fonts so hero text displays without layout shift
+        const fontsPromise = (
+          typeof document !== "undefined" && document.fonts
+            ? document.fonts.ready
+            : Promise.resolve()
+        )
+          .then(() => {
+            if (isMounted) bumpProgress(0.7);
+          })
+          .catch(() => {});
+
+        // Preload /me.webp (hero portrait photo)
+        const mePromise = getGlobalImage("/me.webp")
+          .then(() => {
+            if (isMounted) bumpProgress(0.95);
+          })
+          .catch(() => {});
+
+        // Wait for all critical assets to resolve and decode
+        await Promise.allSettled([headPromise, fontsPromise, mePromise]);
+
+        // Let next animation frames settle so particle grid and canvas can initialize
+        if (typeof window !== "undefined") {
+          await new Promise((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(resolve))
+          );
         }
+
+        if (!isMounted) return;
         bumpProgress(1);
         clearTimeout(safety);
-        finishSplash();
+        setTimeout(finishSplash, 100);
       } catch {
         clearTimeout(safety);
         finishSplash();

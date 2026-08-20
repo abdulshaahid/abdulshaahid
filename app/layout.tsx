@@ -105,6 +105,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <head>
         <link rel="preload" href="/head.webp" as="image" type="image/webp" fetchPriority="high" />
+        <link rel="preload" href="/me.webp" as="image" type="image/webp" fetchPriority="high" />
       </head>
       <body className="bg-black text-white font-sans">
         {children}

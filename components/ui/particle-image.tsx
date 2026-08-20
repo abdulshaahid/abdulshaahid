@@ -20,26 +20,45 @@ interface Particle {
   size: number
 }
 
-const globalImgCache = new Map<string, HTMLImageElement>()
-const globalImgPromises = new Map<string, Promise<HTMLImageElement>>()
+export const globalImgCache = new Map<string, HTMLImageElement>()
+export const globalImgPromises = new Map<string, Promise<HTMLImageElement>>()
 
-function getGlobalImage(src: string): Promise<HTMLImageElement> {
+export function getGlobalImage(src: string): Promise<HTMLImageElement> {
   const cached = globalImgCache.get(src)
-  if (cached && cached.complete) {
+  if (cached && cached.complete && cached.naturalWidth > 0) {
     return Promise.resolve(cached)
   }
   const pending = globalImgPromises.get(src)
   if (pending) return pending
 
-  const p = new Promise<HTMLImageElement>((resolve, reject) => {
+  const p = new Promise<HTMLImageElement>((resolve) => {
+    if (typeof window === "undefined") {
+      resolve(null as any)
+      return
+    }
     const img = new window.Image()
     img.crossOrigin = "anonymous"
     img.src = src
-    img.onload = () => {
+
+    const onDone = () => {
       globalImgCache.set(src, img)
+      if (img.decode) {
+        img.decode().then(() => resolve(img)).catch(() => resolve(img))
+      } else {
+        resolve(img)
+      }
+    }
+
+    if (img.complete && img.naturalWidth > 0) {
+      onDone()
+      return
+    }
+
+    img.onload = onDone
+    img.onerror = () => {
+      // Resolve anyway so network errors never hang the splash screen
       resolve(img)
     }
-    img.onerror = reject
   })
   globalImgPromises.set(src, p)
   return p
@@ -245,22 +264,29 @@ export function ParticleImage({
   const buildFromImage = useCallback((img: HTMLImageElement) => {
     const container = containerRef.current
     const canvas = canvasRef.current
-    if (!container || !canvas) return
+    if (!container || !canvas || !img || !img.naturalWidth || !img.naturalHeight) return
 
     const rect = container.getBoundingClientRect()
-    if (rect.width === 0 || rect.height === 0) return
+    if (rect.width === 0) return
 
-    const isMobile = typeof window !== "undefined" && (window.innerWidth < 640 || "ontouchstart" in window)
     const dpr = Math.min(typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1, 2.5)
     stateRef.current.dpr = dpr
 
     const imgAspect = img.naturalWidth / img.naturalHeight
+
+    // Determine maximum allowed height from computed style or viewport
+    const computedStyle = window.getComputedStyle(container)
+    const computedMaxH = parseFloat(computedStyle.maxHeight)
+    const availableMaxH = !isNaN(computedMaxH) && computedMaxH > 0
+      ? computedMaxH
+      : window.innerHeight * 0.82
+
     let renderWidth = rect.width
     let renderHeight = rect.width / imgAspect
 
-    if (renderHeight > rect.height) {
-      renderHeight = rect.height
-      renderWidth = rect.height * imgAspect
+    if (renderHeight > availableMaxH) {
+      renderHeight = availableMaxH
+      renderWidth = availableMaxH * imgAspect
     }
 
     stateRef.current.width = renderWidth
@@ -552,19 +578,38 @@ export function ParticleImage({
     }
   }, [handleInteractionAt, handleInteractionEnd])
 
-  // Resize & Orientation Listener - ONLY trigger when container width meaningfully changes
+  // Resize & Orientation Observer - dynamically tracks container dimensions
   useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+
     let timer: NodeJS.Timeout
     const handleResize = () => {
       clearTimeout(timer)
       timer = setTimeout(() => {
         if (!containerRef.current) return
         const newWidth = containerRef.current.getBoundingClientRect().width
-        // Ignore mobile browser toolbar collapse height changes (only react if width changed by > 5px)
-        if (Math.abs(newWidth - lastWidthRef.current) > 5) {
-          initCanvas()
+        if (newWidth > 0 && Math.abs(newWidth - lastWidthRef.current) > 4) {
+          if (imgCacheRef.current) {
+            buildFromImage(imgCacheRef.current)
+          } else {
+            initCanvas()
+          }
         }
-      }, 100)
+      }, 80)
+    }
+
+    let ro: ResizeObserver | null = null
+    if (typeof ResizeObserver !== "undefined") {
+      ro = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          const width = entry.contentRect.width
+          if (width > 0 && Math.abs(width - lastWidthRef.current) > 4) {
+            handleResize()
+          }
+        }
+      })
+      ro.observe(container)
     }
 
     window.addEventListener("resize", handleResize, { passive: true })
@@ -574,9 +619,10 @@ export function ParticleImage({
 
     return () => {
       clearTimeout(timer)
+      if (ro) ro.disconnect()
       window.removeEventListener("resize", handleResize)
     }
-  }, [initCanvas])
+  }, [buildFromImage, initCanvas])
 
   // IntersectionObserver
   useEffect(() => {
@@ -617,8 +663,8 @@ export function ParticleImage({
           maxHeight: "100%",
           objectFit: "contain",
         }}
-        className={`max-w-full max-h-full object-contain pointer-events-auto block transition-opacity duration-300 ${
-          isLoaded ? "opacity-100" : "opacity-0 pointer-events-none"
+        className={`max-w-full max-h-full object-contain pointer-events-auto transition-opacity duration-300 mx-auto ${
+          isLoaded ? "opacity-100 block" : "opacity-0 absolute pointer-events-none"
         }`}
       />
 
@@ -627,12 +673,13 @@ export function ParticleImage({
         <img
           src={src}
           alt={alt}
-          width={976}
-          height={1099}
+          width={800}
+          height={901}
           loading="eager"
           decoding="async"
-          className="w-full h-full object-contain pointer-events-none"
+          className="w-full h-auto max-w-full max-h-full object-contain pointer-events-none block mx-auto"
           style={{
+            aspectRatio: "800 / 901",
             maskImage: "linear-gradient(to bottom, black 68%, transparent 100%)",
             WebkitMaskImage: "linear-gradient(to bottom, black 68%, transparent 100%)",
           }}
