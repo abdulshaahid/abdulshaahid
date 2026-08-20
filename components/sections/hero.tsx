@@ -6,8 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useMediaQuery } from "usehooks-ts";
 import Grainient from "@/components/ui/grainient";
 import { ParticleImage } from "@/components/ui/particle-image";
-import { Button } from "@/components/ui/button";
-import { ArrowUpRight } from "lucide-react";
+import { HeroCtaButton } from "@/components/ui/hero-cta-button";
 
 const CURATED_SHAPE_PATHS = [
   // Shape 1: Clover Star
@@ -340,23 +339,12 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
             <div className="col-span-3 flex flex-col justify-center items-end z-20 space-y-8 pb-12 lg:pb-16 -translate-y-4 lg:-translate-y-8">
               <div
                 style={GPU_LAYER}
-                className={`transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] delay-150 ${
+                className={`flex items-center justify-end gap-2.5 sm:gap-3 flex-wrap transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] delay-150 ${
                   isReady ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
                 }`}
               >
-                <Button
-                  render={<a href="#contact" />}
-                  variant="unstyled"
-                  className="group flex cursor-pointer items-center justify-center gap-1.5 rounded-full border-none bg-transparent p-0 font-normal shadow-none hover:bg-transparent"
-                >
-                  <span className="rounded-full border-2 border-zinc-500 bg-transparent px-3 py-2 text-xs font-mono font-medium text-zinc-200 duration-300 ease-in-out group-hover:border-white group-hover:text-white">
-                    Start a Project
-                  </span>
-                  <div className="relative flex h-9 w-9 cursor-pointer items-center justify-center overflow-hidden rounded-full border-2 border-zinc-500 bg-transparent text-zinc-200 duration-300 ease-in-out group-hover:border-white group-hover:text-white">
-                    <ArrowUpRight className="h-4 w-4 transition-transform duration-300 ease-out group-hover:translate-x-5 group-hover:-translate-y-5" />
-                    <ArrowUpRight className="absolute h-4 w-4 -translate-x-5 translate-y-5 transition-transform duration-300 ease-out group-hover:translate-x-0 group-hover:translate-y-0" />
-                  </div>
-                </Button>
+                <HeroCtaButton text="Let's Talk" href="#contact" variant="white" />
+                <HeroCtaButton text="Resume" href="/resume.pdf" download="Mohamed-Abdul-Shahid-CV.pdf" variant="black" icon="download" />
               </div>
 
               <div className="flex items-center justify-end gap-3 lg:gap-4 select-none">
@@ -475,23 +463,12 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
             {/* iPad Bio CTA Button */}
             <div
               style={GPU_LAYER}
-              className={`mt-6 relative z-20 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] delay-200 ${
+              className={`mt-6 relative z-20 flex items-center justify-center gap-2.5 sm:gap-3 flex-wrap transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] delay-200 ${
                 isReady ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
               }`}
             >
-              <Button
-                render={<a href="#contact" />}
-                variant="unstyled"
-                className="group mx-auto flex cursor-pointer items-center justify-center gap-1.5 rounded-full border-none bg-transparent p-0 font-normal shadow-none hover:bg-transparent"
-              >
-                <span className="rounded-full border-2 border-zinc-500 bg-transparent px-3 py-2 text-xs font-mono font-medium text-zinc-200 duration-300 ease-in-out group-hover:border-white group-hover:text-white">
-                  Start a Project
-                </span>
-                <div className="relative flex h-9 w-9 cursor-pointer items-center justify-center overflow-hidden rounded-full border-2 border-zinc-500 bg-transparent text-zinc-200 duration-300 ease-in-out group-hover:border-white group-hover:text-white">
-                  <ArrowUpRight className="h-4 w-4 transition-transform duration-300 ease-out group-hover:translate-x-5 group-hover:-translate-y-5" />
-                  <ArrowUpRight className="absolute h-4 w-4 -translate-x-5 translate-y-5 transition-transform duration-300 ease-out group-hover:translate-x-0 group-hover:translate-y-0" />
-                </div>
-              </Button>
+              <HeroCtaButton text="Let's Talk" href="#contact" variant="white" />
+              <HeroCtaButton text="Resume" href="/resume.pdf" download="Mohamed-Abdul-Shahid-CV.pdf" variant="black" icon="download" />
             </div>
           </div>
 
@@ -574,23 +551,12 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
             {/* Bio CTA Button */}
             <div
               style={GPU_LAYER}
-              className={`mt-10 sm:mt-12 relative z-20 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] delay-200 ${
+              className={`mt-10 sm:mt-12 relative z-20 flex items-center justify-center gap-2.5 sm:gap-3 flex-wrap transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] delay-200 ${
                 isReady ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
               }`}
             >
-              <Button
-                render={<a href="#contact" />}
-                variant="unstyled"
-                className="group mx-auto flex cursor-pointer items-center justify-center gap-1.5 rounded-full border-none bg-transparent p-0 font-normal shadow-none hover:bg-transparent"
-              >
-                <span className="rounded-full border-2 border-zinc-500 bg-transparent px-3 py-2 text-xs font-mono font-medium text-zinc-200 duration-300 ease-in-out group-hover:border-white group-hover:text-white">
-                  Start a Project
-                </span>
-                <div className="relative flex h-9 w-9 cursor-pointer items-center justify-center overflow-hidden rounded-full border-2 border-zinc-500 bg-transparent text-zinc-200 duration-300 ease-in-out group-hover:border-white group-hover:text-white">
-                  <ArrowUpRight className="h-4 w-4 transition-transform duration-300 ease-out group-hover:translate-x-5 group-hover:-translate-y-5" />
-                  <ArrowUpRight className="absolute h-4 w-4 -translate-x-5 translate-y-5 transition-transform duration-300 ease-out group-hover:translate-x-0 group-hover:translate-y-0" />
-                </div>
-              </Button>
+              <HeroCtaButton text="Let's Talk" href="#contact" variant="white" />
+              <HeroCtaButton text="Resume" href="/resume.pdf" download="Mohamed-Abdul-Shahid-CV.pdf" variant="black" icon="download" />
             </div>
           </div>
 

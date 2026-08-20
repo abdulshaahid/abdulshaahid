@@ -13,6 +13,7 @@ import {
   Copy,
   ArrowUpRight,
   ChevronDown,
+  Download,
 } from "lucide-react"
 import { GreenHighlight } from "@/components/ui/geometric"
 import { VIEWPORT_CONFIG, SMOOTH_EASE } from "@/lib/motion"
@@ -234,6 +235,17 @@ export function Contact() {
                   </div>
                 )}
               </div>
+
+              {/* Resume / Download CV */}
+              <a
+                href="/resume.pdf"
+                download="Mohamed-Abdul-Shahid-CV.pdf"
+                className="inline-flex items-center gap-1.5 px-3.5 h-9 rounded-full text-xs font-mono font-medium text-zinc-200 hover:text-white bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 transition-all group"
+              >
+                <Download size={13} className="text-zinc-400 group-hover:text-zinc-200 transition-colors shrink-0" />
+                <span className="leading-none translate-y-[0.75px]">Resume</span>
+              
+              </a>
 
               {/* GitHub */}
               <a
