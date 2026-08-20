@@ -9,24 +9,24 @@ import { VIEWPORT_CONFIG, SMOOTH_EASE } from "@/lib/motion"
 
 const principles = [
   {
-    title: "If It's Repetitive, Automate It",
+    title: "Design Directly in Code",
     description:
-      "Manual work is a signal. Whether a CLI tool or a script — I'd rather build it once than repeat it twice.",
-  },
-  {
-    title: "Clarity Beats Cleverness",
-    description:
-      "Readable code and predictable behavior matter most. Simple implementations always outlast clever hacks.",
+      "I bridge design and engineering by conceptualizing UI directly in React and CSS — crafting micro-interactions, responsive typography, and design systems natively.",
   },
   {
     title: "Think in Systems, Not Screens",
     description:
-      "Components should work together as a structured whole. State, tokens, and UI patterns scale without fragility.",
+      "Components should work together as a structured whole. Scalable design tokens, predictable state management, and reusable UI patterns eliminate technical debt.",
+  },
+  {
+    title: "If It's Repetitive, Automate It",
+    description:
+      "Manual work is a signal to optimize. Whether building CLI utilities, automated workflows, or leveraging modern AI tooling — I'd rather build it once than repeat it twice.",
   },
   {
     title: "Simple on the Surface",
     description:
-      "Good software feels effortless. Complexity can exist under the hood — it shouldn't leak into the interface.",
+      "Good software feels effortless. Complexity stays under the hood with 60fps compositor animations, accessible semantics, and sub-second load times.",
   },
 ]
 
@@ -47,12 +47,12 @@ export function About() {
             viewport={VIEWPORT_CONFIG}
             transition={{ duration: 0.5, ease: SMOOTH_EASE }}
           >
-            <h2 className="font-bricolage text-base sm:text-xl lg:text-2xl font-normal text-zinc-100 leading-snug max-w-3xl text-pretty">
-              I build with{" "}
+            <h2 className="font-bricolage text-base sm:text-xl lg:text-2xl font-normal text-zinc-100 leading-snug max-w-2xl text-pretty">
+              I design and build interfaces with{" "}
               <GreenHighlight delay={0.15}>
-                clarity, structure, and a bias toward automation
+                clean code, fluid motion, and scalable systems
               </GreenHighlight>{" "}
-              — because software should feel simple, even when the logic behind it isn't.
+              — making interfaces feel effortless.
             </h2>
           </motion.div>
 
