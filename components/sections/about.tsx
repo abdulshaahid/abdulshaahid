@@ -110,7 +110,7 @@ export function About() {
                   <div className="w-6 h-6 flex items-center justify-center shrink-0 mt-0.5">
                     <Image
                       src="/trawayl.png"
-                      alt="Trawayl"
+                      alt="Trawayl logo"
                       width={24}
                       height={24}
                       className="w-6 h-6 object-contain"
@@ -329,7 +329,7 @@ export function About() {
                   <div className="w-6 h-6 flex items-center justify-center shrink-0 mt-0.5">
                     <Image
                       src="/luminar.png"
-                      alt="Luminar Technolab"
+                      alt="Luminar Technolab logo"
                       width={24}
                       height={24}
                       className="w-6 h-6 object-contain"
@@ -420,7 +420,7 @@ export function About() {
                   <div className="w-6 h-6 flex items-center justify-center shrink-0 mt-0.5">
                     <Image
                       src="/mea.ico"
-                      alt="MEA Engineering College"
+                      alt="MEA Engineering College crest"
                       width={24}
                       height={24}
                       className="w-6 h-6 object-contain"

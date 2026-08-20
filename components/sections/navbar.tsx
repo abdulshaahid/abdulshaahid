@@ -61,7 +61,7 @@ export function Navbar() {
 
   return (
     <header className="fixed top-6 inset-x-0 z-50 pointer-events-none">
-      <nav className="">
+      <nav aria-label="Main Navigation" className="">
         <div className="flex justify-center pointer-events-auto">
           <ExpandableTabs
             tabs={tabs}

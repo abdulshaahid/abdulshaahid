@@ -281,12 +281,12 @@ export function Portfolio() {
           transition={{ duration: 0.5, ease: SMOOTH_EASE }}
           className="px-6 sm:px-10 lg:px-12 py-8 sm:py-10 border-b border-dashed border-zinc-800/90"
         >
-          <p className="font-bricolage text-base sm:text-xl lg:text-2xl text-zinc-100 leading-snug max-w-2xl text-pretty font-medium">
+          <h2 className="font-bricolage text-base sm:text-xl lg:text-2xl text-zinc-100 leading-snug max-w-2xl text-pretty font-medium">
             Think of{" "}
             <GreenHighlight delay={0.15}>
               side-projects and client work as my personal lab
             </GreenHighlight>
-          </p>
+          </h2>
         </motion.div>
 
         {/* Grid: 1 Column on Mobile, iPad, and iPad Pro (< xl), 2 Columns on Desktop (xl+) */}
@@ -327,7 +327,7 @@ export function Portfolio() {
                     <div className="relative w-full h-full">
                       <Image
                         src={project.imageUrl}
-                        alt={project.title}
+                        alt={`${project.title} project preview`}
                         fill
                         sizes="(max-width: 640px) 100vw, 280px"
                         className="object-cover object-center"

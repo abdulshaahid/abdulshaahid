@@ -31,13 +31,13 @@ export function GithubActivity() {
           transition={{ duration: 0.5, ease: SMOOTH_EASE, delay: 0.08 }}
           className="p-8 sm:p-10 text-center relative"
         >
-          <p className="font-bricolage text-sm sm:text-base text-zinc-200 max-w-xl mx-auto leading-relaxed">
+          <h2 className="font-bricolage text-sm sm:text-base text-zinc-200 max-w-xl mx-auto leading-relaxed font-normal">
             I also contribute to{" "}
             <GreenHighlight delay={0.15}>
               open-source tools & utilities
             </GreenHighlight>{" "}
             regularly on GitHub.
-          </p>
+          </h2>
 
           <div className="mt-4 flex justify-center">
             <a

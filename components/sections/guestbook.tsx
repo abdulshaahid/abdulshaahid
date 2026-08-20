@@ -112,7 +112,7 @@ function TestimonialCard({ item }: { item: Testimonial }) {
         <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-zinc-900 border border-zinc-700/70 flex items-center justify-center shrink-0 overflow-hidden shadow-inner">
           <img
             src={item.avatar}
-            alt={item.company}
+            alt={`${item.company} testimonial avatar`}
             width={40}
             height={40}
             loading="lazy"
@@ -152,9 +152,9 @@ export function Guestbook() {
           transition={{ duration: 0.5, ease: SMOOTH_EASE }}
           className="px-6 sm:px-10 lg:px-12 py-8 sm:py-10 border-b border-zinc-800/90"
         >
-          <p className="font-bricolage text-base sm:text-xl lg:text-2xl text-zinc-100 leading-snug max-w-2xl text-pretty font-medium">
+          <h2 className="font-bricolage text-base sm:text-xl lg:text-2xl text-zinc-100 leading-snug max-w-2xl text-pretty font-medium">
             Words from friends and <GreenHighlight delay={0.15}>collaborators</GreenHighlight> who know me best.
-          </p>
+          </h2>
         </motion.div>
 
         {/* Horizontal Rolling Testimonial Marquees */}

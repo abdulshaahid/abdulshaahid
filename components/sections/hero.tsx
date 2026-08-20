@@ -204,13 +204,18 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
           <div className="absolute bottom-10 right-[-15%] sm:right-[0%] w-[320px] sm:w-[500px] h-[450px] sm:h-[600px] bg-[radial-gradient(circle,_rgba(55,229,165,0.08)_0%,_rgba(55,229,165,0.02)_45%,_transparent_70%)] pointer-events-none" />
         </div>
 
+        {/* Accessible Main Heading for Search Engines & Screen Readers */}
+        <h1 className="sr-only">
+          Mohamed Abdul Shahid — Frontend Developer & UI/UX Designer
+        </h1>
+
         {/* Main Content Container */}
         <div className="relative z-10 w-full max-w-7xl mx-auto flex-1 flex flex-col items-center">
           
           {/* 1. TOP SCRIPT TITLE: "Hey, there" */}
           <div className="relative w-full pointer-events-none pt-2 sm:pt-4 z-0 flex justify-center">
             {/* Desktop Script Title (PC / Laptops in Landscape >= lg) */}
-            <h1 className="hidden lg:landscape:flex font-script italic text-[7.5rem] md:text-[7rem] lg:text-[9rem] xl:text-[10.5rem] text-zinc-100/90 leading-none font-thin tracking-wide drop-shadow-sm items-center justify-center gap-24 lg:gap-32 mx-auto">
+            <div aria-hidden="true" className="hidden lg:landscape:flex font-script italic text-[7.5rem] md:text-[7rem] lg:text-[9rem] xl:text-[10.5rem] text-zinc-100/90 leading-none font-thin tracking-wide drop-shadow-sm items-center justify-center gap-24 lg:gap-32 mx-auto">
               <span className="inline-flex overflow-hidden pb-4 -mb-4 pt-1">
                 <span
                   style={GPU_LAYER}
@@ -231,10 +236,10 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
                   there
                 </span>
               </span>
-            </h1>
+            </div>
 
             {/* iPad / Tablet Script Title (iPad Mini, iPad Air, iPad Pro) */}
-            <h1 className="hidden md:flex lg:landscape:hidden font-script italic text-7xl md:text-8xl lg:text-9xl text-zinc-100/90 leading-none font-thin tracking-wide drop-shadow-sm items-center justify-center gap-12 mx-auto translate-y-6 md:translate-y-8 lg:portrait:translate-y-10">
+            <div aria-hidden="true" className="hidden md:flex lg:landscape:hidden font-script italic text-7xl md:text-8xl lg:text-9xl text-zinc-100/90 leading-none font-thin tracking-wide drop-shadow-sm items-center justify-center gap-12 mx-auto translate-y-6 md:translate-y-8 lg:portrait:translate-y-10">
               <span className="inline-flex overflow-hidden pb-2 -mb-2">
                 <span
                   style={GPU_LAYER}
@@ -255,10 +260,10 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
                   there
                 </span>
               </span>
-            </h1>
+            </div>
 
             {/* Mobile Script Title (< md - Phones) */}
-            <h1 className="block md:hidden font-script italic text-7xl sm:text-8xl text-zinc-100/90 leading-none font-thin tracking-wide drop-shadow-sm text-center">
+            <div aria-hidden="true" className="block md:hidden font-script italic text-7xl sm:text-8xl text-zinc-100/90 leading-none font-thin tracking-wide drop-shadow-sm text-center">
               <span className="inline-flex overflow-hidden pb-2 -mb-2">
                 <span
                   style={GPU_LAYER}
@@ -279,7 +284,7 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
                   there
                 </span>
               </span>
-            </h1>
+            </div>
           </div>
 
           {/* 2. MIDDLE SECTION: Desktop Grid vs iPad Tablet vs Mobile Layout */}
@@ -323,7 +328,7 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
               <div className="relative w-full max-w-[480px] lg:max-w-[580px] xl:max-w-[660px] flex justify-center items-end group">
                 <ParticleImage
                   src="/me.webp"
-                  alt="Mohamed Abdul Shahid"
+                  alt="Mohamed Abdul Shahid — Frontend Developer & UI/UX Designer"
                   className="w-full h-auto max-h-[76vh] lg:max-h-[84vh]"
                 />
               </div>
@@ -389,7 +394,7 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
             >
               <ParticleImage
                 src="/me.webp"
-                alt="Mohamed Abdul Shahid"
+                alt="Mohamed Abdul Shahid — Frontend Developer & UI/UX Designer"
                 className="w-full h-auto max-h-[46vh] md:max-h-[50vh]"
               />
             </div>
@@ -476,7 +481,7 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
             >
               <ParticleImage
                 src="/me.webp"
-                alt="Mohamed Abdul Shahid"
+                alt="Mohamed Abdul Shahid — Frontend Developer & UI/UX Designer"
                 className="w-full h-auto max-h-[52vh] sm:max-h-[62vh]"
               />
             </div>

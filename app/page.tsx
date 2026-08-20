@@ -1,3 +1,6 @@
+import type { Metadata } from "next"
+import { siteConfig } from "@/lib/site-config"
+import { JsonLd } from "@/components/seo/json-ld"
 import { HeroSplashController } from "@/components/ui/hero-splash-controller"
 import { Navbar } from "@/components/sections/navbar"
 import { MouseBackground } from "@/components/ui/mouse-background"
@@ -11,9 +14,20 @@ import { Contact } from "@/components/sections/contact"
 import { Footer } from "@/components/sections/footer"
 import { SlopeDivider } from "@/components/ui/geometric"
 
+export const metadata: Metadata = {
+  title: "Mohamed Abdul Shahid — Frontend Developer & UI/UX Designer",
+  description: siteConfig.description,
+  alternates: {
+    canonical: "/",
+  },
+}
+
 export default function Page() {
   return (
     <>
+      {/* Schema.org Structured Data */}
+      <JsonLd />
+
       {/* Fixed Navbar */}
       <Navbar />
 

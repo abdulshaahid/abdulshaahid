@@ -78,10 +78,10 @@ export function FAQ() {
           className="px-6 sm:px-10 lg:px-12 py-8 sm:py-10 border-b border-dashed border-zinc-800/90 flex flex-col sm:flex-row sm:items-end justify-between gap-4"
         >
           <div>
-            <p className="font-bricolage text-base sm:text-xl lg:text-2xl text-zinc-100 leading-snug max-w-2xl text-pretty font-medium">
+            <h2 className="font-bricolage text-base sm:text-xl lg:text-2xl text-zinc-100 leading-snug max-w-2xl text-pretty font-medium">
               Got questions? Here is everything about{" "}
               <GreenHighlight delay={0.15}>how I work and build</GreenHighlight>.
-            </p>
+            </h2>
           </div>
           <span className="text-xs font-mono text-zinc-500 shrink-0">
             FAQ // WORKFLOW & PROCESS
