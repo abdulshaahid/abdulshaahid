@@ -36,7 +36,7 @@ CANONICAL CONTACT INFO (single source of truth)
 Email: abdulshaahid1@gmail.com
 Phone: +91 62826 69441
 GitHub: https://github.com/abdulshaahid
-LinkedIn: https://www.linkedin.com/in/mohamedabdulshaahid/
+LinkedIn: https://www.linkedin.com/in/mohamedabdulshahid/
 Instagram: https://instagram.com/abdulshaahid/
 
 Every other section of this prompt that needs to point a visitor to contact info should reference "Canonical Contact Info" rather than repeating the details. When deciding which channel to lead with, see CONTACT PRIORITY below.
