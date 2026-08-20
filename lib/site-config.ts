@@ -18,7 +18,7 @@ export const siteConfig = {
     }
     return "https://abdulshaahid.me";
   })(),
-  email: "shahidpallath623@gmail.com",
+  email: "abdulshaahid1@gmail.com",
   phone: "+91 62826 69441",
   phoneRaw: "+916282669441",
   location: {

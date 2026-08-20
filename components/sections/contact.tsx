@@ -36,7 +36,7 @@ export function Contact() {
   const [showPhoneOptions, setShowPhoneOptions] = useState(false)
   const phoneBoxRef = useRef<HTMLDivElement>(null)
 
-  const email = "shahidpallath623@gmail.com"
+  const email = "abdulshaahid1@gmail.com"
   const phone = "+91 62826 69441"
   const phoneRaw = "+916282669441"
 

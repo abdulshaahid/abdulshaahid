@@ -64,7 +64,7 @@ export function Footer() {
                   <Instagram size={14} />
                 </a>
                 <a
-                  href="mailto:shahidpallath623@gmail.com"
+                  href="mailto:abdulshaahid1@gmail.com"
                   aria-label="Email"
                   className="w-8 h-8 rounded-lg bg-zinc-900  flex items-center justify-center text-zinc-400 hover:text-white hover:border-zinc-700 transition-colors"
                 >

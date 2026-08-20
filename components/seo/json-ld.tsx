@@ -246,7 +246,7 @@ export function JsonLd() {
         name: "How do we get started working together?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "You can reach out directly via the contact form below, email me at shahidpallath623@gmail.com, or connect on LinkedIn and GitHub. We'll discuss your project requirements, scope, and timeline.",
+          text: "You can reach out directly via the contact form below, email me at abdulshaahid1@gmail.com, or connect on LinkedIn and GitHub. We'll discuss your project requirements, scope, and timeline.",
         },
       },
     ],
