@@ -11,7 +11,7 @@ const principles = [
   {
     title: "Design Directly in Code",
     description:
-      "I bridge design and engineering by conceptualizing UI directly in React and CSS — crafting micro-interactions, responsive typography, and design systems natively.",
+      "I bridge design and engineering by conceptualizing UI directly in code — crafting micro-interactions, responsive typography, and design systems natively.",
   },
   {
     title: "Think in Systems, Not Screens",
@@ -19,14 +19,14 @@ const principles = [
       "Components should work together as a structured whole. Scalable design tokens, predictable state management, and reusable UI patterns eliminate technical debt.",
   },
   {
-    title: "If It's Repetitive, Automate It",
+    title: "Details Make the Product",
     description:
-      "Manual work is a signal to optimize. Whether building CLI utilities, automated workflows, or leveraging modern AI tooling — I'd rather build it once than repeat it twice.",
+      "Micro-interactions, optical precision, and thoughtful transitions turn ordinary interfaces into memorable digital experiences.",
   },
   {
     title: "Simple on the Surface",
     description:
-      "Good software feels effortless. Complexity stays under the hood with 60fps compositor animations, accessible semantics, and sub-second load times.",
+      "Good interfaces feels effortless. Complexity stays under the hood with high-performance animations, accessible semantics, and fast loading times.",
   },
 ]
 
