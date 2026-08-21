@@ -345,7 +345,7 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
                 }`}
               >
                 <HeroCtaButton text="Let's Talk" href="#contact" variant="white" />
-                <HeroCtaButton text="Resume" href="/resume.pdf" download="Mohamed-Abdul-Shahid-CV.pdf" variant="black" icon="download" />
+                <HeroCtaButton text="Resume" href="/resume.pdf" download="Mohamed-Abdul-Shahid-CV.pdf" target="_blank" variant="black" icon="download" />
               </div>
 
               <div className="flex items-center justify-end gap-3 lg:gap-4 select-none">
@@ -470,7 +470,7 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
               }`}
             >
               <HeroCtaButton text="Let's Talk" href="#contact" variant="white" />
-              <HeroCtaButton text="Resume" href="/resume.pdf" download="Mohamed-Abdul-Shahid-CV.pdf" variant="black" icon="download" />
+              <HeroCtaButton text="Resume" href="/resume.pdf" download="Mohamed-Abdul-Shahid-CV.pdf" target="_blank" variant="black" icon="download" />
             </div>
           </div>
 
@@ -559,7 +559,7 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
               }`}
             >
               <HeroCtaButton text="Let's Talk" href="#contact" variant="white" />
-              <HeroCtaButton text="Resume" href="/resume.pdf" download="Mohamed-Abdul-Shahid-CV.pdf" variant="black" icon="download" />
+              <HeroCtaButton text="Resume" href="/resume.pdf" download="Mohamed-Abdul-Shahid-CV.pdf" target="_blank" variant="black" icon="download" />
             </div>
           </div>
 

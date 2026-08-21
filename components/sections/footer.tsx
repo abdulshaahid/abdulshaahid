@@ -164,6 +164,18 @@ export function Footer() {
                       <span className="text-[10px] text-zinc-600">↗</span>
                     </a>
                   </li>
+                  <li>
+                    <a
+                      href="/resume.pdf"
+                      download="Mohamed-Abdul-Shahid-CV.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-zinc-400 hover:text-white transition-colors flex items-center gap-1"
+                    >
+                      <span>Resume / CV</span>
+                      <span className="text-[10px] text-zinc-600">↓</span>
+                    </a>
+                  </li>
                 </ul>
 
                 <div className="mt-6">

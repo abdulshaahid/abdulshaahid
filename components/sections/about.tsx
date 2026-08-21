@@ -4,7 +4,7 @@ import React from "react"
 import Image from "next/image"
 import { motion } from "framer-motion"
 import { CrosshairMarker, GreenHighlight } from "@/components/ui/geometric"
-import { Lightbulb, BookOpen, ChevronsUpDown, Globe } from "lucide-react"
+import { Lightbulb, BookOpen, ChevronsUpDown, Globe, Download } from "lucide-react"
 import { VIEWPORT_CONFIG, SMOOTH_EASE } from "@/lib/motion"
 
 const principles = [
@@ -92,7 +92,19 @@ export function About() {
                   Experience & Education
                 </h3>
               </div>
-              <span className="text-xs font-mono text-zinc-500">TIMELINE // CAREER</span>
+              <div className="flex items-center gap-3">
+                <a
+                  href="/resume.pdf"
+                  download="Mohamed-Abdul-Shahid-CV.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono text-zinc-300 hover:text-white bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 transition-all"
+                >
+                  <Download size={12} className="text-zinc-400 shrink-0" />
+                  <span>Download CV</span>
+                </a>
+                <span className="hidden sm:inline text-xs font-mono text-zinc-500">TIMELINE // CAREER</span>
+              </div>
             </motion.div>
 
             {/* Timeline Cards Container */}

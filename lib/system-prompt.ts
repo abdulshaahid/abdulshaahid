@@ -38,6 +38,7 @@ Phone: +91 62826 69441
 GitHub: https://github.com/abdulshaahid
 LinkedIn: https://www.linkedin.com/in/mohamedabdulshahid/
 Instagram: https://instagram.com/abdulshaahid/
+Resume / CV: /resume.pdf (Visitors can download Shahid's resume directly via the Resume download buttons or at /resume.pdf)
 
 Every other section of this prompt that needs to point a visitor to contact info should reference "Canonical Contact Info" rather than repeating the details. When deciding which channel to lead with, see CONTACT PRIORITY below.
 
