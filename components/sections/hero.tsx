@@ -331,6 +331,7 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
                   src="/me.webp"
                   alt="Mohamed Abdul Shahid — Frontend Developer & UI/UX Designer"
                   className="w-full h-auto max-h-[76vh] lg:max-h-[84vh]"
+                  isReady={isReady}
                 />
               </div>
             </div>
@@ -398,6 +399,7 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
                 src="/me.webp"
                 alt="Mohamed Abdul Shahid — Frontend Developer & UI/UX Designer"
                 className="w-full h-auto max-h-[46vh] md:max-h-[50vh]"
+                isReady={isReady}
               />
             </div>
 
@@ -486,6 +488,7 @@ export function Hero({ isReady = true }: { isReady?: boolean }) {
                 src="/me.webp"
                 alt="Mohamed Abdul Shahid — Frontend Developer & UI/UX Designer"
                 className="w-full h-auto max-h-[52vh] sm:max-h-[62vh]"
+                isReady={isReady}
               />
             </div>
 

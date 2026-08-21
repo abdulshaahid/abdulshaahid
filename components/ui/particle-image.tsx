@@ -7,6 +7,7 @@ interface ParticleImageProps {
   alt?: string
   className?: string
   priority?: boolean
+  isReady?: boolean
 }
 
 interface Particle {
@@ -37,14 +38,28 @@ export function getGlobalImage(src: string): Promise<HTMLImageElement> {
       return
     }
     const img = new window.Image()
-    img.crossOrigin = "anonymous"
+    // Do NOT set crossOrigin for same-origin local assets (e.g., starting with "/" or relative)
+    // Setting crossOrigin on same-origin assets triggers CORS mode conflicts with preload tags
+    // and causes CORS errors on mobile browsers where Access-Control-Allow-Origin is not returned.
+    if (src.startsWith("http://") || src.startsWith("https://")) {
+      img.crossOrigin = "anonymous"
+    }
     img.src = src
 
-    const onDone = () => {
-      globalImgCache.set(src, img)
-      if (img.decode) {
-        img.decode().then(() => resolve(img)).catch(() => resolve(img))
+    const onDone = async () => {
+      if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+        globalImgCache.set(src, img)
+        if ("decode" in img && typeof img.decode === "function") {
+          try {
+            await img.decode()
+          } catch {
+            // decode() may reject in some mobile browsers even if valid; proceed anyway
+          }
+        }
+        resolve(img)
       } else {
+        // Clear failed promise so subsequent attempts can retry cleanly
+        globalImgPromises.delete(src)
         resolve(img)
       }
     }
@@ -56,7 +71,7 @@ export function getGlobalImage(src: string): Promise<HTMLImageElement> {
 
     img.onload = onDone
     img.onerror = () => {
-      // Resolve anyway so network errors never hang the splash screen
+      globalImgPromises.delete(src)
       resolve(img)
     }
   })
@@ -68,11 +83,13 @@ export function ParticleImage({
   src,
   alt = "Portrait",
   className = "",
+  isReady = true,
 }: ParticleImageProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const imgCacheRef = useRef<HTMLImageElement | null>(null)
   const lastWidthRef = useRef<number>(0)
+  const retryCountRef = useRef<number>(0)
   const [isLoaded, setIsLoaded] = useState(false)
 
   const stateRef = useRef<{
@@ -267,7 +284,20 @@ export function ParticleImage({
     if (!container || !canvas || !img || !img.naturalWidth || !img.naturalHeight) return
 
     const rect = container.getBoundingClientRect()
-    if (rect.width === 0) return
+    if (rect.width === 0) {
+      // Container layout might not be calculated yet during initial render/splash animation.
+      // Retry in the next animation frames (up to 8 attempts)
+      if (retryCountRef.current < 8) {
+        retryCountRef.current += 1
+        requestAnimationFrame(() => {
+          if (containerRef.current) {
+            buildFromImage(img)
+          }
+        })
+      }
+      return
+    }
+    retryCountRef.current = 0
 
     const dpr = Math.min(typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1, 2.5)
     stateRef.current.dpr = dpr
@@ -321,80 +351,84 @@ export function ParticleImage({
 
     stateRef.current.baseCanvas = baseCanvas
 
-    // 2. Sample pixel data for particle physics grid
-    const sampleCanvas = document.createElement("canvas")
-    sampleCanvas.width = Math.floor(renderWidth)
-    sampleCanvas.height = Math.floor(renderHeight)
-    const sampleCtx = sampleCanvas.getContext("2d", { willReadFrequently: true })
-    if (!sampleCtx) return
+    // 2. Sample pixel data for particle physics grid with try/catch resilience
+    try {
+      const sampleCanvas = document.createElement("canvas")
+      sampleCanvas.width = Math.floor(renderWidth)
+      sampleCanvas.height = Math.floor(renderHeight)
+      const sampleCtx = sampleCanvas.getContext("2d", { willReadFrequently: true })
+      if (sampleCtx) {
+        sampleCtx.imageSmoothingEnabled = true
+        sampleCtx.imageSmoothingQuality = "high"
+        sampleCtx.drawImage(img, 0, 0, renderWidth, renderHeight)
+        const imgData = sampleCtx.getImageData(0, 0, renderWidth, renderHeight)
+        const data = imgData.data
+        const gridStep = 2.0
+        const pSize = Math.max(gridStep * 1.35, 2.4)
 
-    sampleCtx.imageSmoothingEnabled = true
-    sampleCtx.imageSmoothingQuality = "high"
-    sampleCtx.drawImage(img, 0, 0, renderWidth, renderHeight)
-    const imgData = sampleCtx.getImageData(0, 0, renderWidth, renderHeight)
-    const data = imgData.data
-    const gridStep = 2.0
-    const pSize = Math.max(gridStep * 1.35, 2.4)
+        const cols = Math.ceil(renderWidth / gridStep)
+        const rows = Math.ceil(renderHeight / gridStep)
+        stateRef.current.particleGrid = new Uint8Array(cols * rows)
 
-    const cols = Math.ceil(renderWidth / gridStep)
-    const rows = Math.ceil(renderHeight / gridStep)
-    stateRef.current.particleGrid = new Uint8Array(cols * rows)
+        const cellSize = 30
+        const gridBucketCols = Math.ceil(renderWidth / cellSize)
+        const gridBucketRows = Math.ceil(renderHeight / cellSize)
+        const buckets: number[][] = Array.from({ length: gridBucketCols * gridBucketRows }, () => [])
 
-    const cellSize = 30
-    const gridBucketCols = Math.ceil(renderWidth / cellSize)
-    const gridBucketRows = Math.ceil(renderHeight / cellSize)
-    const buckets: number[][] = Array.from({ length: gridBucketCols * gridBucketRows }, () => [])
+        const particles: Particle[] = []
 
-    const particles: Particle[] = []
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const x = c * gridStep
+            const y = r * gridStep
+            const px = Math.min(Math.floor(x), renderWidth - 1)
+            const py = Math.min(Math.floor(y), renderHeight - 1)
+            const idx = (py * Math.floor(renderWidth) + px) * 4
 
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const x = c * gridStep
-        const y = r * gridStep
-        const px = Math.min(Math.floor(x), renderWidth - 1)
-        const py = Math.min(Math.floor(y), renderHeight - 1)
-        const idx = (py * Math.floor(renderWidth) + px) * 4
+            const a = data[idx + 3]
+            if (a > 30) {
+              const yNorm = y / renderHeight
+              let fadeA = 1.0
+              if (yNorm > 0.68) {
+                fadeA = Math.max(0, 1.0 - (yNorm - 0.68) / 0.32)
+              }
 
-        const a = data[idx + 3]
-        if (a > 30) {
-          const yNorm = y / renderHeight
-          let fadeA = 1.0
-          if (yNorm > 0.68) {
-            fadeA = Math.max(0, 1.0 - (yNorm - 0.68) / 0.32)
+              if (fadeA <= 0.05) continue
+
+              const red = data[idx]
+              const green = data[idx + 1]
+              const blue = data[idx + 2]
+
+              const pIndex = particles.length
+              particles.push({
+                ox: x,
+                oy: y,
+                cx: x,
+                cy: y,
+                vx: 0,
+                vy: 0,
+                color: `rgb(${red},${green},${blue})`,
+                size: pSize,
+              })
+
+              const bc = Math.min(Math.floor(x / cellSize), gridBucketCols - 1)
+              const br = Math.min(Math.floor(y / cellSize), gridBucketRows - 1)
+              buckets[br * gridBucketCols + bc].push(pIndex)
+            }
           }
+        }
 
-          if (fadeA <= 0.05) continue
-
-          const red = data[idx]
-          const green = data[idx + 1]
-          const blue = data[idx + 2]
-
-          const pIndex = particles.length
-          particles.push({
-            ox: x,
-            oy: y,
-            cx: x,
-            cy: y,
-            vx: 0,
-            vy: 0,
-            color: `rgb(${red},${green},${blue})`,
-            size: pSize,
-          })
-
-          const bc = Math.min(Math.floor(x / cellSize), gridBucketCols - 1)
-          const br = Math.min(Math.floor(y / cellSize), gridBucketRows - 1)
-          buckets[br * gridBucketCols + bc].push(pIndex)
+        stateRef.current.particles = particles
+        stateRef.current.activeIndices = []
+        stateRef.current.spatialGrid = {
+          cellSize,
+          cols: gridBucketCols,
+          rows: gridBucketRows,
+          buckets,
         }
       }
-    }
-
-    stateRef.current.particles = particles
-    stateRef.current.activeIndices = []
-    stateRef.current.spatialGrid = {
-      cellSize,
-      cols: gridBucketCols,
-      rows: gridBucketRows,
-      buckets,
+    } catch {
+      // Even if pixel sampling throws due to device restrictions, base photo still renders cleanly
     }
 
     // Initial clean draw of the pristine photo
@@ -421,6 +455,17 @@ export function ParticleImage({
   useEffect(() => {
     initCanvas()
   }, [initCanvas])
+
+  // Re-check / re-draw when isReady becomes true (e.g. after splash screen transition)
+  useEffect(() => {
+    if (isReady) {
+      if (imgCacheRef.current && imgCacheRef.current.naturalWidth > 0) {
+        buildFromImage(imgCacheRef.current)
+      } else {
+        initCanvas()
+      }
+    }
+  }, [isReady, buildFromImage, initCanvas])
 
   // O(1) Particle perturbation
   const perturbParticles = useCallback(
@@ -676,7 +721,8 @@ export function ParticleImage({
           width={800}
           height={901}
           loading="eager"
-          decoding="async"
+          decoding="sync"
+          fetchPriority="high"
           className="w-full h-auto max-w-full max-h-full object-contain pointer-events-none block mx-auto"
           style={{
             aspectRatio: "800 / 901",
